@@ -1,0 +1,89 @@
+#!/bin/sh
+
+################################################################################
+#
+#  scstart
+#
+#  Start multiple systemd units and immediately follow journal of the last one
+#  using journalctl. Support starting 10 systemd units at once.
+#
+#  Usage:
+#    ./scstart <service1> [service2] [service3] ... [service10]
+#
+#  Example:
+#    ./scstart apache2 nginx
+#    This will start apache2, nginx, then follow nginx logs.
+#
+#  MIT License.
+#  Copyright (C) 2025 Nguyen Nhat Tung.
+#
+################################################################################
+
+if [ ! -z "${1}" ]; then
+	systemctl start ${1}
+fi
+
+if [ ! -z "${2}" ]; then
+	systemctl start ${2}
+else
+	journalctl --output cat --follow --no-hostname --unit ${1}
+	return 0
+fi
+
+if [ ! -z "${3}" ]; then
+	systemctl start ${3}
+else
+	journalctl --output cat --follow --no-hostname --unit ${2}
+	return 0
+fi
+
+if [ ! -z "${4}" ]; then
+	systemctl start ${4}
+else
+	journalctl --output cat --follow --no-hostname --unit ${3}
+	return 0
+fi
+
+if [ ! -z "${5}" ]; then
+	systemctl start ${5}
+else
+	journalctl --output cat --follow --no-hostname --unit ${4}
+	return 0
+fi
+
+if [ ! -z "${6}" ]; then
+	systemctl start ${6}
+else
+	journalctl --output cat --follow --no-hostname --unit ${5}
+	return 0
+fi
+
+if [ ! -z "${7}" ]; then
+	systemctl start ${7}
+else
+	journalctl --output cat --follow --no-hostname --unit ${6}
+	return 0
+fi
+
+if [ ! -z "${8}" ]; then
+	systemctl start ${8}
+else
+	journalctl --output cat --follow --no-hostname --unit ${7}
+	return 0
+fi
+
+if [ ! -z "${9}" ]; then
+	systemctl start ${9}
+else
+	journalctl --output cat --follow --no-hostname --unit ${8}
+	return 0
+fi
+
+if [ ! -z "${10}" ]; then
+	systemctl start ${10}
+else
+	journalctl --output cat --follow --no-hostname --unit ${9}
+	return 0
+fi
+
+journalctl --output cat --follow --no-hostname --unit ${10}

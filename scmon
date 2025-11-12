@@ -1,0 +1,22 @@
+#!/bin/sh
+
+################################################################################
+#
+#  scmon
+#
+#  Shorthand for journalctl to follow a system unit's logs with timestamp and
+#  without hostname.
+#
+#  Usage:
+#    ./scmon <service>
+#
+#  Example:
+#    ./scmon nginx
+#    This will follow nginx logs.
+#
+#  MIT License.
+#  Copyright (C) 2025 Nguyen Nhat Tung.
+#
+################################################################################
+
+journalctl --output cat --follow --no-hostname --unit ${1}
