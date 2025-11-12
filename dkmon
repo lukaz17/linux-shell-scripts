@@ -1,0 +1,21 @@
+#!/bin/sh
+
+################################################################################
+#
+#  dkmon
+#
+#  Get last 100 log messages of a Docker container then follow new log messages.
+#
+#  Usage:
+#    ./dkmon <container>
+#
+#  Example:
+#    ./dkmon nginx-1
+#    This will follow container named nginx-1 logs.
+#
+#  MIT License.
+#  Copyright (C) 2025 Nguyen Nhat Tung.
+#
+################################################################################
+
+docker logs --timestamps --tail 100 --follow ${1}

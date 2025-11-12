@@ -1,0 +1,89 @@
+#!/bin/sh
+
+################################################################################
+#
+#  dkstart
+#
+#  Start multiple Docker containers and immediately follow logs of the last
+#  container in the list. Support starting 10 containers at once.
+#
+#  Usage:
+#    ./dkstart <container1> [container2] [container2] ... [container10]
+#
+#  Example:
+#    ./dkstart mariadb nginx
+#    This will start containers named mariadb, nginx, then follow nginx logs.
+#
+#  MIT License.
+#  Copyright (C) 2025 Nguyen Nhat Tung.
+#
+################################################################################
+
+if [ ! -z "${1}" ]; then
+	docker container start ${1}
+fi
+
+if [ ! -z "${2}" ]; then
+	docker container start ${2}
+else
+	docker logs --timestamps --tail 100 --follow ${1}
+	return 0
+fi
+
+if [ ! -z "${3}" ]; then
+	docker container start ${3}
+else
+	docker logs --timestamps --tail 100 --follow ${2}
+	return 0
+fi
+
+if [ ! -z "${4}" ]; then
+	docker container start ${4}
+else
+	docker logs --timestamps --tail 100 --follow ${3}
+	return 0
+fi
+
+if [ ! -z "${5}" ]; then
+	docker container start ${5}
+else
+	docker logs --timestamps --tail 100 --follow ${4}
+	return 0
+fi
+
+if [ ! -z "${6}" ]; then
+	docker container start ${6}
+else
+	docker logs --timestamps --tail 100 --follow ${5}
+	return 0
+fi
+
+if [ ! -z "${7}" ]; then
+	docker container start ${7}
+else
+	docker logs --timestamps --tail 100 --follow ${6}
+	return 0
+fi
+
+if [ ! -z "${8}" ]; then
+	docker container start ${8}
+else
+	docker logs --timestamps --tail 100 --follow ${7}
+	return 0
+fi
+
+if [ ! -z "${9}" ]; then
+	docker container start ${9}
+else
+	docker logs --timestamps --tail 100 --follow ${8}
+	return 0
+fi
+
+if [ ! -z "${10}" ]; then
+	docker container start ${10}
+else
+	docker logs --timestamps --tail 100 --follow ${9}
+	return 0
+fi
+
+docker logs --timestamps --tail 100 --follow ${10}
