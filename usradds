@@ -1,0 +1,41 @@
+#!/bin/sh
+
+################################################################################
+#
+#  usradds
+#
+#  Create system user and correspond group, along with their home directory in /var/lib.
+#
+#  Usage:
+#    usradds <username> [<display_name>]
+#
+#  Example:
+#    usradds git "Git Version Control"
+#    This will create git user and git user group, with home directory in /var/lib/git.
+#
+#  MIT License.
+#  Copyright (C) 2025 Nguyen Nhat Tung.
+#
+################################################################################
+
+set -ex
+
+if [ -z "$1" ]; then
+	echo "Error: User name is not specified."
+	exit 1
+fi
+
+USERNAME="$1"
+DISPLAYNAME="$1"
+HOMEDIR="/var/lib/${USERNAME}"
+
+if [ ! -z "$2" ]; then
+	DISPLAYNAME="$2"
+fi
+
+if [ -f "${HOMEDIR}" ] || [ -d "${HOMEDIR}" ] || [ -L "${HOMEDIR}" ]; then
+	echo "Error: Home dir existed."
+	exit 1
+fi
+
+adduser --group --system --disabled-password --home /var/lib/${USERNAME} --shell /bin/bash --gecos "${DISPLAYNAME}" "${USERNAME}"
