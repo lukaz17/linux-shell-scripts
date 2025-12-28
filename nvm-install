@@ -1,0 +1,45 @@
+#!/bin/sh
+
+################################################################################
+#
+#  nvm-install
+#
+#  Install/Update Node Version Manager for current user. This also works as a version manager.
+#  If version is not specified, the latest version will be installed.
+#
+#  Homepage: https://github.com/nvm-sh/nvm
+#
+#  Usage:
+#    nvm-install [<version>]
+#
+#  Example:
+#    nvm-install
+#    nvm-install 0.40.3
+#    nvm-install v0.40.3
+#
+#  MIT License.
+#  Copyright (C) 2025 Nguyen Nhat Tung.
+#
+################################################################################
+
+# Application info
+GITHUB_OWNER="nvm-sh"
+GITHUB_REPO="nvm"
+PROGRAM_ID="nvm"
+
+set -ex
+
+# Determine version to install
+if [ -z "$1" ]; then
+	LATEST_VERSION="$(curl https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest | jq -r .tag_name)"
+else
+	LATEST_VERSION="$1"
+fi
+LATEST_VERSION="${LATEST_VERSION#v}"
+
+# Installation environment
+USERID="$(id -u)"
+ARCH="$(uname -m)"
+
+# Download and install binaries
+curl -o- "https://raw.githubusercontent.com/nvm-sh/nvm/v${LATEST_VERSION}/install.sh" | bash
