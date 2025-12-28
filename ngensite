@@ -27,9 +27,9 @@ if [ -z "${1}" ]; then
 fi
 
 NAME=${1%.conf}
-CONFIG_ENABLED="/etc/nginx/sites-enabled/${1}.conf"
+CONFIG_ENABLED="/etc/nginx/sites-enabled/${NAME}.conf"
 
-CONFIG_AVAILABLE="/etc/nginx/sites-available/${1}.conf"
+CONFIG_AVAILABLE="/etc/nginx/sites-available/${NAME}.conf"
 if [ -f "${CONFIG_AVAILABLE}" ]; then
 	if [ ! -f "${CONFIG_ENABLED}" ] && [ ! -L "${CONFIG_ENABLED}" ]; then
 		ln -s "${CONFIG_AVAILABLE}" "${CONFIG_ENABLED}"
@@ -38,7 +38,7 @@ if [ -f "${CONFIG_AVAILABLE}" ]; then
 	exit 0
 fi
 
-CONFIG_AVAILABLE="/etc/nginx/sites-available/${1}"
+CONFIG_AVAILABLE="/etc/nginx/sites-available/${NAME}"
 if [ -f "${CONFIG_AVAILABLE}" ]; then
 	if [ ! -f "${CONFIG_ENABLED}" ] && [ ! -L "${CONFIG_ENABLED}" ]; then
 		ln -s "${CONFIG_AVAILABLE}" "${CONFIG_ENABLED}"

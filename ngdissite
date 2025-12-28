@@ -28,15 +28,15 @@ fi
 
 NAME=${1%.conf}
 
-CONFIG_ENABLED="/etc/nginx/sites-enabled/${1}.conf"
-if [ ! -f "${CONFIG_ENABLED}" ] && [ ! -L "${CONFIG_ENABLED}" ]; then
+CONFIG_ENABLED="/etc/nginx/sites-enabled/${NAME}.conf"
+if [ -f "${CONFIG_ENABLED}" ] || [ -L "${CONFIG_ENABLED}" ]; then
 	rm "${CONFIG_ENABLED}"
 	systemctl reload nginx
 	exit 0
 fi
 
-CONFIG_ENABLED="/etc/nginx/sites-enabled/${1}"
-if [ ! -f "${CONFIG_ENABLED}" ] && [ ! -L "${CONFIG_ENABLED}" ]; then
+CONFIG_ENABLED="/etc/nginx/sites-enabled/${NAME}"
+if [ -f "${CONFIG_ENABLED}" ] || [ -L "${CONFIG_ENABLED}" ]; then
 	rm "${CONFIG_ENABLED}"
 	systemctl reload nginx
 	exit 0
