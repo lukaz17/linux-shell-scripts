@@ -1,0 +1,78 @@
+#!/bin/sh
+
+################################################################################
+#
+#  go-install
+#
+#  Install/Update Go for current user. This also works as a version manager.
+#
+#  Homepage: https://go.dev/
+#
+#  Usage:
+#    go-install <version>
+#
+#  Example:
+#    go-install 1.24.7
+#    go-install v1.24.7
+#
+#  MIT License.
+#  Copyright (C) 2025 Nguyen Nhat Tung.
+#
+################################################################################
+
+# Application info
+PROGRAM_ID="go"
+
+set -ex
+
+# Determine version to install
+if [ -z "$1" ]; then
+	echo "Error: Version must be explicitly specified"
+	exit 1
+else
+	LATEST_VERSION="$1"
+fi
+LATEST_VERSION="${LATEST_VERSION#v}"
+
+# Installation environment
+USERID="$(id -u)"
+ARCH="$(uname -m)"
+if [ "${USERID}" -eq 0 ]; then
+	INSTALL_ROOT="/usr/local/share/${PROGRAM_ID}"
+else
+	INSTALL_ROOT="${HOME}/.local/share/${PROGRAM_ID}"
+fi
+INSTALL_TARGET="${INSTALL_ROOT}/${PROGRAM_ID}-v${LATEST_VERSION}"
+ACTIVE_TARGET="${INSTALL_ROOT}/active-release"
+SYSTEM_BIN_TARGET="/usr/local/bin"
+
+mkdir -p "${INSTALL_ROOT}"
+
+# Download and install binaries
+if [ ! -d "${INSTALL_TARGET}" ]; then
+	BIN_ARCH_URI_AMD64="https://go.dev/dl/go${LATEST_VERSION}.linux-amd64.tar.gz"
+	BIN_ARCH_URI_ARM64="https://go.dev/dl/go${LATEST_VERSION}.linux-arm64.tar.gz"
+	BIN_ARCH_TMP_FILE="/tmp/${PROGRAM_ID}-v${LATEST_VERSION}.tar.gz"
+
+	if [ "${ARCH}" = "x86_64" ] || [ "${ARCH}" = "amd64" ]; then
+		wget "${BIN_ARCH_URI_AMD64}" -O "${BIN_ARCH_TMP_FILE}"
+	elif [ "${ARCH}" = "aarch64" ] || [ "${ARCH}" = "arm64" ]; then
+		wget "${BIN_ARCH_URI_ARM64}" -O "${BIN_ARCH_TMP_FILE}"
+	else
+		echo "Unsupported architecture: ${ARCH}"
+		exit 1
+	fi
+
+	TEMP_TARGET="/tmp/${PROGRAM_ID}-v${LATEST_VERSION}"
+	mkdir "${TEMP_TARGET}"
+	tar -x -v -f "${BIN_ARCH_TMP_FILE}" -C "${TEMP_TARGET}"
+	rm "${BIN_ARCH_TMP_FILE}"
+	mv "${TEMP_TARGET}/go" "${INSTALL_TARGET}"
+    rm -r "${TEMP_TARGET}"
+fi
+
+# Set active release
+if [ -f "${ACTIVE_TARGET}" ] || [ -d "${ACTIVE_TARGET}" ] || [ -L "${ACTIVE_TARGET}" ]; then
+	rm -r "${ACTIVE_TARGET}"
+fi
+ln -s "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
