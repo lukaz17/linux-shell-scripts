@@ -1,0 +1,48 @@
+#!/bin/sh
+
+################################################################################
+#
+#  ngensite
+#
+#  Enable nginx site then reload nginx.
+#  Configuration with .config extension will have higher priority than no extension one.
+#
+#  Usage:
+#    ngensite <name>
+#
+#  Example:
+#    ngensite example
+#    This will enable site configuration named 'example' or 'example.conf'.
+#
+#  MIT License.
+#  Copyright (C) 2025 Nguyen Nhat Tung.
+#
+################################################################################
+
+set -x
+
+if [ -z "${1}" ]; then
+	echo "Error: No configuration specified."
+	exit 1
+fi
+
+NAME=${1%.conf}
+CONFIG_ENABLED="/etc/nginx/sites-enabled/${1}.conf"
+
+CONFIG_AVAILABLE="/etc/nginx/sites-available/${1}.conf"
+if [ -f "${CONFIG_AVAILABLE}" ]; then
+	if [ ! -f "${CONFIG_ENABLED}" ] && [ ! -L "${CONFIG_ENABLED}" ]; then
+		ln -s "${CONFIG_AVAILABLE}" "${CONFIG_ENABLED}"
+	fi
+	systemctl reload nginx
+	exit 0
+fi
+
+CONFIG_AVAILABLE="/etc/nginx/sites-available/${1}"
+if [ -f "${CONFIG_AVAILABLE}" ]; then
+	if [ ! -f "${CONFIG_ENABLED}" ] && [ ! -L "${CONFIG_ENABLED}" ]; then
+		ln -s "${CONFIG_AVAILABLE}" "${CONFIG_ENABLED}"
+	fi
+	systemctl reload nginx
+	exit 0
+fi

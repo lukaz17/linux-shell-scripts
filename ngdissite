@@ -1,0 +1,43 @@
+#!/bin/sh
+
+################################################################################
+#
+#  ngdissite
+#
+#  Disable nginx site then reload nginx.
+#  Configuration with .config and no extension are supported.
+#
+#  Usage:
+#    ngdissite <name>
+#
+#  Example:
+#    ngdissite example
+#    This will disable site configuration named 'example' or 'example.conf'.
+#
+#  MIT License.
+#  Copyright (C) 2025 Nguyen Nhat Tung.
+#
+################################################################################
+
+set -x
+
+if [ -z "${1}" ]; then
+	echo "Error: No configuration specified."
+	exit 1
+fi
+
+NAME=${1%.conf}
+
+CONFIG_ENABLED="/etc/nginx/sites-enabled/${1}.conf"
+if [ ! -f "${CONFIG_ENABLED}" ] && [ ! -L "${CONFIG_ENABLED}" ]; then
+	rm "${CONFIG_ENABLED}"
+	systemctl reload nginx
+	exit 0
+fi
+
+CONFIG_ENABLED="/etc/nginx/sites-enabled/${1}"
+if [ ! -f "${CONFIG_ENABLED}" ] && [ ! -L "${CONFIG_ENABLED}" ]; then
+	rm "${CONFIG_ENABLED}"
+	systemctl reload nginx
+	exit 0
+fi
