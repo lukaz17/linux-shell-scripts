@@ -1,0 +1,51 @@
+#!/bin/sh
+
+################################################################################
+#
+#  rust-install
+#
+#  Install/Update Rust for current user. This also works as a version manager.
+#  If version is not specified, the latest version will be installed.
+#
+#  Homepage: https://rust-lang.org/
+#
+#  Usage:
+#    rust-install [<version>]
+#
+#  Example:
+#    rust-install
+#    rust-install 1.71.0
+#    rust-install v1.71.0
+#
+#  MIT License.
+#  Copyright (C) 2025 Nguyen Nhat Tung.
+#
+################################################################################
+
+# Application info
+GITHUB_OWNER="rust-lang"
+GITHUB_REPO="rust"
+PROGRAM_ID="rust"
+
+set -ex
+
+# Determine version to install
+if [ -z "$1" ]; then
+	LATEST_VERSION="stable"
+else
+	LATEST_VERSION="$1"
+fi
+LATEST_VERSION="${LATEST_VERSION#v}"
+
+# Installation environment
+USERID="$(id -u)"
+ARCH="$(uname -m)"
+
+# Download and install binaries
+if [ "${ARCH}" = "x86_64" ] || [ "${ARCH}" = "amd64" ]; then
+	curl -fSL "https://sh.rustup.rs" | sh -s -- --default-toolchain "${LATEST_VERSION}" --default-host "x86_64-unknown-linux-gnu" --profile "minimal"
+elif [ "${ARCH}" = "aarch64" ] || [ "${ARCH}" = "arm64" ]; then
+	curl -fSL "https://sh.rustup.rs" | sh -s -- --default-toolchain "${LATEST_VERSION}" --default-host "aarch64-unknown-linux-gnu" --profile "minimal"
+else
+	curl -fSL "https://sh.rustup.rs" | sh -s -- --default-toolchain "${LATEST_VERSION}" --profile "minimal"
+fi
