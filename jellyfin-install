@@ -1,0 +1,92 @@
+#!/bin/sh
+
+################################################################################
+#
+#  jellyfin-install
+#
+#  Install/Update Jellyfin for current user. This also works as a version manager.
+#  If version is not specified, the latest version will be installed.
+#
+#  Homepage: https://jellyfin.org/
+#
+#  Usage:
+#    jellyfin-install [<version>]
+#
+#  Example:
+#    jellyfin-install
+#    jellyfin-install 10.11.5
+#    jellyfin-install v10.11.5
+#
+#  MIT License.
+#  Copyright (C) 2025 Nguyen Nhat Tung.
+#
+################################################################################
+
+# Application info
+GITHUB_OWNER="jellyfin"
+GITHUB_REPO="jellyfin"
+PROGRAM_ID="jellyfin"
+PROGRAM_EXEC="jellyfin"
+
+set -ex
+
+# Determine version to install
+if [ -z "$1" ]; then
+	LATEST_VERSION="$(curl https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest | jq -r .tag_name)"
+else
+	LATEST_VERSION="$1"
+fi
+LATEST_VERSION="${LATEST_VERSION#v}"
+
+# Installation environment
+USERID="$(id -u)"
+ARCH="$(uname -m)"
+if [ "${USERID}" -eq 0 ]; then
+	INSTALL_ROOT="/usr/local/share/${PROGRAM_ID}"
+else
+	INSTALL_ROOT="${HOME}/.local/share/${PROGRAM_ID}"
+fi
+INSTALL_TARGET="${INSTALL_ROOT}/${PROGRAM_ID}-v${LATEST_VERSION}"
+ACTIVE_TARGET="${INSTALL_ROOT}/active-release"
+SYSTEM_BIN_TARGET="/usr/local/bin"
+
+mkdir -p "${INSTALL_ROOT}"
+
+# Download and install binaries
+if [ ! -d "${INSTALL_TARGET}" ]; then
+	BIN_ARCH_URI_AMD64="https://repo.jellyfin.org/files/server/linux/latest-stable/amd64/jellyfin_${LATEST_VERSION}-amd64.tar.xz"
+	BIN_ARCH_URI_ARM64="https://repo.jellyfin.org/files/server/linux/latest-stable/arm64/jellyfin_${LATEST_VERSION}-arm64.tar.xz"
+	BIN_ARCH_TMP_FILE="/tmp/${PROGRAM_ID}-v${LATEST_VERSION}.tar.xz"
+
+	if [ "${ARCH}" = "x86_64" ] || [ "${ARCH}" = "amd64" ]; then
+		wget "${BIN_ARCH_URI_AMD64}" -O "${BIN_ARCH_TMP_FILE}"
+	elif [ "${ARCH}" = "aarch64" ] || [ "${ARCH}" = "arm64" ]; then
+		wget "${BIN_ARCH_URI_ARM64}" -O "${BIN_ARCH_TMP_FILE}"
+	else
+		echo "Unsupported architecture: ${ARCH}"
+		exit 1
+	fi
+
+	TEMP_TARGET="/tmp/${PROGRAM_ID}-v${LATEST_VERSION}"
+	mkdir "${TEMP_TARGET}"
+	tar -x -v -f "${BIN_ARCH_TMP_FILE}" -C "${TEMP_TARGET}"
+	rm "${BIN_ARCH_TMP_FILE}"
+	mv "${TEMP_TARGET}/jellyfin" "${INSTALL_TARGET}"
+	rm -r "${TEMP_TARGET}"
+fi
+
+# Set active release
+if [ -f "${ACTIVE_TARGET}" ] || [ -d "${ACTIVE_TARGET}" ] || [ -L "${ACTIVE_TARGET}" ]; then
+	rm -r "${ACTIVE_TARGET}"
+fi
+ln -s "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
+
+# Create symlink for quick access
+ACTIVE_TARGET_BIN="${ACTIVE_TARGET}/${PROGRAM_EXEC}"
+SYSTEM_BIN_TARGET_BIN="${SYSTEM_BIN_TARGET}/${PROGRAM_ID}"
+if [ "${USERID}" -eq 0 ] && [ -f "${ACTIVE_TARGET_BIN}" ]; then
+	if [ -f "${SYSTEM_BIN_TARGET_BIN}" ] || [ -d "${SYSTEM_BIN_TARGET_BIN}" ] || [ -L "${SYSTEM_BIN_TARGET_BIN}" ]; then
+		rm -r "${SYSTEM_BIN_TARGET_BIN}"
+	fi
+	ln -s "${ACTIVE_TARGET_BIN}" "${SYSTEM_BIN_TARGET_BIN}"
+fi
