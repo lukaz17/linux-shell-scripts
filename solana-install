@@ -1,0 +1,82 @@
+#!/bin/sh
+
+################################################################################
+#
+#  solana-install
+#
+#  Install/Update Solana for current user. This also works as a version manager.
+#  If version is not specified, the latest version will be installed.
+#
+#  Homepage: https://www.solanalabs.com/
+#
+#  Usage:
+#    solana-install [<version>]
+#
+#  Example:
+#    solana-install
+#    solana-install 1.18.26
+#    solana-install v1.18.26
+#
+#  MIT License.
+#  Copyright (C) 2025 Nguyen Nhat Tung.
+#
+################################################################################
+
+# Application info
+GITHUB_OWNER="solana-labs"
+GITHUB_REPO="solana"
+PROGRAM_ID="solana"
+PROGRAM_EXEC="solana"
+
+set -ex
+
+# Determine version to install
+if [ -z "$1" ]; then
+	LATEST_VERSION="$(curl https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest | jq -r .tag_name)"
+else
+	LATEST_VERSION="$1"
+fi
+LATEST_VERSION="${LATEST_VERSION#v}"
+
+# Installation environment
+USERID="$(id -u)"
+ARCH="$(uname -m)"
+INSTALL_ROOT="${HOME}/.local/share/solana/install"
+INSTALL_TARGET="${INSTALL_ROOT}/releases/${LATEST_VERSION}"
+ACTIVE_TARGET="${INSTALL_ROOT}/active_release"
+SYSTEM_BIN_TARGET="/usr/local/bin"
+
+mkdir -p "${INSTALL_ROOT}/releases"
+
+# Download and install binaries
+if [ ! -d "${INSTALL_TARGET}" ]; then
+	BIN_ARCH_URI_AMD64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${LATEST_VERSION}/solana-release-x86_64-unknown-linux-gnu.tar.bz2"
+	BIN_ARCH_URI_ARM64=""
+	BIN_ARCH_TMP_FILE="/tmp/${PROGRAM_ID}-v${LATEST_VERSION}.tar.gz"
+
+	if [ "${ARCH}" = "x86_64" ] || [ "${ARCH}" = "amd64" ]; then
+		wget "${BIN_ARCH_URI_AMD64}" -O "${BIN_ARCH_TMP_FILE}"
+	elif [ "${ARCH}" = "aarch64" ] || [ "${ARCH}" = "arm64" ]; then
+		echo "Unsupported architecture: ${ARCH}"
+		exit 1
+	else
+		echo "Unsupported architecture: ${ARCH}"
+		exit 1
+	fi
+
+	TEMP_TARGET="/tmp/${PROGRAM_ID}-v${LATEST_VERSION}"
+	mkdir "${TEMP_TARGET}"
+	tar -x -v -f "${BIN_ARCH_TMP_FILE}" -C "${TEMP_TARGET}"
+	rm "${BIN_ARCH_TMP_FILE}"
+	mkdir "${INSTALL_TARGET}"
+	mv "${TEMP_TARGET}/solana-release" "${INSTALL_TARGET}/solana-release"
+	rm -r "${TEMP_TARGET}"
+fi
+
+# Set active release
+if [ -f "${ACTIVE_TARGET}" ] || [ -d "${ACTIVE_TARGET}" ] || [ -L "${ACTIVE_TARGET}" ]; then
+	rm -r "${ACTIVE_TARGET}"
+fi
+ln -s "${INSTALL_TARGET}/solana-release" "${ACTIVE_TARGET}"
+
+echo "export PATH=\"\$HOME/.local/share/solana/install/active_release/bin:\$PATH\""
