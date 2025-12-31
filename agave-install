@@ -1,0 +1,88 @@
+#!/bin/sh
+
+################################################################################
+#
+#  agave-install
+#
+#  Install/Update Agave for current user. This also works as a version manager.
+#  If version is not specified, the latest version will be installed.
+#
+#  Presquites:
+#  - Rust
+#  - clang protobuf-compiler
+#  - libclang-dev libprotobuf-dev libssl-dev libudev-dev zlib1g-dev
+#
+#  Homepage: https://www.anza.xyz/
+#
+#  Usage:
+#    agave-install [<version>]
+#
+#  Example:
+#    agave-install
+#    agave-install 3.0.12
+#    agave-install v3.0.12
+#
+#  MIT License.
+#  Copyright (C) 2025 Nguyen Nhat Tung.
+#
+################################################################################
+
+# Application info
+GITHUB_OWNER="anza-xyz"
+GITHUB_REPO="agave"
+PROGRAM_ID="agave"
+PROGRAM_EXEC="solana"
+
+set -ex
+
+# Determine version to install
+if [ -z "$1" ]; then
+	LATEST_VERSION="$(curl https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest | jq -r .tag_name)"
+else
+	LATEST_VERSION="$1"
+fi
+LATEST_VERSION="${LATEST_VERSION#v}"
+
+# Installation environment
+USERID="$(id -u)"
+ARCH="$(uname -m)"
+INSTALL_ROOT="${HOME}/.local/share/solana/install"
+INSTALL_TARGET="${INSTALL_ROOT}/releases/${LATEST_VERSION}"
+ACTIVE_TARGET="${INSTALL_ROOT}/active_release"
+SYSTEM_BIN_TARGET="/usr/local/bin"
+
+mkdir -p "${INSTALL_ROOT}/releases"
+
+# Download and install binaries
+if [ ! -d "${INSTALL_TARGET}" ]; then
+	SRC_ARCH_URI_AMD64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/archive/refs/tags/v${LATEST_VERSION}.tar.gz"
+	SRC_ARCH_URI_ARM64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/archive/refs/tags/v${LATEST_VERSION}.tar.gz"
+	SRC_ARCH_TMP_FILE="/tmp/${PROGRAM_ID}-v${LATEST_VERSION}.tar.gz"
+
+	if [ "${ARCH}" = "x86_64" ] || [ "${ARCH}" = "amd64" ]; then
+		wget "${SRC_ARCH_URI_AMD64}" -O "${SRC_ARCH_TMP_FILE}"
+	elif [ "${ARCH}" = "aarch64" ] || [ "${ARCH}" = "arm64" ]; then
+		wget "${SRC_ARCH_URI_ARM64}" -O "${SRC_ARCH_TMP_FILE}"
+	else
+		echo "Unsupported architecture: ${ARCH}"
+		exit 1
+	fi
+
+	TEMP_TARGET="/tmp/${PROGRAM_ID}-v${LATEST_VERSION}"
+	mkdir "${TEMP_TARGET}"
+	tar -x -v -f "${SRC_ARCH_TMP_FILE}" -C "${TEMP_TARGET}"
+	rm "${SRC_ARCH_TMP_FILE}"
+	cd "${TEMP_TARGET}/${GITHUB_REPO}-${LATEST_VERSION}"
+	./scripts/cargo-install-all.sh .
+	mkdir "${INSTALL_TARGET}"
+	mv "${TEMP_TARGET}/${GITHUB_REPO}-${LATEST_VERSION}" "${INSTALL_TARGET}/solana-release"
+	rm -r "${TEMP_TARGET}"
+fi
+
+# Set active release
+if [ -f "${ACTIVE_TARGET}" ] || [ -d "${ACTIVE_TARGET}" ] || [ -L "${ACTIVE_TARGET}" ]; then
+	rm -r "${ACTIVE_TARGET}"
+fi
+ln -s "${INSTALL_TARGET}/solana-release" "${ACTIVE_TARGET}"
+
+echo "export PATH=\"\$HOME/.local/share/solana/install/active_release/bin:\$PATH\""
