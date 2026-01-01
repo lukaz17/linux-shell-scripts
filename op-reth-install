@@ -1,0 +1,92 @@
+#!/bin/sh
+
+################################################################################
+#
+#  op-reth-install
+#
+#  Install/Update op-reth for current user. This also works as a version manager.
+#  If version is not specified, the latest version will be installed.
+#
+#  Homepage: https://reth.rs/
+#
+#  Usage:
+#    reth-install [<version>]
+#
+#  Example:
+#    op-reth-install
+#    op-reth-install 1.9.3
+#    op-reth-install v1.9.3
+#
+#  MIT License.
+#  Copyright (C) 2025 Nguyen Nhat Tung.
+#
+################################################################################
+
+# Application info
+GITHUB_OWNER="paradigmxyz"
+GITHUB_REPO="reth"
+PROGRAM_ID="op-reth"
+PROGRAM_EXEC="op-reth"
+
+set -ex
+
+# Determine version to install
+if [ -z "$1" ]; then
+	LATEST_VERSION="$(curl https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest | jq -r .tag_name)"
+else
+	LATEST_VERSION="$1"
+fi
+LATEST_VERSION="${LATEST_VERSION#v}"
+
+# Installation environment
+USERID="$(id -u)"
+ARCH="$(uname -m)"
+if [ "${USERID}" -eq 0 ]; then
+	INSTALL_ROOT="/usr/local/share/${PROGRAM_ID}"
+else
+	INSTALL_ROOT="${HOME}/.local/share/${PROGRAM_ID}"
+fi
+INSTALL_TARGET="${INSTALL_ROOT}/${PROGRAM_ID}-v${LATEST_VERSION}"
+ACTIVE_TARGET="${INSTALL_ROOT}/active-release"
+SYSTEM_BIN_TARGET="/usr/local/bin"
+
+mkdir -p "${INSTALL_ROOT}"
+
+# Download and install binaries
+if [ ! -d "${INSTALL_TARGET}" ]; then
+	BIN_ARCH_URI_AMD64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${LATEST_VERSION}/op-reth-v${LATEST_VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+	BIN_ARCH_URI_ARM64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${LATEST_VERSION}/op-reth-v${LATEST_VERSION}-aarch64-unknown-linux-gnu.tar.gz"
+	BIN_ARCH_TMP_FILE="/tmp/${PROGRAM_ID}-v${LATEST_VERSION}.tar.gz"
+
+	if [ "${ARCH}" = "x86_64" ] || [ "${ARCH}" = "amd64" ]; then
+		wget "${BIN_ARCH_URI_AMD64}" -O "${BIN_ARCH_TMP_FILE}"
+	elif [ "${ARCH}" = "aarch64" ] || [ "${ARCH}" = "arm64" ]; then
+		wget "${BIN_ARCH_URI_ARM64}" -O "${BIN_ARCH_TMP_FILE}"
+	else
+		echo "Unsupported architecture: ${ARCH}"
+		exit 1
+	fi
+
+	TEMP_TARGET="/tmp/${PROGRAM_ID}-v${LATEST_VERSION}"
+	mkdir "${TEMP_TARGET}"
+	tar -x -v -f "${BIN_ARCH_TMP_FILE}" -C "${TEMP_TARGET}"
+	rm "${BIN_ARCH_TMP_FILE}"
+	cp -r "${TEMP_TARGET}" "${INSTALL_TARGET}"
+	rm -r "${TEMP_TARGET}"
+fi
+
+# Set active release
+if [ -f "${ACTIVE_TARGET}" ] || [ -d "${ACTIVE_TARGET}" ] || [ -L "${ACTIVE_TARGET}" ]; then
+	rm -r "${ACTIVE_TARGET}"
+fi
+ln -s "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
+
+# Create symlink for quick access
+ACTIVE_TARGET_BIN="${ACTIVE_TARGET}/${PROGRAM_EXEC}"
+SYSTEM_BIN_TARGET_BIN="${SYSTEM_BIN_TARGET}/${PROGRAM_ID}"
+if [ "${USERID}" -eq 0 ] && [ -f "${ACTIVE_TARGET_BIN}" ]; then
+	if [ -f "${SYSTEM_BIN_TARGET_BIN}" ] || [ -d "${SYSTEM_BIN_TARGET_BIN}" ] || [ -L "${SYSTEM_BIN_TARGET_BIN}" ]; then
+		rm -r "${SYSTEM_BIN_TARGET_BIN}"
+	fi
+	ln -s "${ACTIVE_TARGET_BIN}" "${SYSTEM_BIN_TARGET_BIN}"
+fi
