@@ -54,8 +54,8 @@ mkdir -p "${INSTALL_ROOT}"
 
 # Download and install binaries
 if [ ! -d "${INSTALL_TARGET}" ]; then
-	BIN_ARCH_URI_AMD64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${LATEST_VERSION}/doublecmd-${LATEST_VERSION}.qt6.x86_64.tar.xz"
-	BIN_ARCH_URI_ARM64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${LATEST_VERSION}/doublecmd-${LATEST_VERSION}.qt6.aarch64.tar.xz"
+	BIN_ARCH_URI_AMD64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${LATEST_VERSION}/doublecmd-${LATEST_VERSION}.qt.x86_64.tar.xz"
+	BIN_ARCH_URI_ARM64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${LATEST_VERSION}/doublecmd-${LATEST_VERSION}.qt.aarch64.tar.xz"
 	BIN_ARCH_TMP_FILE="/tmp/${PROGRAM_ID}-v${LATEST_VERSION}.tar.xz"
 
 	if [ "${ARCH}" = "x86_64" ] || [ "${ARCH}" = "amd64" ]; then
