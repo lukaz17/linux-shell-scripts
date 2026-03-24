@@ -58,8 +58,6 @@ if [ ! -d "${SYSTEM_BIN_ROOT}" ]; then
 	mkdir -p "${SYSTEM_BIN_ROOT}"
 fi
 
-mkdir -p "${INSTALL_ROOT}"
-
 # Download and install binaries
 if [ ! -d "${INSTALL_TARGET}" ]; then
 	BIN_ARCH_URI_AMD64="https://update.code.visualstudio.com/${LATEST_VERSION}/linux-x64/stable"

@@ -46,14 +46,20 @@ USERID="$(id -u)"
 ARCH="$(uname -m)"
 if [ "${USERID}" -eq 0 ]; then
 	INSTALL_ROOT="/usr/local/share/${PROGRAM_ID}"
+	SYSTEM_BIN_ROOT="/usr/local/bin"
 else
 	INSTALL_ROOT="${HOME}/.local/share/${PROGRAM_ID}"
+	SYSTEM_BIN_ROOT="${HOME}/.local/bin"
 fi
 INSTALL_TARGET="${INSTALL_ROOT}/${PROGRAM_ID}-v${LATEST_VERSION}"
 ACTIVE_TARGET="${INSTALL_ROOT}/active-release"
-SYSTEM_BIN_TARGET="/usr/local/bin"
 
-mkdir -p "${INSTALL_ROOT}"
+if [ ! -d "${INSTALL_ROOT}" ]; then
+	mkdir -p "${INSTALL_ROOT}"
+fi
+if [ ! -d "${SYSTEM_BIN_ROOT}" ]; then
+	mkdir -p "${SYSTEM_BIN_ROOT}"
+fi
 
 # Download and install binaries
 if [ ! -d "${INSTALL_TARGET}" ]; then
@@ -88,8 +94,8 @@ ln -s "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
 
 # Create symlink for quick access
 ACTIVE_TARGET_BIN="${ACTIVE_TARGET}/${PROGRAM_EXEC}"
-SYSTEM_BIN_TARGET_BIN="${SYSTEM_BIN_TARGET}/${PROGRAM_ID}"
-if [ "${USERID}" -eq 0 ] && [ -f "${ACTIVE_TARGET_BIN}" ]; then
+SYSTEM_BIN_TARGET_BIN="${SYSTEM_BIN_ROOT}/${PROGRAM_ID}"
+if [ -f "${ACTIVE_TARGET_BIN}" ]; then
 	if [ -f "${SYSTEM_BIN_TARGET_BIN}" ] || [ -d "${SYSTEM_BIN_TARGET_BIN}" ] || [ -L "${SYSTEM_BIN_TARGET_BIN}" ]; then
 		rm -r "${SYSTEM_BIN_TARGET_BIN}"
 	fi
