@@ -65,13 +65,13 @@ if [ ! -d "${INSTALL_TARGET}" ]; then
 	BIN_TMP_FILE3="/tmp/prysmctl-v${LATEST_VERSION}.bin"
 
 	if [ "${ARCH}" = "x86_64" ] || [ "${ARCH}" = "amd64" ]; then
-		wget "${BIN_URI_AMD64}" -O "${BIN_TMP_FILE}"
-		wget "${BIN_URI2_AMD64}" -O "${BIN_TMP_FILE2}"
-		wget "${BIN_URI3_AMD64}" -O "${BIN_TMP_FILE3}"
+		curl -fSL "${BIN_URI_AMD64}" -o "${BIN_TMP_FILE}"
+		curl -fSL "${BIN_URI2_AMD64}" -o "${BIN_TMP_FILE2}"
+		curl -fSL "${BIN_URI3_AMD64}" -o "${BIN_TMP_FILE3}"
 	elif [ "${ARCH}" = "aarch64" ] || [ "${ARCH}" = "arm64" ]; then
-		wget "${BIN_URI_ARM64}" -O "${BIN_TMP_FILE}"
-		wget "${BIN_URI2_ARM64}" -O "${BIN_TMP_FILE2}"
-		wget "${BIN_URI3_ARM64}" -O "${BIN_TMP_FILE3}"
+		curl -fSL "${BIN_URI_ARM64}" -o "${BIN_TMP_FILE}"
+		curl -fSL "${BIN_URI2_ARM64}" -o "${BIN_TMP_FILE2}"
+		curl -fSL "${BIN_URI3_ARM64}" -o "${BIN_TMP_FILE3}"
 	else
 		echo "Unsupported architecture: ${ARCH}"
 		exit 1
