@@ -77,8 +77,10 @@ if [ ! -d "${INSTALL_TARGET}" ]; then
 	mkdir "${TEMP_TARGET}"
 	tar -x -v -f "${BIN_ARCH_TMP_FILE}" -C "${TEMP_TARGET}"
 	rm "${BIN_ARCH_TMP_FILE}"
-	cp -r "${TEMP_TARGET}" "${INSTALL_TARGET}"
-	rm -r "${TEMP_TARGET}"
+	mv "${TEMP_TARGET}" "${INSTALL_TARGET}"
+	if [ -d "${TEMP_TARGET}" ]; then
+		rm -r "${TEMP_TARGET}"
+	fi
 fi
 
 # Set active release
