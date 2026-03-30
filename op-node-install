@@ -83,7 +83,9 @@ if [ ! -d "${INSTALL_TARGET}" ]; then
 	cd "op-node"
 	env GO111MODULE=on GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -ldflags "-X main.GitCommit=release -X main.GitDate=$(date +%s) -X github.com/ethereum-optimism/optimism/op-node/version.Version=v${LATEST_VERSION} -X github.com/ethereum-optimism/optimism/op-node/version.Meta=" -o ./bin/op-node ./cmd
 	mv "${TEMP_TARGET}/${GITHUB_REPO}-${LATEST_VERSION}/op-node/bin" "${INSTALL_TARGET}"
-	rm -r "${TEMP_TARGET}"
+	if [ -d "${TEMP_TARGET}" ]; then
+		rm -r "${TEMP_TARGET}"
+	fi
 fi
 
 # Set active release

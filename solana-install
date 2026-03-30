@@ -70,7 +70,9 @@ if [ ! -d "${INSTALL_TARGET}" ]; then
 	rm "${BIN_ARCH_TMP_FILE}"
 	mkdir "${INSTALL_TARGET}"
 	mv "${TEMP_TARGET}/solana-release" "${INSTALL_TARGET}/solana-release"
-	rm -r "${TEMP_TARGET}"
+	if [ -d "${TEMP_TARGET}" ]; then
+		rm -r "${TEMP_TARGET}"
+	fi
 fi
 
 # Set active release

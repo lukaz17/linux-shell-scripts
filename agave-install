@@ -76,7 +76,9 @@ if [ ! -d "${INSTALL_TARGET}" ]; then
 	./scripts/cargo-install-all.sh .
 	mkdir "${INSTALL_TARGET}"
 	mv "${TEMP_TARGET}/${GITHUB_REPO}-${LATEST_VERSION}" "${INSTALL_TARGET}/solana-release"
-	rm -r "${TEMP_TARGET}"
+	if [ -d "${TEMP_TARGET}" ]; then
+		rm -r "${TEMP_TARGET}"
+	fi
 fi
 
 # Set active release

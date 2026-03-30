@@ -78,7 +78,9 @@ if [ ! -d "${INSTALL_TARGET}" ]; then
 	tar -x -v -f "${BIN_ARCH_TMP_FILE}" -C "${TEMP_TARGET}"
 	rm "${BIN_ARCH_TMP_FILE}"
 	mv "${TEMP_TARGET}/doublecmd" "${INSTALL_TARGET}"
-	rm -r "${TEMP_TARGET}"
+	if [ -d "${TEMP_TARGET}" ]; then
+		rm -r "${TEMP_TARGET}"
+	fi
 fi
 
 # Set active release
