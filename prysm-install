@@ -83,13 +83,18 @@ if [ ! -d "${INSTALL_TARGET}" ]; then
 		exit 1
 	fi
 
-	mkdir "${INSTALL_TARGET}"
+	TEMP_TARGET="/tmp/${PROGRAM_ID}-v${LATEST_VERSION}"
+	mkdir "${TEMP_TARGET}"
 	chmod +x "${BIN_TMP_FILE}"
 	chmod +x "${BIN_TMP_FILE2}"
 	chmod +x "${BIN_TMP_FILE3}"
-	mv "${BIN_TMP_FILE}" "${INSTALL_TARGET}/${PROGRAM_EXEC}"
-	mv "${BIN_TMP_FILE2}" "${INSTALL_TARGET}/client-stats"
-	mv "${BIN_TMP_FILE3}" "${INSTALL_TARGET}/prysmctl"
+	mv "${BIN_TMP_FILE}" "${TEMP_TARGET}/${PROGRAM_EXEC}"
+	mv "${BIN_TMP_FILE2}" "${TEMP_TARGET}/client-stats"
+	mv "${BIN_TMP_FILE3}" "${TEMP_TARGET}/prysmctl"
+	mv "${TEMP_TARGET}" "${INSTALL_TARGET}"
+	if [ -d "${TEMP_TARGET}" ]; then
+		rm -r "${TEMP_TARGET}"
+	fi
 fi
 
 # Set active release

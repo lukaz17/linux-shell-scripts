@@ -74,9 +74,14 @@ if [ ! -d "${INSTALL_TARGET}" ]; then
 		exit 1
 	fi
 
-	mkdir "${INSTALL_TARGET}"
+	TEMP_TARGET="/tmp/${PROGRAM_ID}-v${LATEST_VERSION}"
+	mkdir "${TEMP_TARGET}"
 	chmod +x "${BIN_TMP_FILE}"
-	mv "${BIN_TMP_FILE}" "${INSTALL_TARGET}/${PROGRAM_EXEC}"
+	mv "${BIN_TMP_FILE}" "${TEMP_TARGET}/${PROGRAM_EXEC}"
+	mv "${TEMP_TARGET}" "${INSTALL_TARGET}"
+	if [ -d "${TEMP_TARGET}" ]; then
+		rm -r "${TEMP_TARGET}"
+	fi
 fi
 
 # Set active release
