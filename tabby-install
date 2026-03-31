@@ -1,0 +1,107 @@
+#!/bin/sh
+
+################################################################################
+#
+#  tabby-install
+#
+#  Install/Update Tabby for current user. This also works as a version manager.
+#  If version is not specified, the latest version will be installed.
+#
+#  Homepage: https://tabby.sh/
+#
+#  Usage:
+#    tabby-install [<version>]
+#
+#  Example:
+#    tabby-install
+#    tabby-install 1.0.227
+#    tabby-install v1.0.227
+#
+#  MIT License.
+#  Copyright (C) 2025 Nguyen Nhat Tung.
+#
+################################################################################
+
+# Application info
+GITHUB_OWNER="Eugeny"
+GITHUB_REPO="tabby"
+PROGRAM_ID="tabby"
+PROGRAM_EXEC="tabby"
+
+set -ex
+
+# Determine version to install
+if [ -z "$1" ]; then
+	LATEST_VERSION="$(curl https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest | jq -r .tag_name)"
+else
+	LATEST_VERSION="$1"
+fi
+LATEST_VERSION="${LATEST_VERSION#v}"
+
+# Installation environment
+USERID="$(id -u)"
+ARCH="$(uname -m)"
+if [ "${USERID}" -eq 0 ]; then
+	INSTALL_ROOT="/usr/local/share/${PROGRAM_ID}"
+	SYSTEM_BIN_ROOT="/usr/local/bin"
+else
+	INSTALL_ROOT="${HOME}/.local/share/${PROGRAM_ID}"
+	SYSTEM_BIN_ROOT="${HOME}/.local/bin"
+fi
+INSTALL_TARGET="${INSTALL_ROOT}/${PROGRAM_ID}-v${LATEST_VERSION}"
+ACTIVE_TARGET="${INSTALL_ROOT}/active-release"
+
+if [ ! -d "${INSTALL_ROOT}" ]; then
+	mkdir -p "${INSTALL_ROOT}"
+fi
+if [ ! -d "${SYSTEM_BIN_ROOT}" ]; then
+	mkdir -p "${SYSTEM_BIN_ROOT}"
+fi
+
+# Download and install binaries
+if [ ! -d "${INSTALL_TARGET}" ]; then
+	BIN_ARCH_URI_AMD64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${LATEST_VERSION}/tabby-${LATEST_VERSION}-linux-x64.tar.gz"
+	BIN_ARCH_URI_ARM64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${LATEST_VERSION}/tabby-${LATEST_VERSION}-linux-arm64.tar.gz"
+	BIN_ARCH_TMP_FILE="/tmp/${PROGRAM_ID}-v${LATEST_VERSION}.tar.gz"
+
+	if [ "${ARCH}" = "x86_64" ] || [ "${ARCH}" = "amd64" ]; then
+		curl -fSL "${BIN_ARCH_URI_AMD64}" -o "${BIN_ARCH_TMP_FILE}"
+	elif [ "${ARCH}" = "aarch64" ] || [ "${ARCH}" = "arm64" ]; then
+		curl -fSL "${BIN_ARCH_URI_ARM64}" -o "${BIN_ARCH_TMP_FILE}"
+	else
+		echo "Unsupported architecture: ${ARCH}"
+		exit 1
+	fi
+
+	TEMP_TARGET="/tmp/${PROGRAM_ID}-v${LATEST_VERSION}"
+	mkdir "${TEMP_TARGET}"
+	tar -x -v -f "${BIN_ARCH_TMP_FILE}" -C "${TEMP_TARGET}"
+	rm "${BIN_ARCH_TMP_FILE}"
+	if [ "${ARCH}" = "x86_64" ] || [ "${ARCH}" = "amd64" ]; then
+		mv "${TEMP_TARGET}/tabby-${LATEST_VERSION}-linux-x64" "${INSTALL_TARGET}"
+	elif [ "${ARCH}" = "aarch64" ] || [ "${ARCH}" = "arm64" ]; then
+		mv "${TEMP_TARGET}/tabby-${LATEST_VERSION}-linux-arm64" "${INSTALL_TARGET}"
+	else
+		echo "Unsupported architecture: ${ARCH}"
+		exit 1
+	fi
+	if [ -d "${TEMP_TARGET}" ]; then
+		rm -r "${TEMP_TARGET}"
+	fi
+fi
+
+# Set active release
+if [ -f "${ACTIVE_TARGET}" ] || [ -d "${ACTIVE_TARGET}" ] || [ -L "${ACTIVE_TARGET}" ]; then
+	rm -r "${ACTIVE_TARGET}"
+fi
+cp -r "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
+
+# Create symlink for quick access
+ACTIVE_TARGET_BIN="${ACTIVE_TARGET}/${PROGRAM_EXEC}"
+SYSTEM_BIN_TARGET_BIN="${SYSTEM_BIN_ROOT}/${PROGRAM_ID}"
+if [ -f "${ACTIVE_TARGET_BIN}" ]; then
+	if [ -f "${SYSTEM_BIN_TARGET_BIN}" ] || [ -d "${SYSTEM_BIN_TARGET_BIN}" ] || [ -L "${SYSTEM_BIN_TARGET_BIN}" ]; then
+		rm -r "${SYSTEM_BIN_TARGET_BIN}"
+	fi
+	ln -s "${ACTIVE_TARGET_BIN}" "${SYSTEM_BIN_TARGET_BIN}"
+fi
