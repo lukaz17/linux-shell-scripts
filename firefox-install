@@ -84,7 +84,7 @@ fi
 if [ -f "${ACTIVE_TARGET}" ] || [ -d "${ACTIVE_TARGET}" ] || [ -L "${ACTIVE_TARGET}" ]; then
 	rm -r "${ACTIVE_TARGET}"
 fi
-ln -s "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
+cp -r "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
 
 # Create symlink for quick access
 ACTIVE_TARGET_BIN="${ACTIVE_TARGET}/${PROGRAM_EXEC}"
