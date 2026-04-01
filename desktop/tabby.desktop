@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Tabby
+GenericName=Terminal
+Comment=A terminal for the modern age.
+Exec=tabby %F
+Icon=tabby
+Type=Application
+Terminal=false
+StartupNotify=true
+StartupWMClass=tabby
+Categories=Terminal;SSH-Client;
+Keywords=terminal;serial;terminal-emulators;ssh-client;telnet-client;
