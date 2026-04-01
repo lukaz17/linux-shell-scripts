@@ -39,14 +39,17 @@ fi
 LATEST_VERSION="${LATEST_VERSION#v}"
 
 # Installation environment
+CTXDIR="$(cd "$(dirname "${0}")" && pwd)"
 USERID="$(id -u)"
 ARCH="$(uname -m)"
 if [ "${USERID}" -eq 0 ]; then
 	INSTALL_ROOT="/usr/local/share/${PROGRAM_ID}"
 	SYSTEM_BIN_ROOT="/usr/local/bin"
+	DESKTOP_ROOT="/usr/local/share/applications"
 else
 	INSTALL_ROOT="${HOME}/.local/share/${PROGRAM_ID}"
 	SYSTEM_BIN_ROOT="${HOME}/.local/bin"
+	DESKTOP_ROOT="${HOME}/.local/share/applications"
 fi
 INSTALL_TARGET="${INSTALL_ROOT}/${PROGRAM_ID}-v${LATEST_VERSION}"
 ACTIVE_TARGET="${INSTALL_ROOT}/active-release"
@@ -56,6 +59,9 @@ if [ ! -d "${INSTALL_ROOT}" ]; then
 fi
 if [ ! -d "${SYSTEM_BIN_ROOT}" ]; then
 	mkdir -p "${SYSTEM_BIN_ROOT}"
+fi
+if [ ! -d "${DESKTOP_ROOT}" ]; then
+	mkdir -p "${DESKTOP_ROOT}"
 fi
 
 # Download and install binaries
@@ -97,4 +103,24 @@ if [ -f "${ACTIVE_TARGET_BIN}" ]; then
 		rm -r "${SYSTEM_BIN_TARGET_BIN}"
 	fi
 	ln -s "${ACTIVE_TARGET_BIN}" "${SYSTEM_BIN_TARGET_BIN}"
+fi
+
+# Create desktop shortcut for quick access
+DESKTOP_SOURCE="${CTXDIR}/desktop/${PROGRAM_ID}.desktop"
+DESKTOP_TARGET="${DESKTOP_ROOT}/${PROGRAM_ID}.desktop"
+if [ -f "${DESKTOP_SOURCE}" ]; then
+	if [ -f "${DESKTOP_TARGET}" ] || [ -d "${DESKTOP_TARGET}" ] || [ -L "${DESKTOP_TARGET}" ]; then
+		rm -r "${DESKTOP_TARGET}"
+	fi
+	cp "${DESKTOP_SOURCE}" "${DESKTOP_TARGET}"
+fi
+
+# Create polkit policy for root permission
+POLICY_SOURCE="${CTXDIR}/desktop/doublecmd.policy"
+POLICY_TARGET="/usr/share/polkit-1/actions/org.doublecmd.root.policy"
+if [ -f "${POLICY_SOURCE}" ] && [ -d "/usr/share/polkit-1/actions" ]; then
+	if [ -f "${POLICY_TARGET}" ] || [ -d "${POLICY_TARGET}" ] || [ -L "${POLICY_TARGET}" ]; then
+		rm -r "${POLICY_TARGET}"
+	fi
+	cp "${POLICY_SOURCE}" "${POLICY_TARGET}"
 fi
