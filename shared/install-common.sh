@@ -146,9 +146,14 @@ make_executable() {
 # Normalize install version for consistency
 # ------------------------------------------------------------------------------
 normalize_install_version() {
+	_fallback_version="${1}"
 	if [ -z "${INSTALL_VERSION}" ]; then
-		echo "normalize_install_version: Install version is not specified"
-		return 1
+		if [ -n "${_fallback_version}" ]; then
+			INSTALL_VERSION="${_fallback_version}"
+		else
+			echo "normalize_install_version: Install version is not specified"
+			return 1
+		fi
 	fi
 
 	INSTALL_VERSION="${INSTALL_VERSION#v}"
