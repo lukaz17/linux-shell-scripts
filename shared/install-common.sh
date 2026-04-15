@@ -219,8 +219,10 @@ init_install_env_desktop() {
 	_user_id="$(id -u)"
 	if [ "${_user_id}" -eq 0 ]; then
 		DESKTOP_ROOT="/usr/local/share/applications"
+		ICON_ROOT="/usr/local/share/icons"
 	else
 		DESKTOP_ROOT="${HOME}/.local/share/applications"
+		ICON_ROOT="${HOME}/.local/share/icons"
 	fi
 	create_dir "${DESKTOP_ROOT}"
 }
@@ -315,4 +317,32 @@ extract_archive() {
 		echo "extract_archive: Unsupported archive type: ${_archive_type}"
 		exit 1
 	fi
+}
+
+# ------------------------------------------------------------------------------
+# Install desktop manifest and icons
+# ------------------------------------------------------------------------------
+install_desktop() {
+	_name="$1"
+	_context_root="$2"
+	_desktop_root="$3"
+	_icon_root="$4"
+	if [ -z "${_name}" ] || [ -z "${_context_root}" ] || [ -z "${_desktop_root}" ] || [ -z "${_icon_root}" ]; then
+		echo "install_desktop: Invalid arguments"
+		return 1
+	fi
+
+	if [ -f "${_context_root}/desktop/${_name}.desktop" ]; then
+		copy_item_overwrite "${_context_root}/desktop/${_name}.desktop" "${_desktop_root}/${_name}.desktop"
+	fi
+
+	for SIZE in "16" "24" "32" "48" "64" "72" "96" "128" "256" "512"; do
+		FILE_FROM="${_context_root}/icon/${_name}-${SIZE}.png"
+		if [ -f "${FILE_FROM}" ]; then
+			DIR_TO="${_icon_root}/hicolor/${SIZE}x${SIZE}/apps"
+			create_dir "${DIR_TO}"
+			FILE_TO="${DIR_TO}/${_name}.png"
+			copy_item_overwrite "${FILE_FROM}" "${FILE_TO}"
+		fi
+	done
 }
