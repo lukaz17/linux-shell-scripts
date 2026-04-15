@@ -36,7 +36,7 @@ CTXDIR="$(cd "$(dirname "$0")" && pwd)"
 
 # Prepare environment
 get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "$1"
-init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
+init_install_env_desktop "${PROGRAM_ID}" "${INSTALL_VERSION}"
 
 # Download and install binaries
 if [ ! -d "${INSTALL_TARGET}" ]; then
@@ -54,4 +54,4 @@ fi
 # Finalize install
 copy_item_overwrite "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
 symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC}" "${SYSTEM_BIN_ROOT}/${PROGRAM_ID}"
-copy_item_overwrite "${CTXDIR}/desktop/${PROGRAM_ID}.desktop" "${DESKTOP_ROOT}/${PROGRAM_ID}.desktop"
+install_desktop "${PROGRAM_ID}" "${CTXDIR}" "${DESKTOP_ROOT}" "${ICON_ROOT}"
