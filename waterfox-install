@@ -22,72 +22,33 @@
 #
 ################################################################################
 
+set -ex
+
 # Application info
 GITHUB_OWNER="BrowserWorks"
 GITHUB_REPO="waterfox"
 PROGRAM_ID="waterfox"
 PROGRAM_EXEC="waterfox"
 
-set -ex
+# Shared library
+CTXDIR="$(cd "$(dirname "$0")" && pwd)"
+. "${CTXDIR}/shared/install-common.sh"
 
-# Determine version to install
-if [ -z "$1" ]; then
-	LATEST_VERSION="$(curl https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest | jq -r .tag_name)"
-else
-	LATEST_VERSION="$1"
-fi
-LATEST_VERSION="${LATEST_VERSION#v}"
-
-# Installation environment
-CTXDIR="$(cd "$(dirname "${0}")" && pwd)"
-USERID="$(id -u)"
-ARCH="$(uname -m)"
-if [ "${USERID}" -eq 0 ]; then
-	INSTALL_ROOT="/usr/local/share/${PROGRAM_ID}"
-	SYSTEM_BIN_ROOT="/usr/local/bin"
-	DESKTOP_ROOT="/usr/local/share/applications"
-else
-	INSTALL_ROOT="${HOME}/.local/share/${PROGRAM_ID}"
-	SYSTEM_BIN_ROOT="${HOME}/.local/bin"
-	DESKTOP_ROOT="${HOME}/.local/share/applications"
-fi
-INSTALL_TARGET="${INSTALL_ROOT}/${PROGRAM_ID}-v${LATEST_VERSION}"
-ACTIVE_TARGET="${INSTALL_ROOT}/active-release"
-
-if [ ! -d "${INSTALL_ROOT}" ]; then
-	mkdir -p "${INSTALL_ROOT}"
-fi
-if [ ! -d "${SYSTEM_BIN_ROOT}" ]; then
-	mkdir -p "${SYSTEM_BIN_ROOT}"
-fi
-if [ ! -d "${DESKTOP_ROOT}" ]; then
-	mkdir -p "${DESKTOP_ROOT}"
-fi
+# Prepare environment
+get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "$1"
+init_install_env_desktop "${PROGRAM_ID}" "${INSTALL_VERSION}"
 
 # Download and install binaries
 if [ ! -d "${INSTALL_TARGET}" ]; then
-	BIN_ARCH_URI_AMD64="https://cdn.waterfox.com/waterfox/releases/${LATEST_VERSION}/Linux_x86_64/waterfox-${LATEST_VERSION}.tar.bz2"
-	BIN_ARCH_URI_ARM64="https://cdn.waterfox.com/waterfox/releases/${LATEST_VERSION}/Linux_arm64/waterfox-${LATEST_VERSION}.tar.bz2"
-	BIN_ARCH_TMP_FILE="/tmp/${PROGRAM_ID}-v${LATEST_VERSION}.tar.gz"
-
-	if [ "${ARCH}" = "x86_64" ] || [ "${ARCH}" = "amd64" ]; then
-		curl -fSL "${BIN_ARCH_URI_AMD64}" -o "${BIN_ARCH_TMP_FILE}"
-	elif [ "${ARCH}" = "aarch64" ] || [ "${ARCH}" = "arm64" ]; then
-		echo "Unsupported architecture: ${ARCH}"
-		exit 1
-	else
-		echo "Unsupported architecture: ${ARCH}"
-		exit 1
-	fi
-
-	TEMP_TARGET="/tmp/${PROGRAM_ID}-v${LATEST_VERSION}"
-	mkdir "${TEMP_TARGET}"
-	tar -x -v -f "${BIN_ARCH_TMP_FILE}" -C "${TEMP_TARGET}"
-	rm "${BIN_ARCH_TMP_FILE}"
-	mv "${TEMP_TARGET}/waterfox" "${INSTALL_TARGET}"
-	if [ -d "${TEMP_TARGET}" ]; then
-		rm -r "${TEMP_TARGET}"
-	fi
+	BIN_ARCH_URI_AMD64="https://cdn.waterfox.com/waterfox/releases/${INSTALL_VERSION}/Linux_x86_64/waterfox-${INSTALL_VERSION}.tar.bz2"
+	BIN_ARCH_URI_ARM64="https://cdn.waterfox.com/waterfox/releases/${INSTALL_VERSION}/Linux_arm64/waterfox-${INSTALL_VERSION}.tar.bz2"
+	BIN_ARCH_TMP_FILE="${TEMP_TARGET}.tar.gz"
+	download_uri_per_arch "${BIN_ARCH_URI_AMD64}" "${BIN_ARCH_URI_ARM64}" "${BIN_ARCH_TMP_FILE}"
+	create_dir "${TEMP_TARGET}"
+	extract_archive "${BIN_ARCH_TMP_FILE}" "tar" "${TEMP_TARGET}"
+	remove_item "${BIN_ARCH_TMP_FILE}"
+	move_item "${TEMP_TARGET}/waterfox" "${INSTALL_TARGET}"
+	remove_item "${TEMP_TARGET}"
 fi
 
 # Set active release
@@ -106,12 +67,7 @@ if [ -f "${ACTIVE_TARGET_BIN}" ]; then
 	ln -s "${ACTIVE_TARGET_BIN}" "${SYSTEM_BIN_TARGET_BIN}"
 fi
 
-# Create desktop shortcut for quick access
-DESKTOP_SOURCE="${CTXDIR}/desktop/${PROGRAM_ID}.desktop"
-DESKTOP_TARGET="${DESKTOP_ROOT}/${PROGRAM_ID}.desktop"
-if [ -f "${DESKTOP_SOURCE}" ]; then
-	if [ -f "${DESKTOP_TARGET}" ] || [ -d "${DESKTOP_TARGET}" ] || [ -L "${DESKTOP_TARGET}" ]; then
-		rm -r "${DESKTOP_TARGET}"
-	fi
-	cp "${DESKTOP_SOURCE}" "${DESKTOP_TARGET}"
-fi
+# Finalize install
+copy_item_overwrite "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
+symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC}" "${SYSTEM_BIN_ROOT}/${PROGRAM_ID}"
+install_desktop "${PROGRAM_ID}" "${CTXDIR}" "${DESKTOP_ROOT}" "${ICON_ROOT}"
