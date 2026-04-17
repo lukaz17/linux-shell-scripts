@@ -22,24 +22,20 @@
 #
 ################################################################################
 
+set -ex
+
 # Application info
 GITHUB_OWNER="nvm-sh"
 GITHUB_REPO="nvm"
 PROGRAM_ID="nvm"
 
-set -ex
+# Shared library
+CTXDIR="$(cd "$(dirname "$0")" && pwd)"
+. "${CTXDIR}/shared/install-common.sh"
 
-# Determine version to install
-if [ -z "$1" ]; then
-	LATEST_VERSION="$(curl https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest | jq -r .tag_name)"
-else
-	LATEST_VERSION="$1"
-fi
-LATEST_VERSION="${LATEST_VERSION#v}"
-
-# Installation environment
-USERID="$(id -u)"
-ARCH="$(uname -m)"
+# Prepare environment
+get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "$1"
+init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
 
 # Download and install binaries
-curl -o- "https://raw.githubusercontent.com/nvm-sh/nvm/v${LATEST_VERSION}/install.sh" | bash
+curl -o- "https://raw.githubusercontent.com/nvm-sh/nvm/v${INSTALL_VERSION}/install.sh" | bash
