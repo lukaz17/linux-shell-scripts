@@ -199,6 +199,7 @@ init_install_env() {
 		SYSTEM_BIN_ROOT="${HOME}/.local/bin"
 	fi
 	TEMP_ROOT="/tmp"
+	USER_PROFILE_RC="${HOME}/.profile"
 
 	if [ -n "${CLIINST_USR_LOCAL_SHARE}" ]; then
 		INSTALL_ROOT="${CLIINST_USR_LOCAL_SHARE}/${_program_id}"
@@ -350,4 +351,33 @@ install_desktop() {
 			copy_item_overwrite "${FILE_FROM}" "${FILE_TO}"
 		fi
 	done
+}
+
+# ------------------------------------------------------------------------------
+# Append text into a file
+# ------------------------------------------------------------------------------
+append_text_idempotent() {
+	_text="$1"
+	_file="$2"
+	if [ -z "${_text}" ] || [ -z "${_file}" ]; then
+		echo "append_text_idempotent: Invalid arguments"
+		return 1
+	fi
+	case "${_text}" in
+		*'
+'*)
+			echo "append_text_idempotent: Invalid arguments"
+			return 1
+			;;
+	esac
+
+	if ! grep -qFx "${_text}" "${_file}" 2>/dev/null; then
+		if [ -s "${_file}" ]; then
+			_last_line="$(tail -n 1 "${_file}")"
+			if [ -n "${_last_line}" ]; then
+				printf '\n' >> "${_file}"
+			fi
+		fi
+		printf '%s\n' "${_text}" >> "${_file}"
+	fi
 }
