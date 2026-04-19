@@ -354,6 +354,27 @@ install_desktop() {
 }
 
 # ------------------------------------------------------------------------------
+# Install polkit policy (requires root)
+# ------------------------------------------------------------------------------
+install_polkit_policy() {
+	_name="$1"
+	_context_root="$2"
+	if [ -z "${_name}" ] || [ -z "${_context_root}" ]; then
+		echo "install_polkit_policy: Invalid arguments"
+		return 1
+	fi
+
+	_user_id="$(id -u)"
+	if [ "${_user_id}" -eq 0 ]; then
+		POLICY_SOURCE="${_context_root}/desktop/${_name}.policy"
+		POLICY_TARGET="/usr/share/polkit-1/actions/${_name}.policy"
+		if [ -f "${POLICY_SOURCE}" ] && [ -d "/usr/share/polkit-1/actions" ]; then
+			copy_item_overwrite "${POLICY_SOURCE}" "${POLICY_TARGET}"
+		fi
+	fi
+}
+
+# ------------------------------------------------------------------------------
 # Append text into a file
 # ------------------------------------------------------------------------------
 append_text_idempotent() {
