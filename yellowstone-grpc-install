@@ -1,0 +1,61 @@
+#!/bin/sh
+
+################################################################################
+#
+#  yellowstone-grpc-install
+#
+#  Install/Update Triton's Dragon's Mouth Yellowstone gRPC for current user.
+#  This also works as a version manager.
+#
+#  Homepage: https://triton.one/products/streaming
+#
+#  Presquites:
+#  - Agave
+#
+#  Usage:
+#    yellowstone-grpc-install <version> <solana_version> <ubuntu_release>
+#
+#  Example:
+#    yellowstone-grpc-install 12.3.0 3.1.14 24
+#    yellowstone-grpc-install v12.3.0 v3.1.14 24
+#
+#  MIT License.
+#  Copyright (C) 2025 Nguyen Nhat Tung.
+#
+################################################################################
+
+set -ex
+
+# Application info
+GITHUB_OWNER="rpcpool"
+GITHUB_REPO="yellowstone-grpc"
+PROGRAM_ID="yellowstone-grpc"
+PROGRAM_EXEC=""
+
+# Shared library
+CTXDIR="$(cd "$(dirname "$0")" && pwd)"
+. "${CTXDIR}/shared/install-common.sh"
+
+# Prepare environment
+UBUNTU_VERSION=$(normalize_install_version "$3" && echo "${INSTALL_VERSION}")
+SOLANA_VERSION=$(normalize_install_version "$2" && echo "${INSTALL_VERSION}")
+YGRPC_VERSION=$(normalize_install_version "$1" && echo "${INSTALL_VERSION}")
+INSTALL_VERSION="${YGRPC_VERSION}+solana.${SOLANA_VERSION}+ubuntu.${UBUNTU_VERSION}"
+init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
+
+# Download and install binaries
+if [ ! -d "${INSTALL_TARGET}" ]; then
+	BIN_ARCH_URI_AMD64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${YGRPC_VERSION}+solana.${SOLANA_VERSION}/yellowstone-grpc-geyser-release${UBUNTU_VERSION}-x86_64-unknown-linux-gnu.tar.bz2"
+	BIN_ARCH_URI_ARM64=""
+	BIN_ARCH_TMP_FILE="${TEMP_TARGET}.tar.gz"
+	download_uri_per_arch "${BIN_ARCH_URI_AMD64}" "${BIN_ARCH_URI_ARM64}" "${BIN_ARCH_TMP_FILE}"
+	create_dir "${TEMP_TARGET}"
+	extract_archive "${BIN_ARCH_TMP_FILE}" "tar" "${TEMP_TARGET}"
+	remove_item "${BIN_ARCH_TMP_FILE}"
+	move_item "${TEMP_TARGET}/yellowstone-grpc-geyser-release" "${INSTALL_TARGET}"
+	remove_item "${TEMP_TARGET}"
+fi
+
+# Finalize install
+ACTIVE_TARGET="/root/.local/share/solana/install/releases/${SOLANA_VERSION}/solana-release/ys-grpc"
+symlink_item_overwrite "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
