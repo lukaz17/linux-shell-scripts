@@ -7,12 +7,12 @@
 #  Install/Update Agave for current user. This also works as a version manager.
 #  If version is not specified, the latest version will be installed.
 #
+#  Homepage: https://www.anza.xyz/
+#
 #  Presquites:
 #  - Rust
 #  - clang protobuf-compiler
 #  - libclang-dev libprotobuf-dev libssl-dev libudev-dev zlib1g-dev
-#
-#  Homepage: https://www.anza.xyz/
 #
 #  Usage:
 #    agave-install [<version>]
@@ -27,64 +27,46 @@
 #
 ################################################################################
 
+set -ex
+
 # Application info
 GITHUB_OWNER="anza-xyz"
 GITHUB_REPO="agave"
 PROGRAM_ID="agave"
 PROGRAM_EXEC="solana"
 
-set -ex
+# Shared library
+CTXDIR="$(cd "$(dirname "$0")" && pwd)"
+. "${CTXDIR}/shared/install-common.sh"
 
-# Determine version to install
-if [ -z "$1" ]; then
-	LATEST_VERSION="$(curl https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest | jq -r .tag_name)"
-else
-	LATEST_VERSION="$1"
-fi
-LATEST_VERSION="${LATEST_VERSION#v}"
-
-# Installation environment
-USERID="$(id -u)"
-ARCH="$(uname -m)"
-INSTALL_ROOT="${HOME}/.local/share/solana/install"
-INSTALL_TARGET="${INSTALL_ROOT}/releases/${LATEST_VERSION}"
-ACTIVE_TARGET="${INSTALL_ROOT}/active_release"
-SYSTEM_BIN_TARGET="/usr/local/bin"
-
-mkdir -p "${INSTALL_ROOT}/releases"
+# Prepare environment
+get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "$1"
+init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
+INSTALL_ROOT="${HOME}/.local/share/solana"
+INSTALL_TARGET="${INSTALL_ROOT}/install/releases/${INSTALL_VERSION}"
+ACTIVE_TARGET="${INSTALL_ROOT}/install/active_release"
+mkdir -p "${INSTALL_ROOT}/install/releases"
 
 # Download and install binaries
 if [ ! -d "${INSTALL_TARGET}" ]; then
-	SRC_ARCH_URI_AMD64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/archive/refs/tags/v${LATEST_VERSION}.tar.gz"
-	SRC_ARCH_URI_ARM64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/archive/refs/tags/v${LATEST_VERSION}.tar.gz"
-	SRC_ARCH_TMP_FILE="/tmp/${PROGRAM_ID}-v${LATEST_VERSION}.tar.gz"
-
-	if [ "${ARCH}" = "x86_64" ] || [ "${ARCH}" = "amd64" ]; then
-		curl -fSL "${SRC_ARCH_URI_AMD64}" -o "${SRC_ARCH_TMP_FILE}"
-	elif [ "${ARCH}" = "aarch64" ] || [ "${ARCH}" = "arm64" ]; then
-		curl -fSL "${SRC_ARCH_URI_ARM64}" -o "${SRC_ARCH_TMP_FILE}"
-	else
-		echo "Unsupported architecture: ${ARCH}"
-		exit 1
-	fi
-
-	TEMP_TARGET="/tmp/${PROGRAM_ID}-v${LATEST_VERSION}"
-	mkdir "${TEMP_TARGET}"
-	tar -x -v -f "${SRC_ARCH_TMP_FILE}" -C "${TEMP_TARGET}"
-	rm "${SRC_ARCH_TMP_FILE}"
-	cd "${TEMP_TARGET}/${GITHUB_REPO}-${LATEST_VERSION}"
+	SRC_ARCH_URI_AMD64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/archive/refs/tags/v${INSTALL_VERSION}.tar.gz"
+	SRC_ARCH_URI_ARM64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/archive/refs/tags/v${INSTALL_VERSION}.tar.gz"
+	SRC_ARCH_TMP_FILE="${TEMP_TARGET}.tar.gz"
+	download_uri_per_arch "${SRC_ARCH_URI_AMD64}" "${SRC_ARCH_URI_ARM64}" "${SRC_ARCH_TMP_FILE}"
+	create_dir "${TEMP_TARGET}"
+	extract_archive "${SRC_ARCH_TMP_FILE}" "tar" "${TEMP_TARGET}"
+	remove_item "${SRC_ARCH_TMP_FILE}"
+	move_item "${TEMP_TARGET}/${GITHUB_REPO}-${INSTALL_VERSION}" "${TEMP_TARGET}/solana-release"
+	cd "${TEMP_TARGET}/solana-release"
 	./scripts/cargo-install-all.sh .
-	mkdir "${INSTALL_TARGET}"
-	mv "${TEMP_TARGET}/${GITHUB_REPO}-${LATEST_VERSION}" "${INSTALL_TARGET}/solana-release"
-	if [ -d "${TEMP_TARGET}" ]; then
-		rm -r "${TEMP_TARGET}"
-	fi
+	move_item "${TEMP_TARGET}" "${INSTALL_TARGET}"
+	remove_item "${TEMP_TARGET}"
 fi
 
-# Set active release
-if [ -f "${ACTIVE_TARGET}" ] || [ -d "${ACTIVE_TARGET}" ] || [ -L "${ACTIVE_TARGET}" ]; then
-	rm -r "${ACTIVE_TARGET}"
-fi
-ln -s "${INSTALL_TARGET}/solana-release" "${ACTIVE_TARGET}"
-
-echo "export PATH=\"\$HOME/.local/share/solana/install/active_release/bin:\$PATH\""
+# Finalize install
+symlink_item_overwrite "${INSTALL_TARGET}/solana-release" "${ACTIVE_TARGET}"
+cat << EOF > "${INSTALL_ROOT}/env.sh"
+export PATH="\$HOME/.local/share/solana/install/active_release/bin:\$PATH"
+EOF
+append_text_idempotent "# solana" "${USER_PROFILE_RC}"
+append_text_idempotent ". \"${INSTALL_ROOT}/env.sh\"" "${USER_PROFILE_RC}"
