@@ -166,6 +166,7 @@ get_install_version_from_github() {
 	_github_owner="${1}"
 	_github_repository="${2}"
 	_fallback_version="${3}"
+	_trim_prefix="${4}"
 	if [ -z "${_github_owner}" ] || [ -z "${_github_repository}" ]; then
 		echo "get_install_version_from_github: Invalid arguments"
 		return 1
@@ -173,6 +174,9 @@ get_install_version_from_github() {
 
 	if [ -z "${_fallback_version}" ]; then
 		INSTALL_VERSION="$(curl -fsSL "https://api.github.com/repos/${_github_owner}/${_github_repository}/releases/latest" | jq -r .tag_name)"
+		if [ -n "${_trim_prefix}" ]; then
+			INSTALL_VERSION="${INSTALL_VERSION#${_trim_prefix}}"
+		fi
 	else
 		INSTALL_VERSION="${_fallback_version}"
 	fi
