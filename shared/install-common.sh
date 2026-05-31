@@ -345,6 +345,31 @@ extract_archive() {
 }
 
 # ------------------------------------------------------------------------------
+# Refresh desktop icons
+# ------------------------------------------------------------------------------
+refresh_desktop_icon() {
+	if [ -d "${HOME}/.local/share/applications" ]; then
+		update-desktop-database "${HOME}/.local/share/applications"
+	fi
+	if [ -d "${HOME}/.local/share/icons/hicolor" ]; then
+		gtk-update-icon-cache "${HOME}/.local/share/icons/hicolor"
+	fi
+	_user_id="$(id -u)"
+	if [ -d "/usr/share/applications" ] && [ "${_user_id}" -eq 0 ]; then
+		update-desktop-database "/usr/share/applications"
+	fi
+	if [ -d "/usr/local/share/applications" ] && [ "${_user_id}" -eq 0 ]; then
+		update-desktop-database "/usr/local/share/applications"
+	fi
+	if [ -d "/usr/share/icons/hicolor" ] && [ "${_user_id}" -eq 0 ]; then
+		gtk-update-icon-cache "/usr/share/icons/hicolor"
+	fi
+	if [ -d "/usr/local/share/icons/hicolor" ] && [ "${_user_id}" -eq 0 ]; then
+		gtk-update-icon-cache "/usr/local/share/icons/hicolor"
+	fi
+}
+
+# ------------------------------------------------------------------------------
 # Install desktop manifest and icons
 # ------------------------------------------------------------------------------
 install_desktop() {
@@ -361,6 +386,10 @@ install_desktop() {
 		copy_item_overwrite "${_context_root}/desktop/${_name}.desktop" "${_desktop_root}/${_name}.desktop"
 	fi
 
+	if [ -f "/usr/share/icons/hicolor/index.theme" ]; then
+		create_dir "${_icon_root}/hicolor"
+		copy_item_overwrite "/usr/share/icons/hicolor/index.theme" "${_icon_root}/hicolor/index.theme"
+	fi
 	for SIZE in "16" "24" "32" "48" "64" "72" "96" "128" "256" "512"; do
 		FILE_FROM="${_context_root}/icon/${_name}-${SIZE}.png"
 		if [ -f "${FILE_FROM}" ]; then
@@ -370,6 +399,8 @@ install_desktop() {
 			copy_item_overwrite "${FILE_FROM}" "${FILE_TO}"
 		fi
 	done
+
+	refresh_desktop_icon
 }
 
 # ------------------------------------------------------------------------------
