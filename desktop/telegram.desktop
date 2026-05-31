@@ -1,0 +1,24 @@
+[Desktop Entry]
+Name=Telegram
+GenericName=Instant Messenger
+Comment=New era of messaging
+TryExec=telegram
+Exec=telegram -- %U
+Icon=telegram
+Type=Application
+Terminal=false
+StartupNotify=true
+StartupWMClass=TelegramDesktop
+MimeType=x-scheme-handler/tg;x-scheme-handler/tonsite;
+Categories=Chat;Network;InstantMessaging;Qt;
+Keywords=tg;chat;im;messaging;messenger;sms;tdesktop;
+Actions=quit;
+DBusActivatable=true
+SingleMainWindow=true
+X-GNOME-UsesNotifications=true
+X-GNOME-SingleWindow=true
+
+[Desktop Action quit]
+Exec=telegram -quit
+Name=Quit Telegram
+Icon=application-exit
