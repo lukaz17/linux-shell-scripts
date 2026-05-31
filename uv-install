@@ -54,3 +54,14 @@ fi
 # Finalize install
 symlink_item_overwrite "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
 symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC}" "${SYSTEM_BIN_ROOT}/${PROGRAM_ID}"
+cat << EOF > "${INSTALL_ROOT}/env.sh"
+export UV_INSTALL_DIR="${ACTIVE_TARGET}"
+export UV_PYTHON_INSTALL_DIR="${INSTALL_ROOT}/python"
+export UV_TOOL_DIR="${INSTALL_ROOT}/tool"
+EOF
+create_dir "${INSTALL_ROOT}/python"
+make_all_access "${INSTALL_ROOT}/python"
+create_dir "${INSTALL_ROOT}/tool"
+make_all_access "${INSTALL_ROOT}/tool"
+append_text_idempotent "# uv" "${USER_PROFILE_RC}"
+append_text_idempotent ". \"${INSTALL_ROOT}/env.sh\"" "${USER_PROFILE_RC}"
