@@ -1,0 +1,89 @@
+#!/bin/bash
+
+################################################################################
+#
+#  ollama-models
+#
+#  Get info of all models provided by an Ollama server instance.
+#
+#  Usage:
+#    ollama-models [<server_url>]
+#
+#  Example:
+#    ollama-models
+#    ollama-models http://ollama.local
+#
+#  MIT License.
+#  Copyright (C) 2025 Nguyen Nhat Tung.
+#
+################################################################################
+
+set -e
+
+OLLAMA_HOST="${1:-${OLLAMA_HOST:-http://127.0.0.1:11434}}"
+
+tags_response=$(curl -s "${OLLAMA_HOST}/api/tags")
+model_names=$(echo "$tags_response" | jq -r '.models[].name')
+
+results="[]"
+
+for model_name in $model_names; do
+	show_body="{\"model\":\"${model_name}\"}"
+	show_response=$(curl -s -X POST -H "Content-Type: application/json" -d "$show_body" "${OLLAMA_HOST}/api/show")
+
+	# Extract num_ctx from parameters text
+	num_ctx=""
+	if echo "$show_response" | jq -e '.parameters' >/dev/null 2>&1; then
+		num_ctx=$(echo "$show_response" | jq -r '.parameters // ""' | sed -n 's/^num_ctx[[:space:]]\{1,\}\([0-9]\{1,\}\).*/\1/p')
+	fi
+
+	# Extract architecture from model_info
+	architecture=""
+	if echo "$show_response" | jq -e '.model_info' >/dev/null 2>&1; then
+		architecture=$(echo "$show_response" | jq -r 'if (.model_info | has("general.architecture")) then .model_info["general.architecture"] else "" end')
+	fi
+
+	family=$(echo "$show_response" | jq -r '.details.family // ""')
+
+	# Extract parameter_count from model_info (always under "general")
+	parameter_count=""
+	if echo "$show_response" | jq -e '.model_info' >/dev/null 2>&1; then
+		parameter_count=$(echo "$show_response" | jq -r 'if (.model_info | has("general.parameter_count")) then .model_info["general.parameter_count"] else "" end')
+	fi
+
+	# Extract context_length from model_info using family
+	context_length=""
+	if [ -n "$family" ] && echo "$show_response" | jq -e '.model_info' >/dev/null 2>&1; then
+		context_length=$(echo "$show_response" | jq -r --arg fam "$family" 'if (.model_info | has($fam + ".context_length")) then .model_info[$fam + ".context_length"] else "" end')
+	fi
+
+	parameter_size=$(echo "$show_response" | jq -r '.details.parameter_size // ""')
+	quantization=$(echo "$show_response" | jq -r '.details.quantization_level // ""')
+	capabilities=$(echo "$show_response" | jq -r '(.capabilities // []) | join(", ")')
+
+	info=$(jq -n \
+		--arg name "$model_name" \
+		--arg family "${family}" \
+		--arg architecture "${architecture}" \
+		--arg parameter_size "${parameter_size}" \
+		--arg parameter_count "${parameter_count}" \
+		--arg quantization "${quantization}" \
+		--arg context_length "${context_length}" \
+		--arg context_limit "${num_ctx}" \
+		--arg capabilities "$capabilities" \
+		'{
+			name: $name,
+			family: (if $family == "" then null else $family end),
+			architecture: (if $architecture == "" then null else $architecture end),
+			parameter_size: (if $parameter_size == "" then null else $parameter_size end),
+			parameter_count: (if $parameter_count == "" then null else ($parameter_count | tonumber) end),
+			quantization: (if $quantization == "" then null else $quantization end),
+			context_length: (if $context_length == "" then null else ($context_length | tonumber) end),
+			context_limit: (if $context_limit == "" then null else ($context_limit | tonumber) end),
+			capabilities: $capabilities
+		}')
+
+	results=$(echo "$results" | jq --argjson info "$info" '. + [$info]')
+done
+
+echo "$results" | jq '.'
