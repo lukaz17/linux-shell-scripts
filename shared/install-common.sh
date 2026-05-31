@@ -128,6 +128,21 @@ symlink_item_overwrite() {
 }
 
 # ------------------------------------------------------------------------------
+# Make a file/folder accessible for all users
+# ------------------------------------------------------------------------------
+make_all_access() {
+	_path="${1}"
+	if [ -z "${_path}" ]; then
+		echo "make_executable: Invalid arguments"
+		return 1
+	fi
+
+	if [ -f "${_path}" ] || [ -d "${_path}" ]; then
+		chmod a+wx "${_path}"
+	fi
+}
+
+# ------------------------------------------------------------------------------
 # Make a file/folder executable
 # ------------------------------------------------------------------------------
 make_executable() {
