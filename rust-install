@@ -22,30 +22,33 @@
 #
 ################################################################################
 
+set -ex
+
 # Application info
 GITHUB_OWNER="rust-lang"
 GITHUB_REPO="rust"
 PROGRAM_ID="rust"
 
-set -ex
+# Shared library
+CTXDIR="$(cd "$(dirname "$0")" && pwd)"
+. "${CTXDIR}/shared/install-common.sh"
 
-# Determine version to install
-if [ -z "$1" ]; then
-	LATEST_VERSION="stable"
-else
-	LATEST_VERSION="$1"
-fi
-LATEST_VERSION="${LATEST_VERSION#v}"
-
-# Installation environment
-USERID="$(id -u)"
-ARCH="$(uname -m)"
+# Prepare environment
+normalize_install_version "${1:-stable}"
+init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
 
 # Download and install binaries
+BIN_URI_AMD64="https://static.rust-lang.org/rustup/dist/x86_64-unknown-linux-gnu/rustup-init"
+BIN_URI_ARM64="https://static.rust-lang.org/rustup/dist/aarch64-unknown-linux-gnu/rustup-init"
+BIN_TMP_FILE="${TEMP_ROOT}/rustup-init"
+download_uri_per_arch "${BIN_URI_AMD64}" "${BIN_URI_ARM64}" "${BIN_TMP_FILE}"
+make_executable "${BIN_TMP_FILE}"
+ARCH="$(uname -m)"
 if [ "${ARCH}" = "x86_64" ] || [ "${ARCH}" = "amd64" ]; then
-	curl -fSL "https://sh.rustup.rs" | sh -s -- --default-toolchain "${LATEST_VERSION}" --default-host "x86_64-unknown-linux-gnu" --profile "minimal"
+	/tmp/rustup-init --default-toolchain "${INSTALL_VERSION}" --default-host "x86_64-unknown-linux-gnu" --profile "minimal"
 elif [ "${ARCH}" = "aarch64" ] || [ "${ARCH}" = "arm64" ]; then
-	curl -fSL "https://sh.rustup.rs" | sh -s -- --default-toolchain "${LATEST_VERSION}" --default-host "aarch64-unknown-linux-gnu" --profile "minimal"
+	/tmp/rustup-init --default-toolchain "${INSTALL_VERSION}" --default-host "aarch64-unknown-linux-gnu" --profile "minimal"
 else
-	curl -fSL "https://sh.rustup.rs" | sh -s -- --default-toolchain "${LATEST_VERSION}" --profile "minimal"
+	/tmp/rustup-init --default-toolchain "${INSTALL_VERSION}" --profile "minimal"
 fi
+remove_item ${BIN_TMP_FILE}
