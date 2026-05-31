@@ -28,7 +28,14 @@ set -ex
 GITHUB_OWNER="foundry-rs"
 GITHUB_REPO="foundry"
 PROGRAM_ID="foundry"
-PROGRAM_EXEC="forge"
+PROGRAM_EXEC_1="forge"
+SYSTEM_EXEC__1="forge"
+PROGRAM_EXEC_2="anvil"
+SYSTEM_EXEC__2="anvil"
+PROGRAM_EXEC_3="cast"
+SYSTEM_EXEC__3="cast"
+PROGRAM_EXEC_4="chisel"
+SYSTEM_EXEC__4="chisel"
 
 # Shared library
 CTXDIR="$(cd "$(dirname "$0")" && pwd)"
@@ -53,4 +60,7 @@ fi
 
 # Finalize install
 symlink_item_overwrite "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
-symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC}" "${SYSTEM_BIN_ROOT}/${PROGRAM_ID}"
+symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC_1}" "${SYSTEM_BIN_ROOT}/${SYSTEM_EXEC__1}"
+symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC_2}" "${SYSTEM_BIN_ROOT}/${SYSTEM_EXEC__2}"
+symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC_3}" "${SYSTEM_BIN_ROOT}/${SYSTEM_EXEC__3}"
+symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC_4}" "${SYSTEM_BIN_ROOT}/${SYSTEM_EXEC__4}"
