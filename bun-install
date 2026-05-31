@@ -1,0 +1,57 @@
+#!/bin/sh
+
+################################################################################
+#
+#  bun-install
+#
+#  Install/Update Bun for current user. This also works as a version manager.
+#  If version is not specified, the latest version will be installed.
+#
+#  Homepage: https://bun.com/
+#
+#  Usage:
+#    bun-install [<version>]
+#
+#  Example:
+#    bun-install
+#    bun-install 1.7.15
+#    bun-install v1.7.15
+#
+#  MIT License.
+#  Copyright (C) 2025 Nguyen Nhat Tung.
+#
+################################################################################
+
+set -ex
+
+# Application info
+GITHUB_OWNER="oven-sh"
+GITHUB_REPO="bun"
+PROGRAM_ID="bun"
+PROGRAM_EXEC="bun"
+
+# Shared library
+CTXDIR="$(cd "$(dirname "$0")" && pwd)"
+. "${CTXDIR}/shared/install-common.sh"
+
+# Prepare environment
+get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "$1" "bun-"
+INSTALL_VERSION=${INSTALL_VERSION}
+init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
+
+# Download and install binaries
+if [ ! -d "${INSTALL_TARGET}" ]; then
+	BIN_ARCH_URI_AMD64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/bun-v${INSTALL_VERSION}/bun-linux-x64.zip"
+	BIN_ARCH_URI_ARM64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/bun-v${INSTALL_VERSION}/bun-linux-aarch64.zip"
+	BIN_ARCH_TMP_FILE="${TEMP_TARGET}.zip"
+	download_uri_per_arch "${BIN_ARCH_URI_AMD64}" "${BIN_ARCH_URI_ARM64}" "${BIN_ARCH_TMP_FILE}"
+	create_dir "${TEMP_TARGET}"
+	extract_archive "${BIN_ARCH_TMP_FILE}" "zip" "${TEMP_TARGET}"
+	remove_item "${BIN_ARCH_TMP_FILE}"
+	move_item_per_arch "${TEMP_TARGET}/bun-linux-x64" "${TEMP_TARGET}/bun-linux-aarch64" "${INSTALL_TARGET}"
+	remove_item "${TEMP_TARGET}"
+fi
+
+# Finalize install
+symlink_item_overwrite "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
+symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC}" "${SYSTEM_BIN_ROOT}/${PROGRAM_ID}"
