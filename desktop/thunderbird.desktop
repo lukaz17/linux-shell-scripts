@@ -1,0 +1,24 @@
+[Desktop Entry]
+Name=Thunderbird
+GenericName=Mail Client
+Comment=Send and receive mail with Thunderbird
+Exec=thunderbird %u
+Icon=thunderbird
+Type=Application
+Terminal=false
+X-MultipleArgs=false
+Encoding=UTF-8
+StartupNotify=true
+StartupWMClass=thunderbird
+MimeType=x-scheme-handler/mailto;application/x-xpinstall;
+Categories=Application;Network;Email;
+Keywords=Email;E-mail;Newsgroup;Feed;RSS
+Actions=Compose;Contacts
+
+[Desktop Action Compose]
+Name=Compose New Message
+Exec=thunderbird -compose
+
+[Desktop Action Contacts]
+Name=Contacts
+Exec=thunderbird -addressbook
