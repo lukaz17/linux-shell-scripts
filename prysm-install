@@ -22,93 +22,54 @@
 #
 ################################################################################
 
+set -ex
+
 # Application info
 GITHUB_OWNER="OffchainLabs"
 GITHUB_REPO="prysm"
 PROGRAM_ID="prysm"
-PROGRAM_EXEC="beacon-chain"
+PROGRAM_EXEC_1="beacon-chain"
+SYSTEM_EXEC__1="prysm-beacon"
+PROGRAM_EXEC_2="client-stats"
+SYSTEM_EXEC__2="prysm-stats"
+PROGRAM_EXEC_3="prysmctl"
+SYSTEM_EXEC__3="prysmctl"
 
-set -ex
+# Shared library
+CTXDIR="$(cd "$(dirname "$0")" && pwd)"
+. "${CTXDIR}/shared/install-common.sh"
 
-# Determine version to install
-if [ -z "$1" ]; then
-	LATEST_VERSION="$(curl https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest | jq -r .tag_name)"
-else
-	LATEST_VERSION="$1"
-fi
-LATEST_VERSION="${LATEST_VERSION#v}"
-
-# Installation environment
-USERID="$(id -u)"
-ARCH="$(uname -m)"
-if [ "${USERID}" -eq 0 ]; then
-	INSTALL_ROOT="/usr/local/share/${PROGRAM_ID}"
-	SYSTEM_BIN_ROOT="/usr/local/bin"
-else
-	INSTALL_ROOT="${HOME}/.local/share/${PROGRAM_ID}"
-	SYSTEM_BIN_ROOT="${HOME}/.local/bin"
-fi
-INSTALL_TARGET="${INSTALL_ROOT}/${PROGRAM_ID}-v${LATEST_VERSION}"
-ACTIVE_TARGET="${INSTALL_ROOT}/active-release"
-
-if [ ! -d "${INSTALL_ROOT}" ]; then
-	mkdir -p "${INSTALL_ROOT}"
-fi
-if [ ! -d "${SYSTEM_BIN_ROOT}" ]; then
-	mkdir -p "${SYSTEM_BIN_ROOT}"
-fi
+# Prepare environment
+get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "$1"
+init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
 
 # Download and install binaries
 if [ ! -d "${INSTALL_TARGET}" ]; then
-	BIN_URI_AMD64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${LATEST_VERSION}/beacon-chain-v${LATEST_VERSION}-modern-linux-amd64"
-	BIN_URI2_AMD64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${LATEST_VERSION}/client-stats-v${LATEST_VERSION}-linux-amd64"
-	BIN_URI3_AMD64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${LATEST_VERSION}/prysmctl-v${LATEST_VERSION}-linux-amd64"
-	BIN_URI_ARM64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${LATEST_VERSION}/beacon-chain-v${LATEST_VERSION}-linux-arm64"
-	BIN_URI2_ARM64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${LATEST_VERSION}/client-stats-v${LATEST_VERSION}-linux-arm64"
-	BIN_URI3_ARM64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${LATEST_VERSION}/prysmctl-v${LATEST_VERSION}-linux-arm64"
-	BIN_TMP_FILE="/tmp/${PROGRAM_ID}-v${LATEST_VERSION}.bin"
-	BIN_TMP_FILE2="/tmp/client-stats-v${LATEST_VERSION}.bin"
-	BIN_TMP_FILE3="/tmp/prysmctl-v${LATEST_VERSION}.bin"
-
-	if [ "${ARCH}" = "x86_64" ] || [ "${ARCH}" = "amd64" ]; then
-		curl -fSL "${BIN_URI_AMD64}" -o "${BIN_TMP_FILE}"
-		curl -fSL "${BIN_URI2_AMD64}" -o "${BIN_TMP_FILE2}"
-		curl -fSL "${BIN_URI3_AMD64}" -o "${BIN_TMP_FILE3}"
-	elif [ "${ARCH}" = "aarch64" ] || [ "${ARCH}" = "arm64" ]; then
-		curl -fSL "${BIN_URI_ARM64}" -o "${BIN_TMP_FILE}"
-		curl -fSL "${BIN_URI2_ARM64}" -o "${BIN_TMP_FILE2}"
-		curl -fSL "${BIN_URI3_ARM64}" -o "${BIN_TMP_FILE3}"
-	else
-		echo "Unsupported architecture: ${ARCH}"
-		exit 1
-	fi
-
-	TEMP_TARGET="/tmp/${PROGRAM_ID}-v${LATEST_VERSION}"
-	mkdir "${TEMP_TARGET}"
-	chmod +x "${BIN_TMP_FILE}"
-	chmod +x "${BIN_TMP_FILE2}"
-	chmod +x "${BIN_TMP_FILE3}"
-	mv "${BIN_TMP_FILE}" "${TEMP_TARGET}/${PROGRAM_EXEC}"
-	mv "${BIN_TMP_FILE2}" "${TEMP_TARGET}/client-stats"
-	mv "${BIN_TMP_FILE3}" "${TEMP_TARGET}/prysmctl"
-	mv "${TEMP_TARGET}" "${INSTALL_TARGET}"
-	if [ -d "${TEMP_TARGET}" ]; then
-		rm -r "${TEMP_TARGET}"
-	fi
+	BIN_URI_AMD64_1="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${INSTALL_VERSION}/beacon-chain-v${INSTALL_VERSION}-modern-linux-amd64"
+	BIN_URI_ARM64_1="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${INSTALL_VERSION}/beacon-chain-v${INSTALL_VERSION}-linux-arm64"
+	BIN_TMP_FILE_1="${TEMP_ROOT}/${PROGRAM_EXEC_1}.bin"
+	BIN_URI_AMD64_2="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${INSTALL_VERSION}/client-stats-v${INSTALL_VERSION}-linux-amd64"
+	BIN_URI_ARM64_2="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${INSTALL_VERSION}/client-stats-v${INSTALL_VERSION}-linux-arm64"
+	BIN_TMP_FILE_2="${TEMP_ROOT}/${PROGRAM_EXEC_2}.bin"
+	BIN_URI_AMD64_3="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${INSTALL_VERSION}/prysmctl-v${INSTALL_VERSION}-linux-amd64"
+	BIN_URI_ARM64_3="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${INSTALL_VERSION}/prysmctl-v${INSTALL_VERSION}-linux-arm64"
+	BIN_TMP_FILE_3="${TEMP_ROOT}/${PROGRAM_EXEC_3}.bin"
+	download_uri_per_arch "${BIN_URI_AMD64_1}" "${BIN_URI_ARM64_1}" "${BIN_TMP_FILE_1}"
+	download_uri_per_arch "${BIN_URI_AMD64_2}" "${BIN_URI_ARM64_2}" "${BIN_TMP_FILE_2}"
+	download_uri_per_arch "${BIN_URI_AMD64_3}" "${BIN_URI_ARM64_3}" "${BIN_TMP_FILE_3}"
+	create_dir "${TEMP_TARGET}"
+	make_executable "${BIN_TMP_FILE_1}"
+	make_executable "${BIN_TMP_FILE_2}"
+	make_executable "${BIN_TMP_FILE_3}"
+	move_item "${BIN_TMP_FILE_1}" "${TEMP_TARGET}/${PROGRAM_EXEC_1}"
+	move_item "${BIN_TMP_FILE_2}" "${TEMP_TARGET}/${PROGRAM_EXEC_2}"
+	move_item "${BIN_TMP_FILE_3}" "${TEMP_TARGET}/${PROGRAM_EXEC_3}"
+	move_item "${TEMP_TARGET}" "${INSTALL_TARGET}"
+	remove_item "${TEMP_TARGET}"
 fi
 
-# Set active release
-if [ -f "${ACTIVE_TARGET}" ] || [ -d "${ACTIVE_TARGET}" ] || [ -L "${ACTIVE_TARGET}" ]; then
-	rm -r "${ACTIVE_TARGET}"
-fi
-ln -s "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
-
-# Create symlink for quick access
-ACTIVE_TARGET_BIN="${ACTIVE_TARGET}/${PROGRAM_EXEC}"
-SYSTEM_BIN_TARGET_BIN="${SYSTEM_BIN_ROOT}/${PROGRAM_ID}"
-if [ -f "${ACTIVE_TARGET_BIN}" ]; then
-	if [ -f "${SYSTEM_BIN_TARGET_BIN}" ] || [ -d "${SYSTEM_BIN_TARGET_BIN}" ] || [ -L "${SYSTEM_BIN_TARGET_BIN}" ]; then
-		rm -r "${SYSTEM_BIN_TARGET_BIN}"
-	fi
-	ln -s "${ACTIVE_TARGET_BIN}" "${SYSTEM_BIN_TARGET_BIN}"
-fi
+# Finalize install
+symlink_item_overwrite "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
+symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC_1}" "${SYSTEM_BIN_ROOT}/${SYSTEM_EXEC__1}"
+symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC_2}" "${SYSTEM_BIN_ROOT}/${SYSTEM_EXEC__2}"
+symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC_3}" "${SYSTEM_BIN_ROOT}/${SYSTEM_EXEC__3}"
