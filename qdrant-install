@@ -1,0 +1,56 @@
+#!/bin/sh
+
+################################################################################
+#
+#  qdrant-install
+#
+#  Install/Update Qdrant Database for current user. This also works as a version manager.
+#  If version is not specified, the latest version will be installed.
+#
+#  Homepage: https://qdrant.tech/qdrant-vector-database/
+#
+#  Usage:
+#    qdrant-install [<version>]
+#
+#  Example:
+#    qdrant-install
+#    qdrant-install 1.17.1
+#    qdrant-install v1.17.1
+#
+#  MIT License.
+#  Copyright (C) 2025 Nguyen Nhat Tung.
+#
+################################################################################
+
+set -ex
+
+# Application info
+GITHUB_OWNER="qdrant"
+GITHUB_REPO="qdrant"
+PROGRAM_ID="qdrant"
+PROGRAM_EXEC="qdrant"
+
+# Shared library
+CTXDIR="$(cd "$(dirname "$0")" && pwd)"
+. "${CTXDIR}/shared/install-common.sh"
+
+# Prepare environment
+get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "$1"
+init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
+
+# Download and install binaries
+if [ ! -d "${INSTALL_TARGET}" ]; then
+	BIN_ARCH_URI_AMD64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${INSTALL_VERSION}/qdrant-x86_64-unknown-linux-musl.tar.gz"
+	BIN_ARCH_URI_ARM64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${INSTALL_VERSION}/qdrant-aarch64-unknown-linux-musl.tar.gz"
+	BIN_ARCH_TMP_FILE="${TEMP_TARGET}.tar.gz"
+	download_uri_per_arch "${BIN_ARCH_URI_AMD64}" "${BIN_ARCH_URI_ARM64}" "${BIN_ARCH_TMP_FILE}"
+	create_dir "${TEMP_TARGET}"
+	extract_archive "${BIN_ARCH_TMP_FILE}" "tar" "${TEMP_TARGET}"
+	remove_item "${BIN_ARCH_TMP_FILE}"
+	move_item "${TEMP_TARGET}" "${INSTALL_TARGET}"
+	remove_item "${TEMP_TARGET}"
+fi
+
+# Finalize install
+symlink_item_overwrite "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
+symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC}" "${SYSTEM_BIN_ROOT}/${PROGRAM_ID}"
