@@ -13,11 +13,11 @@
 #  - Agave
 #
 #  Usage:
-#    yellowstone-grpc-install <version> <solana_version> <ubuntu_release>
+#    yellowstone-grpc-install <version> <solana_version>
 #
 #  Example:
-#    yellowstone-grpc-install 12.3.0 3.1.14 24
-#    yellowstone-grpc-install v12.3.0 v3.1.14 24
+#    yellowstone-grpc-install 13.1.1 4.0.0
+#    yellowstone-grpc-install v13.1.1 v4.0.0
 #
 #  MIT License.
 #  Copyright (C) 2025 Nguyen Nhat Tung.
@@ -30,29 +30,37 @@ set -ex
 GITHUB_OWNER="rpcpool"
 GITHUB_REPO="yellowstone-grpc"
 PROGRAM_ID="yellowstone-grpc"
-PROGRAM_EXEC=""
+PROGRAM_EXEC_1="libyellowstone_grpc_geyser.so"
+SYSTEM_EXEC__1="lib/libyellowstone_grpc_geyser.so"
+PROGRAM_EXEC_2="yellowstone-grpc-geyser-release-x86_64-unknown-linux-gnu.yml"
+SYSTEM_EXEC__2="version.yml"
 
 # Shared library
 CTXDIR="$(cd "$(dirname "$0")" && pwd)"
 . "${CTXDIR}/shared/install-common.sh"
 
 # Prepare environment
-UBUNTU_VERSION=$(normalize_install_version "$3" && echo "${INSTALL_VERSION}")
 SOLANA_VERSION=$(normalize_install_version "$2" && echo "${INSTALL_VERSION}")
 YGRPC_VERSION=$(normalize_install_version "$1" && echo "${INSTALL_VERSION}")
-INSTALL_VERSION="${YGRPC_VERSION}+solana.${SOLANA_VERSION}+ubuntu.${UBUNTU_VERSION}"
+INSTALL_VERSION="${YGRPC_VERSION}+solana.${SOLANA_VERSION}"
 init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
 
 # Download and install binaries
 if [ ! -d "${INSTALL_TARGET}" ]; then
-	BIN_ARCH_URI_AMD64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${YGRPC_VERSION}+solana.${SOLANA_VERSION}/yellowstone-grpc-geyser-release${UBUNTU_VERSION}-x86_64-unknown-linux-gnu.tar.bz2"
-	BIN_ARCH_URI_ARM64=""
-	BIN_ARCH_TMP_FILE="${TEMP_TARGET}.tar.gz"
-	download_uri_per_arch "${BIN_ARCH_URI_AMD64}" "${BIN_ARCH_URI_ARM64}" "${BIN_ARCH_TMP_FILE}"
+	BIN_URI_AMD64_1="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${YGRPC_VERSION}+solana.${SOLANA_VERSION}/libyellowstone_grpc_geyser.so"
+	BIN_URI_ARM64_1=""
+	BIN_TMP_FILE_1="${TEMP_ROOT}/${PROGRAM_EXEC_1}"
+	BIN_URI_AMD64_2="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${YGRPC_VERSION}+solana.${SOLANA_VERSION}/yellowstone-grpc-geyser-release-x86_64-unknown-linux-gnu.yml"
+	BIN_URI_ARM64_2=""
+	BIN_TMP_FILE_2="${TEMP_ROOT}/${PROGRAM_EXEC_2}"
+	download_uri_per_arch "${BIN_URI_AMD64_1}" "${BIN_URI_ARM64_1}" "${BIN_TMP_FILE_1}"
+	download_uri_per_arch "${BIN_URI_AMD64_2}" "${BIN_URI_ARM64_2}" "${BIN_TMP_FILE_2}"
 	create_dir "${TEMP_TARGET}"
-	extract_archive "${BIN_ARCH_TMP_FILE}" "tar" "${TEMP_TARGET}"
-	remove_item "${BIN_ARCH_TMP_FILE}"
-	move_item "${TEMP_TARGET}/yellowstone-grpc-geyser-release" "${INSTALL_TARGET}"
+	create_dir "${TEMP_TARGET}/lib"
+	make_executable "${BIN_TMP_FILE_1}"
+	move_item "${BIN_TMP_FILE_1}" "${TEMP_TARGET}/${SYSTEM_EXEC__1}"
+	move_item "${BIN_TMP_FILE_2}" "${TEMP_TARGET}/${SYSTEM_EXEC__2}"
+	move_item "${TEMP_TARGET}" "${INSTALL_TARGET}"
 	remove_item "${TEMP_TARGET}"
 fi
 
