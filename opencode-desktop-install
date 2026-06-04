@@ -1,0 +1,57 @@
+#!/bin/sh
+
+################################################################################
+#
+#  opencode-desktop-install
+#
+#  Install/Update OpenCode Desktop for current user. This also works as a version manager.
+#  If version is not specified, the latest version will be installed.
+#
+#  Homepage: https://opencode.ai/
+#
+#  Usage:
+#    opencode-desktop-install [<version>]
+#
+#  Example:
+#    opencode-desktop-install
+#    opencode-desktop-install 1.3.12
+#    opencode-desktop-install v1.3.12
+#
+#  MIT License.
+#  Copyright (C) 2025 Nguyen Nhat Tung.
+#
+################################################################################
+
+set -ex
+
+# Application info
+GITHUB_OWNER="anomalyco"
+GITHUB_REPO="opencode"
+PROGRAM_ID="opencode-desktop"
+PROGRAM_EXEC="opencode-desktop.AppImage"
+
+# Shared library
+CTXDIR="$(cd "$(dirname "$0")" && pwd)"
+. "${CTXDIR}/shared/install-common.sh"
+
+# Prepare environment
+get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "$1"
+init_install_env_desktop "${PROGRAM_ID}" "${INSTALL_VERSION}"
+
+# Download and install binaries
+if [ ! -d "${INSTALL_TARGET}" ]; then
+	BIN_URI_AMD64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${INSTALL_VERSION}/opencode-desktop-linux-x86_64.AppImage"
+	BIN_URI_ARM64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${INSTALL_VERSION}/opencode-desktop-linux-arm64.AppImage"
+	BIN_TMP_FILE="${TEMP_TARGET}.AppImage"
+	download_uri_per_arch "${BIN_URI_AMD64}" "${BIN_URI_ARM64}" "${BIN_TMP_FILE}"
+	create_dir "${TEMP_TARGET}"
+	make_executable "${BIN_TMP_FILE}"
+	move_item "${BIN_TMP_FILE}" "${TEMP_TARGET}/${PROGRAM_EXEC}"
+	move_item "${TEMP_TARGET}" "${INSTALL_TARGET}"
+	remove_item "${TEMP_TARGET}"
+fi
+
+# Finalize install
+symlink_item_overwrite "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
+symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC}" "${SYSTEM_BIN_ROOT}/${PROGRAM_ID}"
+install_desktop "opencode" "${CTXDIR}" "${DESKTOP_ROOT}" "${ICON_ROOT}"
