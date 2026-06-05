@@ -1,22 +1,22 @@
 #!/bin/sh
+
 ################################################################################
 #
 #  ollama-create
 #
 #  Create a custom model for Ollama from an existing tags in Ollama repository.
-#  If version is not specified, the latest version will be installed.
 #  The script won't handle input validations and delegate it to Ollama.
 #
 #  Usage:
 #    ollama-create <model:tag> [context_size_KB] [base_model:tag] [verify_0_or_1]
-#    ollama-create -m <model:tag> [-c <KB>] [-b <model:tag>] [-v <0/1>]
+#    ollama-create -m <model:tag> [-c <KB>] [-b <model:tag>] [-v <0/1>] [-r <float>] [-t <float>] [-k <int>] [-p <float>] [-n <float>] [-e <kv_cache>] [-H <url>]
 #
 #  Example:
 #    ollama-create qwen3.6:37b-q4_K_M
-#    ollama-create qwen3.6:37b-q4_K_M 256
-#    ollama-create qwen3.6:37b-q4_K_M 256 qwen3.6:37b-q4_K_M
-#    ollama-create qwen3.6:37b-q4_K_M 256 qwen3.6:37b-q4_K_M 1
-#    ollama-create -m qwen3.6:37b-q4_K_M -c 256 -b qwen3.6:37b-q4_K_M -v 1
+#    ollama-create qwen3.6:37b-q4_K_M
+#    ollama-create qwen3.6:37b-q4_K_M qwen3.6:37b-q4_K_M 256
+#    ollama-create qwen3.6:37b-q4_K_M qwen3.6:37b-q4_K_M 256 -v 1
+#    ollama-create -m qwen3.6:27b-q8_0 -c 256 -t 0.7 -k 40 -p 0.9 -r 1.1 -P 0.05 -v 1
 #
 #  MIT License.
 #  Copyright (C) 2025 Nguyen Nhat Tung.
@@ -25,100 +25,111 @@
 
 set -eu
 
-if [ $# -eq 0 ]; then
+if [ ${#} -eq 0 ]; then
 	echo "Error: MODEL argument is required" >&2
 	exit 1
 fi
 
 MODEL=""
-CONTEXT_SIZE=""
 BASE_MODEL=""
+CONTEXT_SIZE=""
+REPEAT_PENALTY=""
+TEMPERATURE=""
+TOP_K=""
+TOP_P=""
+MIN_P=""
+KV_CACHE=""
 VERIFY="0"
+OLLAMA_HOST=""
 
-case "$1" in
+case "${1}" in
 	-*)
-		# Flag-based parsing with getopts
-		while getopts "m:c:b:v:" opt; do
-			case "$opt" in
-				m) MODEL="$OPTARG" ;;
-				c) CONTEXT_SIZE="$OPTARG" ;;
-				b) BASE_MODEL="$OPTARG" ;;
-				v) VERIFY="$OPTARG" ;;
+		while getopts "m:b:c:t:k:p:r:P:e:v:H:" opt; do
+			case "${opt}" in
+				m) MODEL="${OPTARG}" ;;
+				b) BASE_MODEL="${OPTARG}" ;;
+				c) CONTEXT_SIZE="${OPTARG}" ;;
+				t) TEMPERATURE="${OPTARG}" ;;
+				k) TOP_K="${OPTARG}" ;;
+				p) TOP_P="${OPTARG}" ;;
+				r) REPEAT_PENALTY="${OPTARG}" ;;
+				P) MIN_P="${OPTARG}" ;;
+				e) KV_CACHE="${OPTARG}" ;;
+				v) VERIFY="${OPTARG}" ;;
+				H) OLLAMA_HOST="${OPTARG}" ;;
 				*)
-					echo "Invalid option: -$opt" >&2
+					echo "Invalid option: -${opt}" >&2
 					exit 1
 					;;
 			esac
 		done
 
-		# Validate required parameter
-		if [ -z "$MODEL" ]; then
+		if [ -z "${MODEL}" ]; then
 			echo "Error: -m MODEL is required" >&2
 			exit 1
 		fi
 		;;
 	*)
-		# Positional parsing
-		MODEL="$1"
-		CONTEXT_SIZE="${2:-}"
-		BASE_MODEL="${3:-}"
-		VERIFY="${4:-0}"
+		MODEL="${1:-}"
+		BASE_MODEL="${2:-}"
+		CONTEXT_SIZE="${3:-}"
+		TEMPERATURE="${4:-}"
+		TOP_K="${5:-}"
+		TOP_P="${6:-}"
+		REPEAT_PENALTY="${7:-}"
+		MIN_P="${8:-}"
+		KV_CACHE="${9:-}"
+		VERIFY="${10:-0}"
+		OLLAMA_HOST="${11:-}"
 		;;
 esac
 
-NEW_MODEL="$MODEL"
-BASE_MODEL="${BASE_MODEL:-$NEW_MODEL}"
-LOAD_N_VERIFY=$([ "$VERIFY" -ne 0 ] && echo "1" || echo "0")
+: "${OLLAMA_HOST:=${OLLAMA_HOST:-http://127.0.0.1:11434}}"
 
-# Create temporary Modelfile
+NEW_MODEL="${MODEL}"
+BASE_MODEL="${BASE_MODEL:-${NEW_MODEL}}"
+LOAD_N_VERIFY=$([ "${VERIFY}" -ne 0 ] && echo "1" || echo "0")
+
+CTXDIR="$(cd "$(dirname "${0}")" && pwd)"
+
 mfFile=$(mktemp "${TMPDIR:-/tmp}/ollama_XXXXXX.Modelfile")
-trap 'rm -f "$mfFile" 2>/dev/null || true' EXIT INT TERM
-echo "FROM ${BASE_MODEL}" > "${mfFile}"
-if [ -n "${CONTEXT_SIZE}" ]; then
-	echo "PARAMETER num_ctx $((CONTEXT_SIZE * 1024))" >> "${mfFile}"
-fi
+trap 'rm -f "${mfFile}" 2>/dev/null || true' EXIT INT TERM
+
+{
+	echo "FROM ${BASE_MODEL}"
+	if [ -n "${CONTEXT_SIZE}" ]; then
+		echo "PARAMETER num_ctx $((CONTEXT_SIZE * 1024))"
+	fi
+	if [ -n "${REPEAT_PENALTY}" ]; then
+		echo "PARAMETER repeat_penalty ${REPEAT_PENALTY}"
+	fi
+	if [ -n "${TEMPERATURE}" ]; then
+		echo "PARAMETER temperature ${TEMPERATURE}"
+	fi
+	if [ -n "${TOP_K}" ]; then
+		echo "PARAMETER top_k ${TOP_K}"
+	fi
+	if [ -n "${TOP_P}" ]; then
+		echo "PARAMETER top_p ${TOP_P}"
+	fi
+	if [ -n "${MIN_P}" ]; then
+		echo "PARAMETER min_p ${MIN_P}"
+	fi
+	if [ -n "${KV_CACHE}" ]; then
+		echo "PARAMETER kv_cache ${KV_CACHE}"
+	fi
+} > "${mfFile}"
 
 echo "> Creating new model: ${NEW_MODEL}"
 ollama create "${NEW_MODEL}" -f "${mfFile}"
-if [ $? -ne 0 ]; then
-	echo "ollama create failed with exit code $?" >&2
+_ollama_exit=${?}
+if [ ${_ollama_exit} -ne 0 ]; then
+	echo "ollama create failed with exit code ${_ollama_exit}" >&2
 	exit 1
 fi
 
 if [ "${LOAD_N_VERIFY}" = "1" ]; then
-	echo "> Load model into memory."
-	loadBody=$(jq -n --arg model "${MODEL}" '{model: $model, messages: [], keep_alive: 60}')
-	if ! curl -sS -X POST -H "Content-Type: application/json" -d "${loadBody}" http://127.0.0.1:11434/api/chat >/dev/null 2>&1; then
-		echo "Failed to load model into memory" >&2
-		exit 1
-	fi
-
-	echo "> Query model details."
-	psResponse=$(curl -sS -X GET http://127.0.0.1:11434/api/ps 2>&1)
-	if [ $? -ne 0 ]; then
-		echo "Failed to query /api/ps" >&2
-		exit 1
-	fi
-
-	name=$(echo "$psResponse" | jq -r '.models[0].name // empty')
-	param_size=$(echo "$psResponse" | jq -r '.models[0].details.parameter_size // empty')
-	quant_level=$(echo "$psResponse" | jq -r '.models[0].details.quantization_level // empty')
-	family=$(echo "$psResponse" | jq -r '.models[0].details.family // empty')
-	ctx_length=$(echo "$psResponse" | jq -r '.models[0].context_length // empty')
-	size=$(echo "$psResponse" | jq -r '.models[0].size // empty')
-
-	if [ -z "$name" ]; then
-		echo "Model not found in /api/ps" >&2
-		exit 1
-	fi
-
-	printf "Name               : %s\n" "$name"
-	printf "Parameter Size     : %s\n" "$param_size"
-	printf "Quantization Level : %s\n" "$quant_level"
-	printf "Family             : %s\n" "$family"
-	printf "Context Size       : %s\n" "$ctx_length"
-	printf "Memory             : %s\n" "$size"
-	echo "> Success."
+	"${CTXDIR}/ollama-info" "${MODEL}" -H "${OLLAMA_HOST}"
 else
 	echo "> Success."
 	sleep 1
