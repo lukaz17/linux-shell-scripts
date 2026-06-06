@@ -36,7 +36,6 @@ CTXDIR="$(cd "$(dirname "$0")" && pwd)"
 
 # Prepare environment
 get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "$1" "bun-"
-INSTALL_VERSION=${INSTALL_VERSION}
 init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
 
 # Download and install binaries
