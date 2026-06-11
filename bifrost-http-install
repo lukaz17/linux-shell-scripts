@@ -1,0 +1,54 @@
+#!/bin/sh
+
+################################################################################
+#
+#  bifrost-http-install
+#
+#  Install/Update Bifrost LLM Gateway for current user. This also works as a version manager.
+#
+#  Homepage: https://www.getmaxim.ai/bifrost
+#
+#  Usage:
+#    bifrost-http-install <version>
+#
+#  Example:
+#    bifrost-http-install 1.7.1
+#    bifrost-http-install v1.7.1
+#
+#  MIT License.
+#  Copyright (C) 2025 Nguyen Nhat Tung.
+#
+################################################################################
+
+set -ex
+
+# Application info
+GITHUB_OWNER="maximhq"
+GITHUB_REPO="bifrost"
+PROGRAM_ID="bifrost-http"
+PROGRAM_EXEC="bifrost-http"
+
+# Shared library
+CTXDIR="$(cd "$(dirname "$0")" && pwd)"
+. "${CTXDIR}/shared/install-common.sh"
+
+# Prepare environment
+normalize_install_version "$1"
+init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
+
+# Download and install binaries
+if [ ! -d "${INSTALL_TARGET}" ]; then
+	BIN_URI_AMD64="https://downloads.getmaxim.ai/bifrost/v${INSTALL_VERSION}/linux/amd64/bifrost-http"
+	BIN_URI_ARM64="https://downloads.getmaxim.ai/bifrost/v${INSTALL_VERSION}/linux/arm64/bifrost-http"
+	BIN_TMP_FILE="${TEMP_TARGET}.bin"
+	download_uri_per_arch "${BIN_URI_AMD64}" "${BIN_URI_ARM64}" "${BIN_TMP_FILE}"
+	create_dir "${TEMP_TARGET}"
+	make_executable "${BIN_TMP_FILE}"
+	move_item "${BIN_TMP_FILE}" "${TEMP_TARGET}/${PROGRAM_EXEC}"
+	move_item "${TEMP_TARGET}" "${INSTALL_TARGET}"
+	remove_item "${TEMP_TARGET}"
+fi
+
+# Finalize install
+symlink_item_overwrite "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
+symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC}" "${SYSTEM_BIN_ROOT}/${PROGRAM_ID}"
