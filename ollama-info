@@ -7,11 +7,11 @@
 #  Load a model into memory and print its runtime info from an Ollama server.
 #
 #  Usage:
-#    ollama-info <model:tag> [-H <host_url>]
+#    ollama-info <model:tag> [-h <host_url>]
 #
 #  Example:
 #    ollama-info qwen3.6:27b-q8_0
-#    ollama-info qwen3.6:27b-q8_0 -H http://ollama.local
+#    ollama-info qwen3.6:27b-q8_0 -h http://ollama.local
 #
 #  MIT License.
 #  Copyright (C) 2025 Nguyen Nhat Tung.
@@ -21,7 +21,7 @@
 set -eu
 
 MODEL=""
-OLLAMA_HOST=""
+OLLAMA_HOST="${OLLAMA_HOST:-http://127.0.0.1:11434}"
 
 while [ ${#} -gt 0 ]; do
 	case "${1}" in
@@ -46,8 +46,6 @@ if [ -z "${MODEL}" ]; then
 	echo "Error: MODEL argument is required" >&2
 	exit 1
 fi
-: "${OLLAMA_HOST:=${OLLAMA_HOST:-http://127.0.0.1:11434}}"
-
 echo "> Check model capabilities."
 showBody="{\"name\":\"${MODEL}\"}"
 showResponse=$(curl -sS -X POST -H "Content-Type: application/json" -d "${showBody}" "${OLLAMA_HOST}/api/show" 2>&1)
@@ -101,27 +99,18 @@ ctx_allocated=$(echo "${modelInfo}" | jq -r '.context_length')
 size=$(echo "${modelInfo}" | jq -r '.size')
 size_vram=$(echo "${modelInfo}" | jq -r '.size_vram')
 
-ctx_display="${ctx_allocated}"
-if [ -n "${contextLength}" ] && [ "${contextLength}" != "null" ] && [ "${contextLength}" != "0" ] && [ -n "${ctx_allocated}" ] && [ "${ctx_allocated}" != "null" ]; then
-	ctx_pct=$(awk "BEGIN {printf \"%.1f\", ${ctx_allocated} * 100 / ${contextLength}}" 2>/dev/null)
-	ctx_display="${ctx_allocated} (${ctx_pct}%)"
-fi
-
-vram_display="${size_vram}"
-if [ -n "${size}" ] && [ "${size}" != "null" ] && [ "${size}" != "0" ] && [ -n "${size_vram}" ] && [ "${size_vram}" != "null" ]; then
-	vram_pct=$(awk "BEGIN {printf \"%.1f\", ${size_vram} * 100 / ${size}}" 2>/dev/null)
-	vram_display="${size_vram} (${vram_pct}%)"
-fi
+ctx_pct=$(awk "BEGIN {printf \"%.1f\", ${ctx_allocated} * 100 / ${contextLength}}" 2>/dev/null)
+vram_pct=$(awk "BEGIN {printf \"%.1f\", ${size_vram} * 100 / ${size}}" 2>/dev/null)
 
 echo "Name               : ${name}"
 echo "Family             : ${fam}"
-echo "Architecture       : ${architecture:-N/A}"
+echo "Architecture       : ${architecture}"
 echo "Parameter Size     : ${param_size}"
-echo "Parameter Count    : ${parameter_count:-N/A}"
+echo "Parameter Count    : ${parameter_count}"
 echo "Quantization       : ${quant}"
-echo "Context Length     : ${contextLength:-N/A}"
-echo "Context Allocated  : ${ctx_display}"
+echo "Context Length     : ${contextLength}"
+echo "Context Allocated  : ${ctx_allocated} (${ctx_pct}%)"
 echo "Context Memory     : ${size}"
-echo "VRAM Usage         : ${vram_display}"
-echo "Capabilities       : ${capabilities:-N/A}"
+echo "VRAM Usage         : ${size_vram} (${vram_pct}%)"
+echo "Capabilities       : ${capabilities}"
 echo "> Success."
