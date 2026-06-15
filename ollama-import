@@ -1,0 +1,107 @@
+#!/bin/sh
+
+################################################################################
+#
+#  ollama-import
+#
+#  Import GGUF file(s) into Ollama model.
+#  The script won't handle input validations and delegate it to Ollama.
+#
+#  Usage:
+#    ollama-import <model:tag> <src> [src2] [src3] [src4] [src5] [context_size_KB] [verify_0/1]
+#    ollama-import <model:tag> <src> [src2] [src3] [src4] [src5] [-c <KB>] [-v <0/1>] [-H <url>]
+#
+#  Example:
+#    ollama-import qwen3.6:27b-q8_0 ./Qwen3.6-27B-Q8_0.gguf
+#    ollama-import qwen3.6:27b-q8_0 ./Qwen3.6-27B-Q8_0.gguf 256
+#    ollama-import qwen3.6:27b-q8_0 ./Qwen3.6-27B-Q8_0.gguf 256 1
+#    ollama-import qwen3.6:27b-q8_0 ./Qwen3.6-27B-Q8_0.gguf -c 256 -v 1
+#    ollama-import qwen3.6-vl:27b-q8_0 ./Qwen3.6-27B-Q8_0.gguf ./mmproj-F16.gguf 256 1
+#    ollama-import qwen3.6-vl:27b-q8_0 ./Qwen3.6-27B-Q8_0.gguf ./mmproj-F16.gguf -c 256 -v 1
+#
+#  MIT License.
+#  Copyright (C) 2025 Nguyen Nhat Tung.
+#
+################################################################################
+
+set -eu
+
+if [ ${#} -lt 2 ]; then
+	echo "Error: MODEL and SRC arguments are required" >&2
+	exit 1
+fi
+
+MODEL="${1}"
+SRC="${2}"
+SRC2=""
+SRC3=""
+SRC4=""
+SRC5=""
+CONTEXT_SIZE=""
+VERIFY="0"
+OLLAMA_HOST=""
+
+shift 2
+
+_src_idx=2
+while [ ${#} -gt 0 ] && [ ${_src_idx} -le 5 ] && ! echo "${1}" | grep -q '^-'; do
+	eval "SRC${_src_idx}=\"${1}\""
+	shift
+	_src_idx=$((_src_idx + 1))
+done
+
+if [ ${#} -gt 0 ]; then
+	case "${1}" in
+		-*)
+			while getopts "c:v:h:" opt; do
+				case "${opt}" in
+					c) CONTEXT_SIZE="${OPTARG}" ;;
+					v) VERIFY="${OPTARG}" ;;
+					h) OLLAMA_HOST="${OPTARG}" ;;
+					*) echo "Error: Unknown option: -${OPTARG}" >&2; exit 1 ;;
+				esac
+			done
+			;;
+		*)
+			CONTEXT_SIZE="${1:-}"
+			VERIFY="${2:-0}"
+			OLLAMA_HOST="${3:-}"
+			;;
+	esac
+fi
+
+for _v in SRC SRC2 SRC3 SRC4 SRC5; do
+	eval "_val=\"\${${_v}}\""
+	if [ -n "${_val}" ]; then
+		_val="$(realpath "${_val}")"
+		eval "${_v}=\"${_val}\""
+	fi
+done
+
+CTXDIR="$(cd "$(dirname "${0}")" && pwd)"
+
+mfFile=$(mktemp "${CLIINST_TMP:-/tmp}/ollama_XXXXXX.Modelfile")
+trap 'rm -f "${mfFile}" 2>/dev/null || true' EXIT INT TERM
+
+{
+	echo "FROM ${SRC}"
+	for _src_i in 2 3 4 5; do
+		eval "_src_val=\"\$SRC${_src_i}\""
+		if [ -n "${_src_val}" ]; then
+			echo "FROM ${_src_val}"
+		fi
+	done
+	if [ -n "${CONTEXT_SIZE}" ]; then
+		echo "PARAMETER num_ctx $((CONTEXT_SIZE * 1024))"
+	fi
+} > "${mfFile}"
+
+echo "> Creating new model: ${MODEL}"
+ollama create "${MODEL}" -f "${mfFile}"
+_ollama_exit=${?}
+if [ ${_ollama_exit} -ne 0 ]; then
+	echo "ollama create failed with exit code ${_ollama_exit}" >&2
+	exit 1
+fi
+
+"${CTXDIR}/ollama-create" "${MODEL}" -c "${CONTEXT_SIZE}" -v "${VERIFY}" -h "${OLLAMA_HOST}"
