@@ -1,0 +1,30 @@
+#!/bin/sh
+
+################################################################################
+#
+#  cliinst-update
+#
+#  Update CliInst to latest version.
+#
+#  Usage:
+#    cliinst-update
+#
+#  MIT License.
+#  Copyright (C) 2025 Nguyen Nhat Tung.
+#
+################################################################################
+
+set -ex
+
+CTXDIR="$(cd "$(dirname "$0")" && pwd)"
+
+if [ -d "${CTXDIR}/.git" ]; then
+	if command -v git >/dev/null 2>&1; then
+		git -C "${CTXDIR}" pull --rebase
+		echo "> Success."
+	else
+		echo "Warning: git command not found." >&2
+	fi
+else
+	echo "Warning: This is not a git repository." >&2
+fi
