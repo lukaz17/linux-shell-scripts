@@ -10,6 +10,8 @@
 #
 ################################################################################
 
+set +x
+
 # ------------------------------------------------------------------------------
 # Create a directory safely
 # ------------------------------------------------------------------------------
@@ -21,6 +23,7 @@ create_dir() {
 	fi
 
 	if [ ! -d "${_path}" ]; then
+		echo "> Create Dir:   ${_path}"
 		mkdir -p "${_path}"
 	fi
 }
@@ -36,6 +39,7 @@ remove_item() {
 	fi
 
 	if [ -f "${_path}" ] || [ -d "${_path}" ] || [ -L "${_path}" ]; then
+		echo "> Remove Item:  ${_path}"
 		rm -r "${_path}"
 	fi
 }
@@ -51,6 +55,7 @@ copy_item() {
 		return 1
 	fi
 
+	echo "> Copy Item:    ${_from} -> ${_to}"
 	cp -r "${_from}" "${_to}"
 }
 
@@ -66,6 +71,7 @@ copy_item_overwrite() {
 	fi
 
 	remove_item "${_to}"
+	echo "> Copy Item:    ${_from} -> ${_to}"
 	cp -r "${_from}" "${_to}"
 }
 
@@ -80,6 +86,7 @@ move_item() {
 		return 1
 	fi
 
+	echo "> Move Item:    ${_from} -> ${_to}"
 	mv "${_from}" "${_to}"
 }
 
@@ -95,6 +102,7 @@ move_item_overwrite() {
 	fi
 
 	remove_item "${_to}"
+	echo "> Move Item:    ${_from} -> ${_to}"
 	mv "${_from}" "${_to}"
 }
 
@@ -109,6 +117,7 @@ symlink_item() {
 		return 1
 	fi
 
+	echo "> Link Item:    ${_from} -> ${_to}"
 	ln -s "${_from}" "${_to}"
 }
 
@@ -124,6 +133,7 @@ symlink_item_overwrite() {
 	fi
 
 	remove_item "${_to}"
+	echo "> Link Item:    ${_from} -> ${_to}"
 	ln -s "${_from}" "${_to}"
 }
 
@@ -138,6 +148,7 @@ make_all_access() {
 	fi
 
 	if [ -f "${_path}" ] || [ -d "${_path}" ]; then
+		echo "> Make Public:  ${_path}"
 		chmod a+wx "${_path}"
 	fi
 }
@@ -153,6 +164,7 @@ make_executable() {
 	fi
 
 	if [ -f "${_path}" ] || [ -d "${_path}" ]; then
+		echo "> Make Exec:    ${_path}"
 		chmod +x "${_path}"
 	fi
 }
@@ -196,6 +208,7 @@ get_install_version_from_github() {
 		INSTALL_VERSION="${_fallback_version}"
 	fi
 	normalize_install_version
+	echo "> Latest Version:  ${INSTALL_VERSION}"
 }
 
 # ------------------------------------------------------------------------------
@@ -208,6 +221,8 @@ init_install_env() {
 		echo "init_install_env: Invalid arguments"
 		return 1
 	fi
+
+	echo "> Init InstEnv: ${_program_id} v${_install_version} $(uname -m)"
 
 	_user_id="$(id -u)"
 	if [ "${_user_id}" -eq 0 ]; then
@@ -274,12 +289,14 @@ download_uri_per_arch() {
 			echo "download_uri_per_arch: Unsupported architecture: ${_arch}"
 			exit 1
 		fi
+		echo "> Download Uri: ${_amd64_url} -> ${_destination}"
 		curl -fSL "${_amd64_url}" -o "${_destination}"
 	elif [ "${_arch}" = "aarch64" ] || [ "${_arch}" = "arm64" ]; then
 		if [ -z "${_arm64_url}" ]; then
 			echo "download_uri_per_arch: Unsupported architecture: ${_arch}"
 			exit 1
 		fi
+		echo "> Download Uri: ${_arm64_url} -> ${_destination}"
 		curl -fSL "${_arm64_url}" -o "${_destination}"
 	else
 		echo "download_uri_per_arch: Unsupported architecture: ${_arch}"
@@ -334,6 +351,7 @@ extract_archive() {
 		return 1
 	fi
 
+	echo "> Extract Arch: ${_archive_file} -> ${_destination_dir}"
 	if [ "${_archive_type}" = "tar" ] || [ "${_archive_type}" = "TAR" ]; then
 		tar -x -v -f "${_archive_file}" -C "${_destination_dir}"
 	elif [ "${_archive_type}" = "zip" ] || [ "${_archive_type}" = "ZIP" ]; then
@@ -349,22 +367,28 @@ extract_archive() {
 # ------------------------------------------------------------------------------
 refresh_desktop_icon() {
 	if [ -d "${HOME}/.local/share/applications" ]; then
+		echo "> Refresh Desktop:  ${HOME}/.local/share/applications"
 		update-desktop-database "${HOME}/.local/share/applications"
 	fi
 	if [ -d "${HOME}/.local/share/icons/hicolor" ]; then
+		echo "> Refresh Icon:     ${HOME}/.local/share/icons/hicolor"
 		gtk-update-icon-cache "${HOME}/.local/share/icons/hicolor"
 	fi
 	_user_id="$(id -u)"
 	if [ -d "/usr/share/applications" ] && [ "${_user_id}" -eq 0 ]; then
+		echo "> Refresh Desktop:   /usr/share/applications"
 		update-desktop-database "/usr/share/applications"
 	fi
 	if [ -d "/usr/local/share/applications" ] && [ "${_user_id}" -eq 0 ]; then
+		echo "> Refresh Desktop:  /usr/local/share/applications"
 		update-desktop-database "/usr/local/share/applications"
 	fi
 	if [ -d "/usr/share/icons/hicolor" ] && [ "${_user_id}" -eq 0 ]; then
+		echo "> Refresh Icon:     /usr/share/icons/hicolor"
 		gtk-update-icon-cache "/usr/share/icons/hicolor"
 	fi
 	if [ -d "/usr/local/share/icons/hicolor" ] && [ "${_user_id}" -eq 0 ]; then
+		echo "> Refresh Icon:     /usr/local/share/icons/hicolor"
 		gtk-update-icon-cache "/usr/local/share/icons/hicolor"
 	fi
 }
@@ -381,6 +405,8 @@ install_desktop() {
 		echo "install_desktop: Invalid arguments"
 		return 1
 	fi
+
+	echo "> Install Desktop:  ${_name}"
 
 	if [ -f "${_context_root}/desktop/${_name}.desktop" ]; then
 		copy_item_overwrite "${_context_root}/desktop/${_name}.desktop" "${_desktop_root}/${_name}.desktop"
@@ -416,6 +442,7 @@ install_polkit_policy() {
 
 	_user_id="$(id -u)"
 	if [ "${_user_id}" -eq 0 ]; then
+		echo "> Install Policy:  ${_name}"
 		POLICY_SOURCE="${_context_root}/desktop/${_name}.policy"
 		POLICY_TARGET="/usr/share/polkit-1/actions/${_name}.policy"
 		if [ -f "${POLICY_SOURCE}" ] && [ -d "/usr/share/polkit-1/actions" ]; then
@@ -446,6 +473,7 @@ append_text_idempotent() {
 		if [ -s "${_file}" ]; then
 			_last_line="$(tail -n 1 "${_file}")"
 			if [ -n "${_last_line}" ]; then
+				echo "> Updated Cfg:  ${_file}"
 				printf '\n' >> "${_file}"
 			fi
 		fi
