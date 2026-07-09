@@ -14,34 +14,35 @@
 #
 #  Example:
 #    opencode-install
-#    opencode-install 1.3.12
-#    opencode-install v1.3.12
+#    opencode-install 1.17.17
+#    opencode-install v1.17.17
 #
 #  MIT License.
 #  Copyright (C) 2025 Nguyen Nhat Tung.
 #
 ################################################################################
 
-set -ex
+set -e
 
 # Application info
-GITHUB_OWNER="anomalyco"
-GITHUB_REPO="opencode"
 PROGRAM_ID="opencode"
 PROGRAM_EXEC="opencode"
 
 # Shared library
 CTXDIR="$(cd "$(dirname "$0")" && pwd)"
 . "${CTXDIR}/shared/install-common.sh"
+. "${CTXDIR}/shared/install-source.sh"
 
 # Prepare environment
+GITHUB_OWNER="$(get_source_owner "${PROGRAM_ID}")"
+GITHUB_REPO="$(get_source_repo "${PROGRAM_ID}")"
 get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "$1"
 init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
 
 # Download and install binaries
 if [ ! -d "${INSTALL_TARGET}" ]; then
-	BIN_ARCH_URI_AMD64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${INSTALL_VERSION}/opencode-linux-x64.tar.gz"
-	BIN_ARCH_URI_ARM64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${INSTALL_VERSION}/opencode-linux-arm64.tar.gz"
+	BIN_ARCH_URI_AMD64="$(get_download_uri_amd64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
+	BIN_ARCH_URI_ARM64="$(get_download_uri_arm64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
 	BIN_ARCH_TMP_FILE="${TEMP_TARGET}.tar.gz"
 	download_uri_per_arch "${BIN_ARCH_URI_AMD64}" "${BIN_ARCH_URI_ARM64}" "${BIN_ARCH_TMP_FILE}"
 	create_dir "${TEMP_TARGET}"
@@ -54,3 +55,5 @@ fi
 # Finalize install
 symlink_item_overwrite "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
 symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC}" "${SYSTEM_BIN_ROOT}/${PROGRAM_ID}"
+
+echo "> Success."
