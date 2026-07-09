@@ -22,11 +22,9 @@
 #
 ################################################################################
 
-set -ex
+set -e
 
 # Application info
-GITHUB_OWNER="OffchainLabs"
-GITHUB_REPO="prysm"
 PROGRAM_ID="prysm"
 PROGRAM_EXEC_1="beacon-chain"
 SYSTEM_EXEC__1="prysm-beacon"
@@ -38,21 +36,24 @@ SYSTEM_EXEC__3="prysmctl"
 # Shared library
 CTXDIR="$(cd "$(dirname "$0")" && pwd)"
 . "${CTXDIR}/shared/install-common.sh"
+. "${CTXDIR}/shared/install-source.sh"
 
 # Prepare environment
+GITHUB_OWNER="$(get_source_owner "${PROGRAM_ID}")"
+GITHUB_REPO="$(get_source_repo "${PROGRAM_ID}")"
 get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "$1"
 init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
 
 # Download and install binaries
 if [ ! -d "${INSTALL_TARGET}" ]; then
-	BIN_URI_AMD64_1="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${INSTALL_VERSION}/beacon-chain-v${INSTALL_VERSION}-modern-linux-amd64"
-	BIN_URI_ARM64_1="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${INSTALL_VERSION}/beacon-chain-v${INSTALL_VERSION}-linux-arm64"
+	BIN_URI_AMD64_1="$(get_download_uri_amd64 "${SYSTEM_EXEC__1}" "${INSTALL_VERSION}")"
+	BIN_URI_ARM64_1="$(get_download_uri_arm64 "${SYSTEM_EXEC__1}" "${INSTALL_VERSION}")"
 	BIN_TMP_FILE_1="${TEMP_ROOT}/${PROGRAM_EXEC_1}.bin"
-	BIN_URI_AMD64_2="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${INSTALL_VERSION}/client-stats-v${INSTALL_VERSION}-linux-amd64"
-	BIN_URI_ARM64_2="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${INSTALL_VERSION}/client-stats-v${INSTALL_VERSION}-linux-arm64"
+	BIN_URI_AMD64_2="$(get_download_uri_amd64 "${SYSTEM_EXEC__2}" "${INSTALL_VERSION}")"
+	BIN_URI_ARM64_2="$(get_download_uri_arm64 "${SYSTEM_EXEC__2}" "${INSTALL_VERSION}")"
 	BIN_TMP_FILE_2="${TEMP_ROOT}/${PROGRAM_EXEC_2}.bin"
-	BIN_URI_AMD64_3="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${INSTALL_VERSION}/prysmctl-v${INSTALL_VERSION}-linux-amd64"
-	BIN_URI_ARM64_3="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${INSTALL_VERSION}/prysmctl-v${INSTALL_VERSION}-linux-arm64"
+	BIN_URI_AMD64_3="$(get_download_uri_amd64 "${SYSTEM_EXEC__3}" "${INSTALL_VERSION}")"
+	BIN_URI_ARM64_3="$(get_download_uri_arm64 "${SYSTEM_EXEC__3}" "${INSTALL_VERSION}")"
 	BIN_TMP_FILE_3="${TEMP_ROOT}/${PROGRAM_EXEC_3}.bin"
 	download_uri_per_arch "${BIN_URI_AMD64_1}" "${BIN_URI_ARM64_1}" "${BIN_TMP_FILE_1}"
 	download_uri_per_arch "${BIN_URI_AMD64_2}" "${BIN_URI_ARM64_2}" "${BIN_TMP_FILE_2}"
@@ -73,3 +74,5 @@ symlink_item_overwrite "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
 symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC_1}" "${SYSTEM_BIN_ROOT}/${SYSTEM_EXEC__1}"
 symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC_2}" "${SYSTEM_BIN_ROOT}/${SYSTEM_EXEC__2}"
 symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC_3}" "${SYSTEM_BIN_ROOT}/${SYSTEM_EXEC__3}"
+
+echo "> Success."

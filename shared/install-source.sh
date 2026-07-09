@@ -44,6 +44,7 @@ get_source_owner() {
 		opencode-desktop) echo "anomalyco" ;;
 		pgweb) echo "sosedoff" ;;
 		pnpm) echo "pnpm" ;;
+		prysm) echo "OffchainLabs" ;;
 		qdrant) echo "qdrant" ;;
 		reth) echo "paradigmxyz" ;;
 		rust) echo "rust-lang" ;;
@@ -102,6 +103,7 @@ get_source_repo() {
 		opencode-desktop) echo "opencode" ;;
 		pgweb) echo "pgweb" ;;
 		pnpm) echo "pnpm" ;;
+		prysm) echo "prysm" ;;
 		qdrant) echo "qdrant" ;;
 		reth) echo "reth" ;;
 		rust) echo "rust" ;;
@@ -186,6 +188,12 @@ get_download_uri_amd64() {
 			echo "https://github.com/sosedoff/pgweb/releases/download/v${2}/pgweb_linux_amd64.zip" ;;
 		pnpm)
 			echo "https://github.com/pnpm/pnpm/releases/download/v${2}/pnpm-linux-x64" ;;
+		prysm-beacon)
+			echo "https://github.com/OffchainLabs/prysm/releases/download/v${2}/beacon-chain-v${2}-modern-linux-amd64" ;;
+		prysm-stats)
+			echo "https://github.com/OffchainLabs/prysm/releases/download/v${2}/client-stats-v${2}-linux-amd64" ;;
+		prysmctl)
+			echo "https://github.com/OffchainLabs/prysm/releases/download/v${2}/prysmctl-v${2}-linux-amd64" ;;
 		qdrant)
 			echo "https://github.com/qdrant/qdrant/releases/download/v${2}/qdrant-x86_64-unknown-linux-musl.tar.gz" ;;
 		reth)
@@ -290,6 +298,12 @@ get_download_uri_arm64() {
 			echo "https://github.com/sosedoff/pgweb/releases/download/v${2}/pgweb_linux_arm64.zip" ;;
 		pnpm)
 			echo "https://github.com/pnpm/pnpm/releases/download/v${2}/pnpm-linux-arm64" ;;
+		prysm-beacon)
+			echo "https://github.com/OffchainLabs/prysm/releases/download/v${2}/beacon-chain-v${2}-linux-arm64" ;;
+		prysm-stats)
+			echo "https://github.com/OffchainLabs/prysm/releases/download/v${2}/client-stats-v${2}-linux-arm64" ;;
+		prysmctl)
+			echo "https://github.com/OffchainLabs/prysm/releases/download/v${2}/prysmctl-v${2}-linux-arm64" ;;
 		qdrant)
 			echo "https://github.com/qdrant/qdrant/releases/download/v${2}/qdrant-aarch64-unknown-linux-musl.tar.gz" ;;
 		reth)
