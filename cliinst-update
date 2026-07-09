@@ -14,12 +14,13 @@
 #
 ################################################################################
 
-set -ex
+set -e
 
 CTXDIR="$(cd "$(dirname "$0")" && pwd)"
 
 if [ -d "${CTXDIR}/.git" ]; then
 	if command -v git >/dev/null 2>&1; then
+		echo "> Update from git."
 		git -C "${CTXDIR}" pull --rebase
 		echo "> Success."
 	else
