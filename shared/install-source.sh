@@ -23,6 +23,7 @@ get_source_owner() {
 		bsc-erigon) echo "node-real" ;;
 		bsc-geth) echo "bnb-chain" ;;
 		bsc-reth) echo "bnb-chain" ;;
+		btop) echo "aristocratos" ;;
 		bun) echo "oven-sh" ;;
 		composer) echo "composer" ;;
 		doublecmd) echo "doublecmd" ;;
@@ -82,6 +83,7 @@ get_source_repo() {
 		bsc-erigon) echo "bsc-erigon" ;;
 		bsc-geth) echo "bsc" ;;
 		bsc-reth) echo "reth-bsc" ;;
+		btop) echo "btop" ;;
 		bun) echo "bun" ;;
 		composer) echo "composer" ;;
 		doublecmd) echo "doublecmd" ;;
@@ -148,6 +150,8 @@ get_download_uri_amd64() {
 			echo "https://github.com/bnb-chain/bsc/releases/download/v${2}/geth_linux" ;;
 		bsc-reth)
 			echo "https://github.com/bnb-chain/reth-bsc/archive/refs/tags/v${2}.tar.gz" ;;
+		btop)
+			echo "https://github.com/aristocratos/btop/releases/download/v${2}/btop-x86_64-unknown-linux-musl.tar.gz" ;;
 		bun)
 			echo "https://github.com/oven-sh/bun/releases/download/bun-v${2}/bun-linux-x64.zip" ;;
 		composer)
@@ -258,6 +262,8 @@ get_download_uri_arm64() {
 			echo "https://github.com/bnb-chain/bsc/releases/download/v${2}/geth-linux-arm64" ;;
 		bsc-reth)
 			echo "https://github.com/bnb-chain/reth-bsc/archive/refs/tags/v${2}.tar.gz" ;;
+		btop)
+			echo "https://github.com/aristocratos/btop/releases/download/v${2}/btop-aarch64-unknown-linux-musl.tar.gz" ;;
 		bun)
 			echo "https://github.com/oven-sh/bun/releases/download/bun-v${2}/bun-linux-aarch64.zip" ;;
 		composer)
