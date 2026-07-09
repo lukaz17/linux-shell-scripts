@@ -47,6 +47,7 @@ get_source_owner() {
 		opencode-desktop) echo "anomalyco" ;;
 		pgweb) echo "sosedoff" ;;
 		pnpm) echo "pnpm" ;;
+		prometheus) echo "prometheus" ;;
 		prysm) echo "OffchainLabs" ;;
 		qdrant) echo "qdrant" ;;
 		reth) echo "paradigmxyz" ;;
@@ -110,6 +111,7 @@ get_source_repo() {
 		opencode-desktop) echo "opencode" ;;
 		pgweb) echo "pgweb" ;;
 		pnpm) echo "pnpm" ;;
+		prometheus) echo "prometheus" ;;
 		prysm) echo "prysm" ;;
 		qdrant) echo "qdrant" ;;
 		reth) echo "reth" ;;
@@ -202,6 +204,8 @@ get_download_uri_amd64() {
 			echo "https://github.com/sosedoff/pgweb/releases/download/v${2}/pgweb_linux_amd64.zip" ;;
 		pnpm)
 			echo "https://github.com/pnpm/pnpm/releases/download/v${2}/pnpm-linux-x64" ;;
+		prometheus)
+			echo "https://github.com/prometheus/prometheus/releases/download/v${2}/prometheus-${2}.linux-amd64.tar.gz" ;;
 		prysm-beacon)
 			echo "https://github.com/OffchainLabs/prysm/releases/download/v${2}/beacon-chain-v${2}-modern-linux-amd64" ;;
 		prysm-stats)
@@ -320,6 +324,8 @@ get_download_uri_arm64() {
 			echo "https://github.com/sosedoff/pgweb/releases/download/v${2}/pgweb_linux_arm64.zip" ;;
 		pnpm)
 			echo "https://github.com/pnpm/pnpm/releases/download/v${2}/pnpm-linux-arm64" ;;
+		prometheus)
+			echo "https://github.com/prometheus/prometheus/releases/download/v${2}/prometheus-${2}.linux-arm64.tar.gz" ;;
 		prysm-beacon)
 			echo "https://github.com/OffchainLabs/prysm/releases/download/v${2}/beacon-chain-v${2}-linux-arm64" ;;
 		prysm-stats)
