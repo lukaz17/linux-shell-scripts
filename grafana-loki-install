@@ -1,0 +1,61 @@
+#!/bin/sh
+
+################################################################################
+#
+#  grafana-loki-install
+#
+#  Install/Update Grafana Loki for current user. This also works as a version manager.
+#  If version is not specified, the latest version will be installed.
+#
+#  Homepage: https://grafana.com/oss/loki
+#
+#  Usage:
+#    grafana-loki-install [<version>]
+#
+#  Example:
+#    grafana-loki-install
+#    grafana-loki-install 3.7.3
+#    grafana-loki-install v3.7.3
+#
+#  MIT License.
+#  Copyright (C) 2025 Nguyen Nhat Tung.
+#
+################################################################################
+
+set -e
+
+# Application info
+PROGRAM_ID="grafana-loki"
+PROGRAM_EXEC="loki"
+
+# Shared library
+CTXDIR="$(cd "$(dirname "$0")" && pwd)"
+. "${CTXDIR}/shared/install-common.sh"
+. "${CTXDIR}/shared/install-source.sh"
+
+# Prepare environment
+GITHUB_OWNER="$(get_source_owner "${PROGRAM_ID}")"
+GITHUB_REPO="$(get_source_repo "${PROGRAM_ID}")"
+get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "$1"
+init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
+
+# Download and install binaries
+if [ ! -d "${INSTALL_TARGET}" ]; then
+	BIN_ARCH_URI_AMD64="$(get_download_uri_amd64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
+	BIN_ARCH_URI_ARM64="$(get_download_uri_arm64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
+	BIN_ARCH_TMP_FILE="${TEMP_TARGET}.zip"
+	download_uri_per_arch "${BIN_ARCH_URI_AMD64}" "${BIN_ARCH_URI_ARM64}" "${BIN_ARCH_TMP_FILE}"
+	create_dir "${TEMP_TARGET}"
+	extract_archive "${BIN_ARCH_TMP_FILE}" "zip" "${TEMP_TARGET}"
+	remove_item "${BIN_ARCH_TMP_FILE}"
+	move_item_per_arch "${TEMP_TARGET}/loki-linux-amd64" "${TEMP_TARGET}/loki-linux-arm64" "${TEMP_TARGET}/${PROGRAM_EXEC}"
+	make_executable "${TEMP_TARGET}/${PROGRAM_EXEC}"
+	move_item "${TEMP_TARGET}" "${INSTALL_TARGET}"
+	remove_item "${TEMP_TARGET}"
+fi
+
+# Finalize install
+symlink_item_overwrite "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
+symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC}" "${SYSTEM_BIN_ROOT}/${PROGRAM_ID}"
+
+echo "> Success."

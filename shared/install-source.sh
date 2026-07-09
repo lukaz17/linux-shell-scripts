@@ -35,6 +35,7 @@ get_source_owner() {
 		go) echo "" ;;
 		golangci-lint) echo "golangci" ;;
 		grafana-alloy) echo "grafana" ;;
+		grafana-loki) echo "grafana" ;;
 		hugo) echo "gohugoio" ;;
 		jellyfin) echo "" ;;
 		just) echo "casey" ;;
@@ -97,6 +98,7 @@ get_source_repo() {
 		go) echo "" ;;
 		golangci-lint) echo "golangci-lint" ;;
 		grafana-alloy) echo "alloy" ;;
+		grafana-loki) echo "loki" ;;
 		hugo) echo "hugo" ;;
 		jellyfin) echo "" ;;
 		just) echo "just" ;;
@@ -178,6 +180,8 @@ get_download_uri_amd64() {
 			echo "https://github.com/golangci/golangci-lint/releases/download/v${2}/golangci-lint-${2}-linux-amd64.tar.gz" ;;
 		grafana-alloy)
 			echo "https://github.com/grafana/alloy/releases/download/v${2}/alloy-linux-amd64.zip" ;;
+		grafana-loki)
+			echo "https://github.com/grafana/loki/releases/download/v${2}/loki-linux-amd64.zip" ;;
 		hugo)
 			echo "https://github.com/gohugoio/hugo/releases/download/v${2}/hugo_extended_withdeploy_${2}_linux-amd64.tar.gz" ;;
 		jellyfin)
@@ -296,6 +300,8 @@ get_download_uri_arm64() {
 			echo "https://github.com/gohugoio/hugo/releases/download/v${2}/hugo_extended_withdeploy_${2}_linux-arm64.tar.gz" ;;
 		grafana-alloy)
 			echo "https://github.com/grafana/alloy/releases/download/v${2}/alloy-linux-arm64.zip" ;;
+		grafana-loki)
+			echo "https://github.com/grafana/loki/releases/download/v${2}/loki-linux-arm64.zip" ;;
 		jellyfin)
 			echo "https://repo.jellyfin.org/files/server/linux/stable/v${2}/arm64/jellyfin_${2}-arm64.tar.xz" ;;
 		just)
