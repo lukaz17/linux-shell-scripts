@@ -68,6 +68,7 @@ get_source_owner() {
 		waterfox) echo "BrowserWorks" ;;
 		yellowstone-grpc) echo "rpcpool" ;;
 		ytdlp) echo "yt-dlp" ;;
+		zenith) echo "bvaisvil" ;;
 		*) echo "" ;;
 	esac
 }
@@ -128,6 +129,7 @@ get_source_repo() {
 		waterfox) echo "waterfox" ;;
 		yellowstone-grpc) echo "yellowstone-grpc" ;;
 		ytdlp) echo "yt-dlp" ;;
+		zenith) echo "zenith" ;;
 		*) echo "" ;;
 	esac
 }
@@ -240,6 +242,8 @@ get_download_uri_amd64() {
 			echo "" ;;
 		ytdlp)
 			echo "https://github.com/yt-dlp/yt-dlp/releases/download/${2}/yt-dlp_linux" ;;
+		zenith)
+			echo "https://github.com/bvaisvil/zenith/releases/download/${2}/zenith-Linux-musl-x86_64.tar.gz" ;;
 		*) echo "" ;;
 	esac
 }
@@ -352,6 +356,8 @@ get_download_uri_arm64() {
 			echo "" ;;
 		ytdlp)
 			echo "https://github.com/yt-dlp/yt-dlp/releases/download/${2}/yt-dlp_linux_aarch64" ;;
+		zenith)
+			echo "https://github.com/bvaisvil/zenith/releases/download/${2}/zenith-Linux-musl-arm64.tar.gz" ;;
 		*) echo "" ;;
 	esac
 }
