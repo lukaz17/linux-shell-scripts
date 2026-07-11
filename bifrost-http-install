@@ -20,17 +20,16 @@
 #
 ################################################################################
 
-set -ex
+set -e
 
 # Application info
-GITHUB_OWNER="maximhq"
-GITHUB_REPO="bifrost"
 PROGRAM_ID="bifrost-http"
 PROGRAM_EXEC="bifrost-http"
 
 # Shared library
 CTXDIR="$(cd "$(dirname "$0")" && pwd)"
 . "${CTXDIR}/shared/install-common.sh"
+. "${CTXDIR}/shared/install-source.sh"
 
 # Prepare environment
 normalize_install_version "$1"
@@ -38,8 +37,8 @@ init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
 
 # Download and install binaries
 if [ ! -d "${INSTALL_TARGET}" ]; then
-	BIN_URI_AMD64="https://downloads.getmaxim.ai/bifrost/v${INSTALL_VERSION}/linux/amd64/bifrost-http"
-	BIN_URI_ARM64="https://downloads.getmaxim.ai/bifrost/v${INSTALL_VERSION}/linux/arm64/bifrost-http"
+	BIN_URI_AMD64="$(get_download_uri_amd64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
+	BIN_URI_ARM64="$(get_download_uri_arm64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
 	BIN_TMP_FILE="${TEMP_TARGET}.bin"
 	download_uri_per_arch "${BIN_URI_AMD64}" "${BIN_URI_ARM64}" "${BIN_TMP_FILE}"
 	create_dir "${TEMP_TARGET}"
@@ -52,3 +51,4 @@ fi
 # Finalize install
 symlink_item_overwrite "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
 symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC}" "${SYSTEM_BIN_ROOT}/${PROGRAM_ID}"
+finalize_install
