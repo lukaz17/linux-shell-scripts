@@ -1,0 +1,23 @@
+#!/bin/sh
+
+################################################################################
+#
+#  tskdo
+#
+#  Run a command in the background.
+#
+#  Usage:
+#    ./tskdo <command> [args...]
+#
+#  MIT License.
+#  Copyright (C) 2025 Nguyen Nhat Tung.
+#
+################################################################################
+
+if [ $# -eq 0 ]; then
+	exit 1
+fi
+
+NOHUP_LOG="nohup-$(date +%Y%m%d%H%M%S).out"
+nohup "$@" > "$NOHUP_LOG" 2>&1 &
+echo $!
