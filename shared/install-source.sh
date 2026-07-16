@@ -28,6 +28,7 @@ get_source_owner() {
 		composer) echo "composer" ;;
 		doublecmd) echo "doublecmd" ;;
 		erigon) echo "erigontech" ;;
+		etcd) echo "etcd-io" ;;
 		firefox) echo "" ;;
 		foundry) echo "foundry-rs" ;;
 		geth) echo "ethereum" ;;
@@ -92,6 +93,7 @@ get_source_repo() {
 		composer) echo "composer" ;;
 		doublecmd) echo "doublecmd" ;;
 		erigon) echo "erigon" ;;
+		etcd) echo "etcd" ;;
 		firefox) echo "" ;;
 		foundry) echo "foundry" ;;
 		geth) echo "go-ethereum" ;;
@@ -168,6 +170,8 @@ get_download_uri_amd64() {
 			echo "https://github.com/doublecmd/doublecmd/releases/download/v${2}/doublecmd-${2}.qt.x86_64.tar.xz" ;;
 		erigon)
 			echo "https://github.com/erigontech/erigon/releases/download/v${2}/erigon_v${2}_linux_amd64v2.tar.gz" ;;
+		etcd)
+			echo "https://github.com/etcd-io/etcd/releases/download/v${2}/etcd-v${2}-linux-amd64.tar.gz" ;;
 		firefox)
 			echo "https://ftp.mozilla.org/pub/firefox/releases/${2}/linux-x86_64/en-US/firefox-${2}.tar.xz" ;;
 		foundry)
@@ -288,6 +292,8 @@ get_download_uri_arm64() {
 			echo "https://github.com/doublecmd/doublecmd/releases/download/v${2}/doublecmd-${2}.qt.aarch64.tar.xz" ;;
 		erigon)
 			echo "https://github.com/erigontech/erigon/releases/download/v${2}/erigon_v${2}_linux_arm64.tar.gz" ;;
+		etcd)
+			echo "https://github.com/etcd-io/etcd/releases/download/v${2}/etcd-v${2}-linux-arm64.tar.gz" ;;
 		firefox)
 			echo "https://ftp.mozilla.org/pub/firefox/releases/${2}/linux-aarch64/en-US/firefox-${2}.tar.xz" ;;
 		foundry)
