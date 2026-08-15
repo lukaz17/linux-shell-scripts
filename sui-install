@@ -5,13 +5,15 @@
 #  sui-install
 #
 #  Install/Update Sui for current user. This also works as a version manager.
+#  If version is not specified, the latest version will be installed.
 #
 #  Homepage: https://www.sui.io/
 #
 #  Usage:
-#    sui-install <version>
+#    sui-install [<version>]
 #
 #  Example:
+#    sui-install
 #    sui-install 1.62.1
 #    sui-install v1.62.1
 #
@@ -20,11 +22,9 @@
 #
 ################################################################################
 
-set -ex
+set -e
 
 # Application info
-GITHUB_OWNER="MystenLabs"
-GITHUB_REPO="sui"
 PROGRAM_ID="sui"
 PROGRAM_EXEC="sui"
 PROGRAM_EXEC_1="sui-bridge"
@@ -39,15 +39,18 @@ SYSTEM_EXEC__4="sui-tool"
 # Shared library
 CTXDIR="$(cd "$(dirname "$0")" && pwd)"
 . "${CTXDIR}/shared/install-common.sh"
+. "${CTXDIR}/shared/install-source.sh"
 
 # Prepare environment
-normalize_install_version "$1"
-init_install_env_desktop "${PROGRAM_ID}" "${INSTALL_VERSION}"
+GITHUB_OWNER="$(get_source_owner "${PROGRAM_ID}")"
+GITHUB_REPO="$(get_source_repo "${PROGRAM_ID}")"
+get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "$1" "mainnet-v" "mainnet-v"
+init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
 
 # Download and install binaries
 if [ ! -d "${INSTALL_TARGET}" ]; then
-	BIN_ARCH_URI_AMD64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/mainnet-v${INSTALL_VERSION}/sui-mainnet-v${INSTALL_VERSION}-ubuntu-x86_64.tgz"
-	BIN_ARCH_URI_ARM64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/mainnet-v${INSTALL_VERSION}/sui-mainnet-v${INSTALL_VERSION}-ubuntu-aarch64.tgz"
+	BIN_ARCH_URI_AMD64="$(get_download_uri_amd64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
+	BIN_ARCH_URI_ARM64="$(get_download_uri_arm64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
 	BIN_ARCH_TMP_FILE="${TEMP_TARGET}.tgz"
 	download_uri_per_arch "${BIN_ARCH_URI_AMD64}" "${BIN_ARCH_URI_ARM64}" "${BIN_ARCH_TMP_FILE}"
 	create_dir "${TEMP_TARGET}"
@@ -64,3 +67,4 @@ symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC_1}" "${SYSTEM_BIN_ROOT}/
 symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC_2}" "${SYSTEM_BIN_ROOT}/${SYSTEM_EXEC__2}"
 symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC_3}" "${SYSTEM_BIN_ROOT}/${SYSTEM_EXEC__3}"
 symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC_4}" "${SYSTEM_BIN_ROOT}/${SYSTEM_EXEC__4}"
+finalize_install
