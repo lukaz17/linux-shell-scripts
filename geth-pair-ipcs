@@ -1,0 +1,84 @@
+#!/bin/sh
+
+################################################################################
+#
+#  geth-pair-ipcs
+#
+#  Pair two Ethereum client nodes by adding each other as peer through their
+#  IPC endpoints. This works with any client that supports the "attach"
+#  command such as Geth, BSC...
+#
+#  Usage:
+#    geth-pair-ipcs <ipc1> <ipc2> [client]
+#
+#  Example:
+#    geth-pair-ipcs /path/to/geth1.ipc /path/to/geth2.ipc
+#    geth-pair-ipcs /path/to/geth1.ipc /path/to/geth2.ipc /path/to/geth
+#
+#  MIT License.
+#  Copyright (C) 2026 Nguyen Nhat Tung.
+#
+################################################################################
+
+if [ $# -lt 2 ] || [ $# -gt 3 ]; then
+	echo "Usage: geth-pair-ipcs <ipc1> <ipc2> [client]"
+	exit 1
+fi
+
+IPC1="$1"
+IPC2="$2"
+CLIENT="${3:-geth}"
+FAILED=0
+
+for IPC in "$IPC1" "$IPC2"; do
+	if [ ! -S "$IPC" ]; then
+		echo "IPC endpoint not found: $IPC"
+		exit 1
+	fi
+done
+
+if ! command -v "$CLIENT" > /dev/null 2>&1; then
+	echo "Client not found: $CLIENT"
+	exit 1
+fi
+
+ENODE1="$("$CLIENT" attach --exec 'admin.nodeInfo.enode' "$IPC1" | tr -d '"')"
+case "$ENODE1" in
+enode://*)
+	;;
+*)
+	echo "Failed to get enode of $IPC1: $ENODE1"
+	exit 1
+	;;
+esac
+
+ENODE2="$("$CLIENT" attach --exec 'admin.nodeInfo.enode' "$IPC2" | tr -d '"')"
+case "$ENODE2" in
+enode://*)
+	;;
+*)
+	echo "Failed to get enode of $IPC2: $ENODE2"
+	exit 1
+	;;
+esac
+
+echo "$IPC1 enode: $ENODE1"
+echo "$IPC2 enode: $ENODE2"
+
+RESULT1="$("$CLIENT" attach --exec "admin.addPeer(\"$ENODE2\")" "$IPC1")"
+if [ "$RESULT1" != "true" ]; then
+	echo "Failed to add peer to $IPC1: $RESULT1"
+	FAILED=1
+fi
+
+RESULT2="$("$CLIENT" attach --exec "admin.addPeer(\"$ENODE1\")" "$IPC2")"
+if [ "$RESULT2" != "true" ]; then
+	echo "Failed to add peer to $IPC2: $RESULT2"
+	FAILED=1
+fi
+
+if [ "$FAILED" -ne 0 ]; then
+	exit 1
+fi
+
+echo "Paired $IPC1 and $IPC2 successfully"
