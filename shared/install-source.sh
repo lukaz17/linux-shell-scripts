@@ -67,6 +67,7 @@ get_source_owner() {
 		thunderbird) echo "" ;;
 		tufw) echo "peltho" ;;
 		uv) echo "astral-sh" ;;
+		vic-geth) echo "BuildOnViction" ;;
 		viction) echo "BuildOnViction" ;;
 		vscode) echo "microsoft" ;;
 		waterfox) echo "BrowserWorks" ;;
@@ -132,6 +133,7 @@ get_source_repo() {
 		thunderbird) echo "" ;;
 		tufw) echo "tufw" ;;
 		uv) echo "uv" ;;
+		vic-geth) echo "vic-geth" ;;
 		viction) echo "victionchain" ;;
 		vscode) echo "vscode" ;;
 		waterfox) echo "waterfox" ;;
@@ -248,6 +250,8 @@ get_download_uri_amd64() {
 			echo "https://github.com/peltho/tufw/releases/download/v${2}/tufw_${2}_linux_amd64.tar.gz" ;;
 		uv)
 			echo "https://github.com/astral-sh/uv/releases/download/${2}/uv-x86_64-unknown-linux-gnu.tar.gz" ;;
+		vic-geth)
+			echo "https://github.com/BuildOnViction/vic-geth/releases/download/v${2}/vic-geth-v${2}-linux-amd64.tar.zst" ;;
 		viction)
 			echo "https://github.com/BuildOnViction/victionchain/releases/download/v${2}/tomo-linux-amd64" ;;
 		vscode)
@@ -370,6 +374,8 @@ get_download_uri_arm64() {
 			echo "https://github.com/peltho/tufw/releases/download/v${2}/tufw_${2}_linux_amd64.tar.gz" ;;
 		uv)
 			echo "https://github.com/astral-sh/uv/releases/download/${2}/uv-aarch64-unknown-linux-gnu.tar.gz" ;;
+		vic-geth)
+			echo "https://github.com/BuildOnViction/vic-geth/releases/download/v${2}/vic-geth-v${2}-linux-arm64.tar.zst" ;;
 		viction)
 			echo "https://github.com/BuildOnViction/victionchain/releases/download/v${2}/tomo-linux-arm64" ;;
 		vscode)
