@@ -40,6 +40,7 @@ get_source_owner() {
 		hugo) echo "gohugoio" ;;
 		jellyfin) echo "" ;;
 		just) echo "casey" ;;
+		localai) echo "mudler" ;;
 		nvm) echo "nvm-sh" ;;
 		ollama) echo "ollama" ;;
 		op-reth) echo "paradigmxyz" ;;
@@ -106,6 +107,7 @@ get_source_repo() {
 		hugo) echo "hugo" ;;
 		jellyfin) echo "" ;;
 		just) echo "just" ;;
+		localai) echo "LocalAI" ;;
 		nvm) echo "nvm" ;;
 		ollama) echo "ollama" ;;
 		op-reth) echo "reth" ;;
@@ -196,6 +198,8 @@ get_download_uri_amd64() {
 			echo "https://repo.jellyfin.org/files/server/linux/stable/v${2}/amd64/jellyfin_${2}-amd64.tar.xz" ;;
 		just)
 			echo "https://github.com/casey/just/releases/download/${2}/just-${2}-x86_64-unknown-linux-musl.tar.gz" ;;
+		localai)
+			echo "https://github.com/mudler/LocalAI/releases/download/v${2}/local-ai-v${2}-linux-amd64" ;;
 		ollama)
 			echo "https://github.com/ollama/ollama/releases/download/v${2}/ollama-linux-amd64.tar.zst" ;;
 		op-reth)
@@ -320,6 +324,8 @@ get_download_uri_arm64() {
 			echo "https://repo.jellyfin.org/files/server/linux/stable/v${2}/arm64/jellyfin_${2}-arm64.tar.xz" ;;
 		just)
 			echo "https://github.com/casey/just/releases/download/${2}/just-${2}-aarch64-unknown-linux-musl.tar.gz" ;;
+		localai)
+			echo "https://github.com/mudler/LocalAI/releases/download/v${2}/local-ai-v${2}-linux-arm64" ;;
 		ollama)
 			echo "https://github.com/ollama/ollama/releases/download/v${2}/ollama-linux-arm64.tar.zst" ;;
 		op-reth)

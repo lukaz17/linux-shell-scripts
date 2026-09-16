@@ -1,0 +1,60 @@
+#!/bin/sh
+
+################################################################################
+#
+#  localai-install
+#
+#  Install/Update LocalAI for current user. This also works as a version manager.
+#  If version is not specified, the latest version will be installed.
+#
+#  Homepage: https://localai.io/
+#
+#  Usage:
+#    localai-install [<version>]
+#
+#  Example:
+#    localai-install
+#    localai-install 4.7.0
+#    localai-install v4.7.0
+#
+#  MIT License.
+#  Copyright (C) 2025 Nguyen Nhat Tung.
+#
+################################################################################
+
+set -e
+
+# Application info
+PROGRAM_ID="localai"
+PROGRAM_EXEC="localai"
+
+# Shared library
+CTXDIR="$(cd "$(dirname "$0")" && pwd)"
+. "${CTXDIR}/shared/install-common.sh"
+. "${CTXDIR}/shared/install-source.sh"
+
+# Prepare environment
+GITHUB_OWNER="$(get_source_owner "${PROGRAM_ID}")"
+GITHUB_REPO="$(get_source_repo "${PROGRAM_ID}")"
+
+# Prepare environment
+get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "$1"
+init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
+
+# Download and install binaries
+if [ ! -d "${INSTALL_TARGET}" ]; then
+	BIN_URI_AMD64="$(get_download_uri_amd64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
+	BIN_URI_ARM64="$(get_download_uri_arm64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
+	BIN_TMP_FILE="${TEMP_TARGET}.bin"
+	download_uri_per_arch "${BIN_URI_AMD64}" "${BIN_URI_ARM64}" "${BIN_TMP_FILE}"
+	create_dir "${TEMP_TARGET}"
+	make_executable "${BIN_TMP_FILE}"
+	move_item "${BIN_TMP_FILE}" "${TEMP_TARGET}/${PROGRAM_EXEC}"
+	move_item "${TEMP_TARGET}" "${INSTALL_TARGET}"
+	remove_item "${TEMP_TARGET}"
+fi
+
+# Finalize install
+symlink_item_overwrite "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
+symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC}" "${SYSTEM_BIN_ROOT}/${PROGRAM_ID}"
+finalize_install
