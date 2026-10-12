@@ -1,0 +1,10 @@
+# Changes here will be overwritten by Copier; DO NOT EDIT MANUALLY
+_commit: v0.9.0
+_src_path: gh:tforce-io/tf-attunic
+copyright_holder: Nguyen Nhat Tung
+copyright_year: 2025
+languages:
+- shell
+license: MIT
+license_header: None
+project_name: Linux Shell Scripts
