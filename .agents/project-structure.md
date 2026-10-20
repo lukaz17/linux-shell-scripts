@@ -13,7 +13,7 @@ The files holding the rules for working with this project are [coding-convention
 - Keep one script per operational task; when unrelated subcommands accumulate, split the script or add a real subcommand dispatcher.
 - Put shared functions in `lib/`, entry points in `bin/` or the project root — whichever the project already uses; never duplicate a helper across scripts.
 - Keep generated or vendored scripts out of the directories you hand-edit.
-<!-- Project-specific / Guideline -->
+<!-- Project-specific / Shell-Guideline -->
 
 ### Layout
 
@@ -33,7 +33,7 @@ The files holding the rules for working with this project are [coding-convention
 ├── CONTRIBUTING.md # contribution guidelines
 ├── Makefile        # build/test/lint task automation (optional)
 ├── README.md       # project overview and pointing entry
-<!-- Project-specific / Layout -->
+<!-- Project-specific / Shell-Layout -->
 ```
 
 ### Layer Dependencies
@@ -44,7 +44,7 @@ Notes for declaring layers in the `Layer Dependencies` section of `.attunic/cont
 - Past a couple hundred lines, or the first time an associative array models more than a lookup table, move that logic out; a shell script is glue, not an application.
 - Keep no dependency-injection wiring: shell has none of the tooling to enforce the Dependency Rule, so keep the script small enough that the question does not arise.
 - Check by hand: a script containing business rules instead of delegating them to the main language is a violation.
-<!-- Project-specific / Layer Dependencies -->
+<!-- Project-specific / Shell-Layer-Dependencies -->
 
 ## Project-specific
 

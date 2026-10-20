@@ -6,10 +6,12 @@ The principles below are for all languages. They use camelCase for demonstration
 
 ### Formats
 
+- Let the project's formatter own the format: run it when the project define an formatter or linter, its check must report no files.
 - Keep file content reads top-down: high-level intent first, details descending (newspaper metaphor).
 - Keep related things close: declarations near first use, callers near callees.
 - Always brace control-flow bodies (if/else, for, while, do, switch, when) even for a single statement; never rely on brace-less bodies.
 <!-- Project-specific / Formats -->
+- Start top-level scripts with a standard banner comment block: program name, purpose, prerequisites if any, `Usage:`, `Example:`, then the MIT license block; see any existing script, consistency matters more than wording.
 
 ### Names
 
@@ -22,6 +24,18 @@ The principles below are for all languages. They use camelCase for demonstration
 - Avoid generic names: (`data`, `manager`, `helper`, `util`, `info`, `result`) when a domain name exists.
 - Avoid noise: names that differ only by noise words or loose abbreviations.
 <!-- Project-specific / Names -->
+
+### Packages
+
+<!-- Project-specific / Packages -->
+
+### Types
+
+<!-- Project-specific / Types -->
+
+### Functions
+
+<!-- Project-specific / Functions -->
 
 ### Comments
 
@@ -49,8 +63,8 @@ The principles below are for all languages. They use camelCase for demonstration
 
 ### Formats
 
-- Run `shfmt -d .` to check formatting; it must report no files; run `shfmt -w .` locally before committing.
 <!-- Project-specific / Shell-Formats -->
+- Let EditorConfig format layout per `.editorconfig`: tabs for indent, LF, UTF-8, final newline.
 
 ### Names
 
@@ -61,14 +75,31 @@ The principles below are for all languages. They use camelCase for demonstration
 - Keep a name that short only for a loop index (`for i in`) or a shell idiom (`$#`, `$?`); name anything read later on.
 <!-- Project-specific / Shell-Names -->
 
-### Functions And Types
+### Packages
+
+- Keep reusable functions in `lib/*.sh`, loaded with `source`.
+- Guard a sourced library against double-sourcing (`[[ -n "${MYLIB_SOURCED:-}" ]] && return`).
+- Never `export` a variable a sourced library does not document as its interface; keep the rest local to the sourcing script.
+<!-- Project-specific / Shell-Packages -->
+
+### Types
+
+<!-- Project-specific / Shell-Types -->
+
+### Functions
 
 - Wrap logic in functions and call them from one `main "$@"` at the bottom; nothing but definitions runs at the top level.
 - Declare every function-local with `local` (`local -r` when it never changes); an undeclared variable leaks into the caller's scope.
 - Mark a value that must not change `readonly` right after it is set.
 - Keep a function to one job; parsing arguments, doing the work, and printing a report is three functions.
 - Pass data through arguments and exit status, not through a global a sibling function set earlier.
-<!-- Project-specific / Shell-Functions-And-Types -->
+<!-- Project-specific / Shell-Functions -->
+- Keep an installer script a linear top-level flow calling shared-library functions; wrap an application's logic in functions only where the script itself owns it.
+- Prefix a function-local variable with `_` (`_path`) so it visibly belongs to the function; pass state up via documented uppercase globals (`INSTALL_VERSION`, `INSTALL_TARGET`) — POSIX sh has no `local`.
+
+### Comments
+
+<!-- Project-specific / Shell-Comments -->
 
 ### Errors
 
@@ -78,27 +109,15 @@ The principles below are for all languages. They use camelCase for demonstration
 - Use `trap 'cleanup' EXIT` (and `INT`/`TERM` when the script holds a lock or a temp file) so cleanup runs on every exit path.
 - Never swallow a failure with `2>/dev/null` alone; redirect, then act on the exit status, or let the error surface.
 <!-- Project-specific / Shell-Errors -->
-
-### Modules And Visibility
-
-- Keep reusable functions in `lib/*.sh`, loaded with `source`.
-- Guard a sourced library against double-sourcing (`[[ -n "${MYLIB_SOURCED:-}" ]] && return`).
-- Never `export` a variable a sourced library does not document as its interface; keep the rest local to the sourcing script.
-<!-- Project-specific / Shell-Modules-And-Visibility -->
+- Use an `echo "> Label:   value"` status line as the CLI progress channel; a failure message goes to stderr as `Error: ...` or `<function>: Invalid arguments`.
+- Set `set -e` at the start of the script; POSIX sh has no `pipefail`, so make a pipeline's error path explicit instead.
 
 ### Tests
 
-- Test with bats-core or ShellSpec; guard `main "$@"` behind `[[ "${BASH_SOURCE[0]}" == "${0}" ]]` so a test can load its functions without running it.
+- Guard `main "$@"` behind `[[ "${BASH_SOURCE[0]}" == "${0}" ]]` so a test can load its functions without running it.
 - Assert on exit status and stdout/stderr, not on incidental formatting; use real temp directories, cleaned up in teardown.
 - Add a test for every argument-parsing edge case and every past incident: a missing argument, an unwritable path, a missing dependency on `PATH`.
 <!-- Project-specific / Shell-Tests -->
-
-### Tooling
-
-- Run ShellCheck in CI on every script (`git ls-files '*.sh' | xargs shellcheck`) as a build failure, not a suggestion; disable one code only with a comment saying why (`# shellcheck disable=SC2064 # trap must expand now`).
-- Run `shfmt -d` in CI so formatting never bikesheds a review.
-- Pin the dialect per file when the project mixes Bash and POSIX sh (`# shellcheck shell=sh`).
-<!-- Project-specific / Shell-Tooling -->
 
 ### Smells
 
@@ -109,6 +128,8 @@ The principles below are for all languages. They use camelCase for demonstration
 - An unchecked `cd` — a failed one leaves later commands running against the wrong files.
 - A script hundreds of lines long with no functions and no `main`, that nobody wants to touch.
 <!-- Project-specific / Shell-Smells -->
+- A top-level script whose top lacks the banner comment or a `set` guard.
+- A script nowhere `$PATH`-invokable: a top-level script missing the executable bit.
 
 ## Project-specific
 

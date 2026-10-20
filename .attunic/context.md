@@ -9,6 +9,11 @@ The reading and writing rules for this file and the rest of `.attunic/` are defi
 A newcomer should be able to tell what the software does without knowing what it is built with. One paragraph that describes the domain, not the technology, in simple terms:
 <!-- Project-specific / Abstract -->
 
+Collection of installers and utility scripts for Linux, written in Shell.
+
+- The installer scripts automate the process of querying the new version, downloading and extracting open-source software.
+- The utility scripts automate the common repetitive tasks with configurable parameters.
+
 ## Technical Specifications
 
 A brief overview of the ingredients used for developing this project. These are things developers should know when developing the project.
@@ -16,6 +21,12 @@ A brief overview of the ingredients used for developing this project. These are 
 Typical ingredients include, but are not limited to: primary language, frameworks, architecture styles, environment prerequisites, libraries, test runners, tools, databases...
 
 <!-- Project-specific / Technical Specifications -->
+
+- Language: Shell (POSIX `/bin/sh`).
+- Framework: None.
+- Build system: None.
+- Test runner: None.
+- Linter: None.
 
 ## Layout
 
@@ -26,6 +37,26 @@ List of important folders, files and their roles in the project:
 - They visualize the actual file system where source files live.
 - If a top-level file/folder is missing from the list, prompt the user to update it.
 <!-- Project-specific / Layout -->
+- Top-level *-install scripts are an exception, it is not necessary to include all of them in the Layout.
+
+```
+├── .agents/                  # project AI agent instructions (attunic protocol, coding-conventions, development-guideline, pull-request-guideline)
+├── .attunic/                 # project AI agent memory (context, memory, wip)
+├── desktop/                  # XDG .desktop manifests and polkit policies for desktop installers
+│   └── *.desktop, *.policy
+├── icon/                     # PNG/SVG icon assets per program, sized for the Hicolor theme
+│   └── *.svg, *.png
+├── shared/                   # support libraries sourced by top-level scripts
+│   ├── install-common.sh     # installer script shared functions: safe file ops, install env initialization, extraction, desktop manifest, finalization
+│   ├── install-source.sh     # installer script download sources per Program ID and version lookup
+│   └── rasterize-svg.sh      # rasterize an SVG into the Hicolor PNG size set using Inkscape
+├── .copier-answers.yml       # project Copier answers
+├── .editorconfig             # editor formatting rules
+├── .gitignore                # git ignore patterns
+├── LICENSE                   # project license (MIT)
+├── README.md                 # project README
+└── *                         # top-level scripts
+```
 
 ## Layer Dependencies
 
@@ -58,6 +89,8 @@ List each required tool/library under its own heading, followed by the commands 
 Common use cases include: Build, Test, Lint, Format, Install, ...
 
 <!-- Project-specific / Supporting Tools -->
+
+There is no build, test, lint, or format pipeline; shell scripts are executed directly from the repository root. Format consistency is governed by `.editorconfig` (tabs for this project).
 
 ## Confirmed Facts
 

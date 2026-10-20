@@ -39,6 +39,7 @@ When writing code, follow these rules:
 - Avoid unnecessary abstraction; don't introduce an interface until there are two or more real implementations.
 - Never modify arguments of functions/methods as side effects; return values instead.
 <!-- Project-specific / Writing -->
+- Create the top-level script with the executable bit set (git mode 100755); only `shared/` libraries may be non-executable.
 
 ## Security
 
@@ -61,6 +62,8 @@ When fixing issues, instructions of [Writing](#writing) apply, plus:
 - For refactoring, run the relevant tests before and after; behavior must not change.
 - For deduplication, only merge true duplication (copies that must always change together); merging accidental lookalikes is harder to undo than leaving them apart.
 <!-- Project-specific / Fixing -->
+- For fixing: reproduce by running the failing script, capture and quote its output, fix, then re-run the same invocation and quote the passing result. There is no test or testing framework.
+- For refactoring, run the touched script(s) before and after; behavior must not change.
 
 ## Testing
 
