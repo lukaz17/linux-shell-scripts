@@ -5,13 +5,15 @@
 #  go-install
 #
 #  Install/Update Go for current user. This also works as a version manager.
+#  If version is not specified, the latest version will be installed.
 #
 #  Homepage: https://go.dev/
 #
 #  Usage:
-#    go-install <version>
+#    go-install [<version>]
 #
 #  Example:
+#    go-install
 #    go-install 1.24.7
 #    go-install v1.24.7
 #
@@ -20,7 +22,7 @@
 #
 ################################################################################
 
-set -ex
+set -e
 
 # Application info
 PROGRAM_ID="go"
@@ -28,15 +30,31 @@ PROGRAM_ID="go"
 # Shared library
 CTXDIR="$(cd "$(dirname "$0")" && pwd)"
 . "${CTXDIR}/shared/install-common.sh"
+. "${CTXDIR}/shared/install-source.sh"
+
+# ------------------------------------------------------------------------------
+# Get latest Go version
+# ------------------------------------------------------------------------------
+get_install_version_from_godev() {
+	_fallback_version="${1}"
+	if [ -z "${_fallback_version}" ]; then
+		INSTALL_VERSION="$(curl -fsSL "https://go.dev/VERSION?m=text" | head -n 1)"
+	else
+		INSTALL_VERSION="${_fallback_version}"
+	fi
+	INSTALL_VERSION="${INSTALL_VERSION#go}"
+	normalize_install_version
+	echo "> Latest Version:  ${INSTALL_VERSION}"
+}
 
 # Prepare environment
-normalize_install_version "$1"
+get_install_version_from_godev "$1"
 init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
 
 # Download and install binaries
 if [ ! -d "${INSTALL_TARGET}" ]; then
-	BIN_ARCH_URI_AMD64="https://go.dev/dl/go${INSTALL_VERSION}.linux-amd64.tar.gz"
-	BIN_ARCH_URI_ARM64="https://go.dev/dl/go${INSTALL_VERSION}.linux-arm64.tar.gz"
+	BIN_ARCH_URI_AMD64="$(get_download_uri_amd64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
+	BIN_ARCH_URI_ARM64="$(get_download_uri_arm64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
 	BIN_ARCH_TMP_FILE="${TEMP_TARGET}.tar.gz"
 	download_uri_per_arch "${BIN_ARCH_URI_AMD64}" "${BIN_ARCH_URI_ARM64}" "${BIN_ARCH_TMP_FILE}"
 	create_dir "${TEMP_TARGET}"
@@ -53,5 +71,6 @@ export GOROOT="${ACTIVE_TARGET}"
 export GOPATH="\$HOME/go"
 export PATH="\$GOROOT/bin:\$GOPATH/bin:\$PATH"
 EOF
-append_text_idempotent "# go" "${USER_PROFILE_RC}"
+append_text_idempotent "\n# go" "${USER_PROFILE_RC}"
 append_text_idempotent ". \"${INSTALL_ROOT}/env.sh\"" "${USER_PROFILE_RC}"
+finalize_install
