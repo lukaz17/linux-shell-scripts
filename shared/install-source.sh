@@ -20,6 +20,7 @@ get_source_owner() {
 	case "${_program_id}" in
 		7z) echo "ip7z" ;;
 		agave) echo "anza-xyz" ;;
+		base-node) echo "base" ;;
 		bifrost-http) echo "maximhq" ;;
 		bsc-erigon) echo "node-real" ;;
 		bsc-geth) echo "bnb-chain" ;;
@@ -88,6 +89,7 @@ get_source_repo() {
 	case "${_program_id}" in
 		7z) echo "7zip" ;;
 		agave) echo "agave" ;;
+		base-node) echo "base" ;;
 		bifrost-http) echo "bifrost" ;;
 		bsc-erigon) echo "bsc-erigon" ;;
 		bsc-geth) echo "bsc" ;;
@@ -160,6 +162,12 @@ get_download_uri_amd64() {
 			echo "https://github.com/ip7z/7zip/releases/download/${_version}/7z${_v_nodot}-linux-x64.tar.xz" ;;
 		agave)
 			echo "https://github.com/anza-xyz/agave/archive/refs/tags/v${_version}.tar.gz" ;;
+		base-node)
+			echo "https://github.com/base/base/releases/download/v${_version}/base-consensus-v${_version}-x86_64-unknown-linux-gnu.tar.gz" ;;
+		base-reth)
+			echo "https://github.com/base/base/releases/download/v${_version}/base-reth-node-v${_version}-x86_64-unknown-linux-gnu.tar.gz" ;;
+		basectl)
+			echo "https://github.com/base/base/releases/download/v${_version}/basectl-v${_version}-x86_64-unknown-linux-gnu.tar.gz" ;;
 		bifrost-http)
 			echo "https://downloads.getmaxim.ai/bifrost/v${_version}/linux/amd64/bifrost-http" ;;
 		bsc-erigon)
@@ -288,6 +296,12 @@ get_download_uri_arm64() {
 			echo "https://github.com/ip7z/7zip/releases/download/${_version}/7z${_v_nodot}-linux-arm64.tar.xz" ;;
 		agave)
 			echo "https://github.com/anza-xyz/agave/archive/refs/tags/v${_version}.tar.gz" ;;
+		base-node)
+			echo "https://github.com/base/base/releases/download/v${_version}/base-consensus-v${_version}-aarch64-unknown-linux-gnu.tar.gz" ;;
+		base-reth)
+			echo "https://github.com/base/base/releases/download/v${_version}/base-reth-node-v${_version}-aarch64-unknown-linux-gnu.tar.gz" ;;
+		basectl)
+			echo "https://github.com/base/base/releases/download/v${_version}/basectl-v${_version}-aarch64-unknown-linux-gnu.tar.gz" ;;
 		bifrost-http)
 			echo "https://downloads.getmaxim.ai/bifrost/v${_version}/linux/arm64/bifrost-http" ;;
 		bsc-erigon)

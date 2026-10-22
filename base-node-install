@@ -22,11 +22,9 @@
 #
 ################################################################################
 
-set -ex
+set -e
 
 # Application info
-GITHUB_OWNER="base"
-GITHUB_REPO="base"
 PROGRAM_ID="base-node"
 PROGRAM_EXEC_1="base-reth-node"
 SYSTEM_EXEC__1="base-reth"
@@ -38,21 +36,24 @@ SYSTEM_EXEC__3="basectl"
 # Shared library
 CTXDIR="$(cd "$(dirname "$0")" && pwd)"
 . "${CTXDIR}/shared/install-common.sh"
+. "${CTXDIR}/shared/install-source.sh"
 
 # Prepare environment
+GITHUB_OWNER="$(get_source_owner "${PROGRAM_ID}")"
+GITHUB_REPO="$(get_source_repo "${PROGRAM_ID}")"
 get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "$1"
 init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
 
 # Download and install binaries
 if [ ! -d "${INSTALL_TARGET}" ]; then
-	BIN_ARCH_URI_AMD64_1="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${INSTALL_VERSION}/base-reth-node-v${INSTALL_VERSION}-x86_64-unknown-linux-gnu.tar.gz"
-	BIN_ARCH_URI_ARM64_1="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${INSTALL_VERSION}/base-reth-node-v${INSTALL_VERSION}-aarch64-unknown-linux-gnu.tar.gz"
+	BIN_ARCH_URI_AMD64_1="$(get_download_uri_amd64 "${SYSTEM_EXEC__1}" "${INSTALL_VERSION}")"
+	BIN_ARCH_URI_ARM64_1="$(get_download_uri_arm64 "${SYSTEM_EXEC__1}" "${INSTALL_VERSION}")"
 	BIN_ARCH_TMP_FILE_1="${TEMP_ROOT}/${PROGRAM_EXEC_1}.tar.gz"
-	BIN_ARCH_URI_AMD64_2="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${INSTALL_VERSION}/base-consensus-v${INSTALL_VERSION}-x86_64-unknown-linux-gnu.tar.gz"
-	BIN_ARCH_URI_ARM64_2="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${INSTALL_VERSION}/base-consensus-v${INSTALL_VERSION}-aarch64-unknown-linux-gnu.tar.gz"
+	BIN_ARCH_URI_AMD64_2="$(get_download_uri_amd64 "${SYSTEM_EXEC__2}" "${INSTALL_VERSION}")"
+	BIN_ARCH_URI_ARM64_2="$(get_download_uri_arm64 "${SYSTEM_EXEC__2}" "${INSTALL_VERSION}")"
 	BIN_ARCH_TMP_FILE_2="${TEMP_ROOT}/${PROGRAM_EXEC_2}.tar.gz"
-	BIN_ARCH_URI_AMD64_3="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${INSTALL_VERSION}/basectl-v${INSTALL_VERSION}-x86_64-unknown-linux-gnu.tar.gz"
-	BIN_ARCH_URI_ARM64_3="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/v${INSTALL_VERSION}/basectl-v${INSTALL_VERSION}-aarch64-unknown-linux-gnu.tar.gz"
+	BIN_ARCH_URI_AMD64_3="$(get_download_uri_amd64 "${SYSTEM_EXEC__3}" "${INSTALL_VERSION}")"
+	BIN_ARCH_URI_ARM64_3="$(get_download_uri_arm64 "${SYSTEM_EXEC__3}" "${INSTALL_VERSION}")"
 	BIN_ARCH_TMP_FILE_3="${TEMP_ROOT}/${PROGRAM_EXEC_3}.tar.gz"
 	download_uri_per_arch "${BIN_ARCH_URI_AMD64_1}" "${BIN_ARCH_URI_ARM64_1}" "${BIN_ARCH_TMP_FILE_1}"
 	download_uri_per_arch "${BIN_ARCH_URI_AMD64_2}" "${BIN_ARCH_URI_ARM64_2}" "${BIN_ARCH_TMP_FILE_2}"
@@ -73,3 +74,4 @@ symlink_item_overwrite "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
 symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC_1}" "${SYSTEM_BIN_ROOT}/${SYSTEM_EXEC__1}"
 symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC_2}" "${SYSTEM_BIN_ROOT}/${SYSTEM_EXEC__2}"
 symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC_3}" "${SYSTEM_BIN_ROOT}/${SYSTEM_EXEC__3}"
+finalize_install
