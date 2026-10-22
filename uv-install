@@ -22,26 +22,27 @@
 #
 ################################################################################
 
-set -ex
+set -e
 
 # Application info
-GITHUB_OWNER="astral-sh"
-GITHUB_REPO="uv"
 PROGRAM_ID="uv"
 PROGRAM_EXEC="uv"
 
 # Shared library
 CTXDIR="$(cd "$(dirname "$0")" && pwd)"
 . "${CTXDIR}/shared/install-common.sh"
+. "${CTXDIR}/shared/install-source.sh"
 
 # Prepare environment
+GITHUB_OWNER="$(get_source_owner "${PROGRAM_ID}")"
+GITHUB_REPO="$(get_source_repo "${PROGRAM_ID}")"
 get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "$1"
 init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
 
 # Download and install binaries
 if [ ! -d "${INSTALL_TARGET}" ]; then
-	BIN_ARCH_URI_AMD64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/${INSTALL_VERSION}/uv-x86_64-unknown-linux-gnu.tar.gz"
-	BIN_ARCH_URI_ARM64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/${INSTALL_VERSION}/uv-aarch64-unknown-linux-gnu.tar.gz"
+	BIN_ARCH_URI_AMD64="$(get_download_uri_amd64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
+	BIN_ARCH_URI_ARM64="$(get_download_uri_arm64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
 	BIN_ARCH_TMP_FILE="${TEMP_TARGET}.tar.gz"
 	download_uri_per_arch "${BIN_ARCH_URI_AMD64}" "${BIN_ARCH_URI_ARM64}" "${BIN_ARCH_TMP_FILE}"
 	create_dir "${TEMP_TARGET}"
@@ -63,5 +64,6 @@ create_dir "${INSTALL_ROOT}/python"
 make_all_access "${INSTALL_ROOT}/python"
 create_dir "${INSTALL_ROOT}/tool"
 make_all_access "${INSTALL_ROOT}/tool"
-append_text_idempotent "# uv" "${USER_PROFILE_RC}"
+append_text_idempotent "\n# uv" "${USER_PROFILE_RC}"
 append_text_idempotent ". \"${INSTALL_ROOT}/env.sh\"" "${USER_PROFILE_RC}"
+finalize_install
