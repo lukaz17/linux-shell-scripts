@@ -94,6 +94,7 @@ The principles below are for all languages. They use camelCase for demonstration
 - Keep a function to one job; parsing arguments, doing the work, and printing a report is three functions.
 - Pass data through arguments and exit status, not through a global a sibling function set earlier.
 <!-- Project-specific / Shell-Functions -->
+- Open every function body by binding its positional parameters: one argument per line, `_name="${1}"`, `_name="${2}"`,... before any other statement; use only those `_` names afterward — never reference `$1`, `${2}`,... directly inside a function.
 - Keep an installer script a linear top-level flow calling shared-library functions; wrap an application's logic in functions only where the script itself owns it.
 - Prefix a function-local variable with `_` (`_path`) so it visibly belongs to the function; pass state up via documented uppercase globals (`INSTALL_VERSION`, `INSTALL_TARGET`) — POSIX sh has no `local`.
 
@@ -128,6 +129,7 @@ The principles below are for all languages. They use camelCase for demonstration
 - An unchecked `cd` — a failed one leaves later commands running against the wrong files.
 - A script hundreds of lines long with no functions and no `main`, that nobody wants to touch.
 <!-- Project-specific / Shell-Smells -->
+- A positional parameter (`$1`, `${2}`) referenced anywhere inside a function body, instead of being bound to an `_`-prefixed name at the top.
 - A top-level script whose top lacks the banner comment or a `set` guard.
 - A script nowhere `$PATH`-invokable: a top-level script missing the executable bit.
 
