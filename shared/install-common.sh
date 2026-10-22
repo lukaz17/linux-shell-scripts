@@ -458,6 +458,11 @@ install_polkit_policy() {
 
 # ------------------------------------------------------------------------------
 # Append text into a file
+# - If the text matches a whole-line in the file, do nothing
+# - The text must be inserted as a whole-line
+# - The text can have an optional newline: real newline or a literal "\n" to create 1-line spacing from existing content
+# - The optional newline can only be placed at the beginning of the text, otherwise throw an error
+# - The file must end with a newline
 # ------------------------------------------------------------------------------
 append_text_idempotent() {
 	_text="$1"
@@ -466,24 +471,58 @@ append_text_idempotent() {
 		echo "append_text_idempotent: Invalid arguments"
 		return 1
 	fi
+	# Optional newline: a real newline or a literal "\n".
+	# Only the content after the newline is used for the idempotent check.
+	# The newline itself adds a blank line separator before the content.
+	_has_newline=0
 	case "${_text}" in
-		*'
+		'
 '*)
+			_content="${_text#?}"
+			_has_newline=1
+			;;
+		'\n'*)
+			_content="${_text#??}"
+			_has_newline=1
+			;;
+		*)
+			_content="${_text}"
+			;;
+	esac
+	case "${_content}" in
+		*'
+'* | *'\n'*)
 			echo "append_text_idempotent: Invalid arguments"
 			return 1
 			;;
 	esac
-
-	if ! grep -qFx "${_text}" "${_file}" 2>/dev/null; then
-		if [ -s "${_file}" ]; then
-			_last_line="$(tail -n 1 "${_file}")"
-			if [ -n "${_last_line}" ]; then
-				echo "> Updated Cfg:  ${_file}"
-				printf '\n' >> "${_file}"
-			fi
-		fi
-		printf '%s\n' "${_text}" >> "${_file}"
+	if [ -z "${_content}" ]; then
+		echo "append_text_idempotent: Invalid arguments"
+		return 1
 	fi
+
+	# Whole-line match on the content: nothing to do.
+	if grep -qFxe "${_content}" "${_file}" 2>/dev/null; then
+		return 0
+	fi
+
+	if [ -s "${_file}" ]; then
+		# Ensure the file ends with a newline before appending.
+		_last_char="$(tail -c 1 "${_file}" 2>/dev/null)"
+		if [ -n "${_last_char}" ]; then
+			printf '\n' >> "${_file}"
+		fi
+		# Insert the content
+		if [ "${_has_newline}" -eq 1 ]; then
+			printf '\n%s\n' "${_content}" >> "${_file}"
+		else
+			printf '%s\n' "${_content}" >> "${_file}"
+		fi
+	else
+		# Create new file with the content
+		printf '%s\n' "${_content}" >> "${_file}"
+	fi
+	echo "> Updated Cfg:  ${_file}"
 }
 
 # ------------------------------------------------------------------------------
