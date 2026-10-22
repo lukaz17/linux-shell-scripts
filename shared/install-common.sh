@@ -237,8 +237,15 @@ init_install_env() {
 		INSTALL_ROOT="${HOME}/.local/share/${_program_id}"
 		SYSTEM_BIN_ROOT="${HOME}/.local/bin"
 	fi
+	USER_HOME="${HOME}"
+	if [ "${_user_id}" -eq 0 ] && [ -n "${SUDO_USER}" ]; then
+		USER_HOME="$(getent passwd "${SUDO_USER}" 2>/dev/null | cut -d: -f6)"
+		if [ -z "${USER_HOME}" ]; then
+			eval "USER_HOME=\"~${SUDO_USER}\""
+		fi
+	fi
 	TEMP_ROOT="/tmp"
-	USER_PROFILE_RC="${HOME}/.profile"
+	USER_PROFILE_RC="${USER_HOME}/.profile"
 
 	if [ -n "${CLIINST_USR_LOCAL_SHARE}" ]; then
 		INSTALL_ROOT="${CLIINST_USR_LOCAL_SHARE}/${_program_id}"
