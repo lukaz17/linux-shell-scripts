@@ -16,7 +16,8 @@ set +x
 # Return the GitHub owner for a Program ID.
 # ------------------------------------------------------------------------------
 get_source_owner() {
-	case "$1" in
+	_program_id="${1}"
+	case "${_program_id}" in
 		7z) echo "ip7z" ;;
 		agave) echo "anza-xyz" ;;
 		bifrost-http) echo "maximhq" ;;
@@ -83,7 +84,8 @@ get_source_owner() {
 # Return the GitHub repository for a Program ID.
 # ------------------------------------------------------------------------------
 get_source_repo() {
-	case "$1" in
+	_program_id="${1}"
+	case "${_program_id}" in
 		7z) echo "7zip" ;;
 		agave) echo "agave" ;;
 		bifrost-http) echo "bifrost" ;;
@@ -150,124 +152,126 @@ get_source_repo() {
 # Return the download URI for AMD64 for a Program ID.
 # ------------------------------------------------------------------------------
 get_download_uri_amd64() {
-	case "$1" in
+	_program_id="${1}"
+	_version="${2}"
+	case "${_program_id}" in
 		7z)
-			_v_nodot=$(echo "$2" | sed 's/\.//g')
-			echo "https://github.com/ip7z/7zip/releases/download/${2}/7z${_v_nodot}-linux-x64.tar.xz" ;;
+			_v_nodot=$(echo "${_version}" | sed 's/\.//g')
+			echo "https://github.com/ip7z/7zip/releases/download/${_version}/7z${_v_nodot}-linux-x64.tar.xz" ;;
 		agave)
-			echo "https://github.com/anza-xyz/agave/archive/refs/tags/v${2}.tar.gz" ;;
+			echo "https://github.com/anza-xyz/agave/archive/refs/tags/v${_version}.tar.gz" ;;
 		bifrost-http)
-			echo "https://downloads.getmaxim.ai/bifrost/v${2}/linux/amd64/bifrost-http" ;;
+			echo "https://downloads.getmaxim.ai/bifrost/v${_version}/linux/amd64/bifrost-http" ;;
 		bsc-erigon)
-			echo "https://github.com/node-real/bsc-erigon/releases/download/v${2}/bsc-erigon_v${2}_linux_amd64v2.tar.gz" ;;
+			echo "https://github.com/node-real/bsc-erigon/releases/download/v${_version}/bsc-erigon_v${_version}_linux_amd64v2.tar.gz" ;;
 		bsc-geth)
-			echo "https://github.com/bnb-chain/bsc/releases/download/v${2}/geth_linux" ;;
+			echo "https://github.com/bnb-chain/bsc/releases/download/v${_version}/geth_linux" ;;
 		bsc-reth)
-			echo "https://github.com/bnb-chain/reth-bsc/archive/refs/tags/v${2}.tar.gz" ;;
+			echo "https://github.com/bnb-chain/reth-bsc/archive/refs/tags/v${_version}.tar.gz" ;;
 		btop)
-			echo "https://github.com/aristocratos/btop/releases/download/v${2}/btop-x86_64-unknown-linux-musl.tar.gz" ;;
+			echo "https://github.com/aristocratos/btop/releases/download/v${_version}/btop-x86_64-unknown-linux-musl.tar.gz" ;;
 		bun)
-			echo "https://github.com/oven-sh/bun/releases/download/bun-v${2}/bun-linux-x64.zip" ;;
+			echo "https://github.com/oven-sh/bun/releases/download/bun-v${_version}/bun-linux-x64.zip" ;;
 		composer)
-			echo "https://github.com/composer/composer/releases/download/${2}/composer.phar" ;;
+			echo "https://github.com/composer/composer/releases/download/${_version}/composer.phar" ;;
 		doublecmd)
-			echo "https://github.com/doublecmd/doublecmd/releases/download/v${2}/doublecmd-${2}.qt.x86_64.tar.xz" ;;
+			echo "https://github.com/doublecmd/doublecmd/releases/download/v${_version}/doublecmd-${_version}.qt.x86_64.tar.xz" ;;
 		erigon)
-			echo "https://github.com/erigontech/erigon/releases/download/v${2}/erigon_v${2}_linux_amd64v2.tar.gz" ;;
+			echo "https://github.com/erigontech/erigon/releases/download/v${_version}/erigon_v${_version}_linux_amd64v2.tar.gz" ;;
 		etcd)
-			echo "https://github.com/etcd-io/etcd/releases/download/v${2}/etcd-v${2}-linux-amd64.tar.gz" ;;
+			echo "https://github.com/etcd-io/etcd/releases/download/v${_version}/etcd-v${_version}-linux-amd64.tar.gz" ;;
 		firefox)
-			echo "https://ftp.mozilla.org/pub/firefox/releases/${2}/linux-x86_64/en-US/firefox-${2}.tar.xz" ;;
+			echo "https://ftp.mozilla.org/pub/firefox/releases/${_version}/linux-x86_64/en-US/firefox-${_version}.tar.xz" ;;
 		foundry)
-			echo "https://github.com/foundry-rs/foundry/releases/download/v${2}/foundry_v${2}_linux_amd64.tar.gz" ;;
+			echo "https://github.com/foundry-rs/foundry/releases/download/v${_version}/foundry_v${_version}_linux_amd64.tar.gz" ;;
 		geth)
-			echo "https://github.com/ethereum/go-ethereum/archive/refs/tags/v${2}.tar.gz" ;;
+			echo "https://github.com/ethereum/go-ethereum/archive/refs/tags/v${_version}.tar.gz" ;;
 		gitea)
-			echo "https://github.com/go-gitea/gitea/releases/download/v${2}/gitea-${2}-linux-amd64" ;;
+			echo "https://github.com/go-gitea/gitea/releases/download/v${_version}/gitea-${_version}-linux-amd64" ;;
 		go)
-			echo "https://go.dev/dl/go${2}.linux-amd64.tar.gz" ;;
+			echo "https://go.dev/dl/go${_version}.linux-amd64.tar.gz" ;;
 		golangci-lint)
-			echo "https://github.com/golangci/golangci-lint/releases/download/v${2}/golangci-lint-${2}-linux-amd64.tar.gz" ;;
+			echo "https://github.com/golangci/golangci-lint/releases/download/v${_version}/golangci-lint-${_version}-linux-amd64.tar.gz" ;;
 		grafana-alloy)
-			echo "https://github.com/grafana/alloy/releases/download/v${2}/alloy-linux-amd64.zip" ;;
+			echo "https://github.com/grafana/alloy/releases/download/v${_version}/alloy-linux-amd64.zip" ;;
 		grafana-loki)
-			echo "https://github.com/grafana/loki/releases/download/v${2}/loki-linux-amd64.zip" ;;
+			echo "https://github.com/grafana/loki/releases/download/v${_version}/loki-linux-amd64.zip" ;;
 		hugo)
-			echo "https://github.com/gohugoio/hugo/releases/download/v${2}/hugo_extended_withdeploy_${2}_linux-amd64.tar.gz" ;;
+			echo "https://github.com/gohugoio/hugo/releases/download/v${_version}/hugo_extended_withdeploy_${_version}_linux-amd64.tar.gz" ;;
 		jellyfin)
-			echo "https://repo.jellyfin.org/files/server/linux/stable/v${2}/amd64/jellyfin_${2}-amd64.tar.xz" ;;
+			echo "https://repo.jellyfin.org/files/server/linux/stable/v${_version}/amd64/jellyfin_${_version}-amd64.tar.xz" ;;
 		just)
-			echo "https://github.com/casey/just/releases/download/${2}/just-${2}-x86_64-unknown-linux-musl.tar.gz" ;;
+			echo "https://github.com/casey/just/releases/download/${_version}/just-${_version}-x86_64-unknown-linux-musl.tar.gz" ;;
 		localai)
-			echo "https://github.com/mudler/LocalAI/releases/download/v${2}/local-ai-v${2}-linux-amd64" ;;
+			echo "https://github.com/mudler/LocalAI/releases/download/v${_version}/local-ai-v${_version}-linux-amd64" ;;
 		ollama)
-			echo "https://github.com/ollama/ollama/releases/download/v${2}/ollama-linux-amd64.tar.zst" ;;
+			echo "https://github.com/ollama/ollama/releases/download/v${_version}/ollama-linux-amd64.tar.zst" ;;
 		op-reth)
-			echo "https://github.com/paradigmxyz/reth/releases/download/v${2}/op-reth-v${2}-x86_64-unknown-linux-gnu.tar.gz" ;;
+			echo "https://github.com/paradigmxyz/reth/releases/download/v${_version}/op-reth-v${_version}-x86_64-unknown-linux-gnu.tar.gz" ;;
 		op-node)
-			echo "https://github.com/ethereum-optimism/optimism/archive/refs/tags/v${2}.tar.gz" ;;
+			echo "https://github.com/ethereum-optimism/optimism/archive/refs/tags/v${_version}.tar.gz" ;;
 		opencode)
-			echo "https://github.com/anomalyco/opencode/releases/download/v${2}/opencode-linux-x64.tar.gz" ;;
+			echo "https://github.com/anomalyco/opencode/releases/download/v${_version}/opencode-linux-x64.tar.gz" ;;
 		opencode-desktop)
-			echo "https://github.com/anomalyco/opencode/releases/download/v${2}/opencode-desktop-linux-x86_64.AppImage" ;;
+			echo "https://github.com/anomalyco/opencode/releases/download/v${_version}/opencode-desktop-linux-x86_64.AppImage" ;;
 		pgweb)
-			echo "https://github.com/sosedoff/pgweb/releases/download/v${2}/pgweb_linux_amd64.zip" ;;
+			echo "https://github.com/sosedoff/pgweb/releases/download/v${_version}/pgweb_linux_amd64.zip" ;;
 		pnpm)
-			echo "https://github.com/pnpm/pnpm/releases/download/v${2}/pnpm-linux-x64" ;;
+			echo "https://github.com/pnpm/pnpm/releases/download/v${_version}/pnpm-linux-x64" ;;
 		prometheus)
-			echo "https://github.com/prometheus/prometheus/releases/download/v${2}/prometheus-${2}.linux-amd64.tar.gz" ;;
+			echo "https://github.com/prometheus/prometheus/releases/download/v${_version}/prometheus-${_version}.linux-amd64.tar.gz" ;;
 		prysm-beacon)
-			echo "https://github.com/OffchainLabs/prysm/releases/download/v${2}/beacon-chain-v${2}-modern-linux-amd64" ;;
+			echo "https://github.com/OffchainLabs/prysm/releases/download/v${_version}/beacon-chain-v${_version}-modern-linux-amd64" ;;
 		prysm-stats)
-			echo "https://github.com/OffchainLabs/prysm/releases/download/v${2}/client-stats-v${2}-linux-amd64" ;;
+			echo "https://github.com/OffchainLabs/prysm/releases/download/v${_version}/client-stats-v${_version}-linux-amd64" ;;
 		prysmctl)
-			echo "https://github.com/OffchainLabs/prysm/releases/download/v${2}/prysmctl-v${2}-linux-amd64" ;;
+			echo "https://github.com/OffchainLabs/prysm/releases/download/v${_version}/prysmctl-v${_version}-linux-amd64" ;;
 		qdrant)
-			echo "https://github.com/qdrant/qdrant/releases/download/v${2}/qdrant-x86_64-unknown-linux-musl.tar.gz" ;;
+			echo "https://github.com/qdrant/qdrant/releases/download/v${_version}/qdrant-x86_64-unknown-linux-musl.tar.gz" ;;
 		reth)
-			echo "https://github.com/paradigmxyz/reth/releases/download/v${2}/reth-v${2}-x86_64-unknown-linux-gnu.tar.gz" ;;
+			echo "https://github.com/paradigmxyz/reth/releases/download/v${_version}/reth-v${_version}-x86_64-unknown-linux-gnu.tar.gz" ;;
 		sass)
-			echo "https://github.com/sass/dart-sass/releases/download/${2}/dart-sass-${2}-linux-x64.tar.gz" ;;
+			echo "https://github.com/sass/dart-sass/releases/download/${_version}/dart-sass-${_version}-linux-x64.tar.gz" ;;
 		snitch)
-			echo "https://github.com/karol-broda/snitch/releases/download/v${2}/snitch_${2}_linux_amd64.tar.gz" ;;
+			echo "https://github.com/karol-broda/snitch/releases/download/v${_version}/snitch_${_version}_linux_amd64.tar.gz" ;;
 		solana)
-			echo "https://github.com/solana-labs/solana/releases/download/v${2}/solana-release-x86_64-unknown-linux-gnu.tar.bz2" ;;
+			echo "https://github.com/solana-labs/solana/releases/download/v${_version}/solana-release-x86_64-unknown-linux-gnu.tar.bz2" ;;
 		stashapp)
-			echo "https://github.com/stashapp/stash/releases/download/v${2}/stash-linux" ;;
+			echo "https://github.com/stashapp/stash/releases/download/v${_version}/stash-linux" ;;
 		stashbox)
-			echo "https://github.com/stashapp/stash-box/releases/download/v${2}/stash-box-linux" ;;
+			echo "https://github.com/stashapp/stash-box/releases/download/v${_version}/stash-box-linux" ;;
 		sui)
-			echo "https://github.com/MystenLabs/sui/releases/download/mainnet-v${2}/sui-mainnet-v${2}-ubuntu-x86_64.tgz" ;;
+			echo "https://github.com/MystenLabs/sui/releases/download/mainnet-v${_version}/sui-mainnet-v${_version}-ubuntu-x86_64.tgz" ;;
 		syncthing)
-			echo "https://github.com/syncthing/syncthing/releases/download/v${2}/syncthing-linux-amd64-v${2}.tar.gz" ;;
+			echo "https://github.com/syncthing/syncthing/releases/download/v${_version}/syncthing-linux-amd64-v${_version}.tar.gz" ;;
 		syncthrelay)
-			echo "https://github.com/syncthing/relaysrv/releases/download/v${2}/strelaysrv-linux-amd64-v${2}.tar.gz" ;;
+			echo "https://github.com/syncthing/relaysrv/releases/download/v${_version}/strelaysrv-linux-amd64-v${_version}.tar.gz" ;;
 		syncthdiscv)
-			echo "https://github.com/syncthing/discosrv/releases/download/v${2}/stdiscosrv-linux-amd64-v${2}.tar.gz" ;;
+			echo "https://github.com/syncthing/discosrv/releases/download/v${_version}/stdiscosrv-linux-amd64-v${_version}.tar.gz" ;;
 		tabby)
-			echo "https://github.com/Eugeny/tabby/releases/download/v${2}/tabby-${2}-linux-x64.tar.gz" ;;
+			echo "https://github.com/Eugeny/tabby/releases/download/v${_version}/tabby-${_version}-linux-x64.tar.gz" ;;
 		telegram)
-			echo "https://github.com/telegramdesktop/tdesktop/releases/download/v${2}/tsetup.${2}.tar.xz" ;;
+			echo "https://github.com/telegramdesktop/tdesktop/releases/download/v${_version}/tsetup.${_version}.tar.xz" ;;
 		thunderbird)
-			echo "https://ftp.mozilla.org/pub/thunderbird/releases/${2}/linux-x86_64/en-US/thunderbird-${2}.tar.xz" ;;
+			echo "https://ftp.mozilla.org/pub/thunderbird/releases/${_version}/linux-x86_64/en-US/thunderbird-${_version}.tar.xz" ;;
 		tufw)
-			echo "https://github.com/peltho/tufw/releases/download/v${2}/tufw_${2}_linux_amd64.tar.gz" ;;
+			echo "https://github.com/peltho/tufw/releases/download/v${_version}/tufw_${_version}_linux_amd64.tar.gz" ;;
 		uv)
-			echo "https://github.com/astral-sh/uv/releases/download/${2}/uv-x86_64-unknown-linux-gnu.tar.gz" ;;
+			echo "https://github.com/astral-sh/uv/releases/download/${_version}/uv-x86_64-unknown-linux-gnu.tar.gz" ;;
 		vic-geth)
-			echo "https://github.com/BuildOnViction/vic-geth/releases/download/v${2}/vic-geth-v${2}-linux-amd64.tar.zst" ;;
+			echo "https://github.com/BuildOnViction/vic-geth/releases/download/v${_version}/vic-geth-v${_version}-linux-amd64.tar.zst" ;;
 		viction)
-			echo "https://github.com/BuildOnViction/victionchain/releases/download/v${2}/tomo-linux-amd64" ;;
+			echo "https://github.com/BuildOnViction/victionchain/releases/download/v${_version}/tomo-linux-amd64" ;;
 		vscode)
-			echo "https://update.code.visualstudio.com/${2}/linux-x64/stable" ;;
+			echo "https://update.code.visualstudio.com/${_version}/linux-x64/stable" ;;
 		waterfox)
-			echo "https://cdn.waterfox.com/waterfox/releases/${2}/Linux_x86_64/waterfox-${2}.tar.bz2" ;;
+			echo "https://cdn.waterfox.com/waterfox/releases/${_version}/Linux_x86_64/waterfox-${_version}.tar.bz2" ;;
 		yellowstone-grpc)
 			echo "" ;;
 		ytdlp)
-			echo "https://github.com/yt-dlp/yt-dlp/releases/download/${2}/yt-dlp_linux" ;;
+			echo "https://github.com/yt-dlp/yt-dlp/releases/download/${_version}/yt-dlp_linux" ;;
 		zenith)
-			echo "https://github.com/bvaisvil/zenith/releases/download/${2}/zenith-Linux-musl-x86_64.tar.gz" ;;
+			echo "https://github.com/bvaisvil/zenith/releases/download/${_version}/zenith-Linux-musl-x86_64.tar.gz" ;;
 		*) echo "" ;;
 	esac
 }
@@ -276,124 +280,126 @@ get_download_uri_amd64() {
 # Return the download URI for ARM64 for a Program ID.
 # ------------------------------------------------------------------------------
 get_download_uri_arm64() {
-	case "$1" in
+	_program_id="${1}"
+	_version="${2}"
+	case "${_program_id}" in
 		7z)
-			_v_nodot=$(echo "$2" | sed 's/\.//g')
-			echo "https://github.com/ip7z/7zip/releases/download/${2}/7z${_v_nodot}-linux-arm64.tar.xz" ;;
+			_v_nodot=$(echo "${_version}" | sed 's/\.//g')
+			echo "https://github.com/ip7z/7zip/releases/download/${_version}/7z${_v_nodot}-linux-arm64.tar.xz" ;;
 		agave)
-			echo "https://github.com/anza-xyz/agave/archive/refs/tags/v${2}.tar.gz" ;;
+			echo "https://github.com/anza-xyz/agave/archive/refs/tags/v${_version}.tar.gz" ;;
 		bifrost-http)
-			echo "https://downloads.getmaxim.ai/bifrost/v${2}/linux/arm64/bifrost-http" ;;
+			echo "https://downloads.getmaxim.ai/bifrost/v${_version}/linux/arm64/bifrost-http" ;;
 		bsc-erigon)
-			echo "https://github.com/node-real/bsc-erigon/releases/download/v${2}/bsc-erigon_v${2}_linux_arm64.tar.gz" ;;
+			echo "https://github.com/node-real/bsc-erigon/releases/download/v${_version}/bsc-erigon_v${_version}_linux_arm64.tar.gz" ;;
 		bsc-geth)
-			echo "https://github.com/bnb-chain/bsc/releases/download/v${2}/geth-linux-arm64" ;;
+			echo "https://github.com/bnb-chain/bsc/releases/download/v${_version}/geth-linux-arm64" ;;
 		bsc-reth)
-			echo "https://github.com/bnb-chain/reth-bsc/archive/refs/tags/v${2}.tar.gz" ;;
+			echo "https://github.com/bnb-chain/reth-bsc/archive/refs/tags/v${_version}.tar.gz" ;;
 		btop)
-			echo "https://github.com/aristocratos/btop/releases/download/v${2}/btop-aarch64-unknown-linux-musl.tar.gz" ;;
+			echo "https://github.com/aristocratos/btop/releases/download/v${_version}/btop-aarch64-unknown-linux-musl.tar.gz" ;;
 		bun)
-			echo "https://github.com/oven-sh/bun/releases/download/bun-v${2}/bun-linux-aarch64.zip" ;;
+			echo "https://github.com/oven-sh/bun/releases/download/bun-v${_version}/bun-linux-aarch64.zip" ;;
 		composer)
-			echo "https://github.com/composer/composer/releases/download/${2}/composer.phar" ;;
+			echo "https://github.com/composer/composer/releases/download/${_version}/composer.phar" ;;
 		doublecmd)
-			echo "https://github.com/doublecmd/doublecmd/releases/download/v${2}/doublecmd-${2}.qt.aarch64.tar.xz" ;;
+			echo "https://github.com/doublecmd/doublecmd/releases/download/v${_version}/doublecmd-${_version}.qt.aarch64.tar.xz" ;;
 		erigon)
-			echo "https://github.com/erigontech/erigon/releases/download/v${2}/erigon_v${2}_linux_arm64.tar.gz" ;;
+			echo "https://github.com/erigontech/erigon/releases/download/v${_version}/erigon_v${_version}_linux_arm64.tar.gz" ;;
 		etcd)
-			echo "https://github.com/etcd-io/etcd/releases/download/v${2}/etcd-v${2}-linux-arm64.tar.gz" ;;
+			echo "https://github.com/etcd-io/etcd/releases/download/v${_version}/etcd-v${_version}-linux-arm64.tar.gz" ;;
 		firefox)
-			echo "https://ftp.mozilla.org/pub/firefox/releases/${2}/linux-aarch64/en-US/firefox-${2}.tar.xz" ;;
+			echo "https://ftp.mozilla.org/pub/firefox/releases/${_version}/linux-aarch64/en-US/firefox-${_version}.tar.xz" ;;
 		foundry)
-			echo "https://github.com/foundry-rs/foundry/releases/download/v${2}/foundry_v${2}_linux_arm64.tar.gz" ;;
+			echo "https://github.com/foundry-rs/foundry/releases/download/v${_version}/foundry_v${_version}_linux_arm64.tar.gz" ;;
 		geth)
-			echo "https://github.com/ethereum/go-ethereum/archive/refs/tags/v${2}.tar.gz" ;;
+			echo "https://github.com/ethereum/go-ethereum/archive/refs/tags/v${_version}.tar.gz" ;;
 		gitea)
-			echo "https://github.com/go-gitea/gitea/releases/download/v${2}/gitea-${2}-linux-arm64" ;;
+			echo "https://github.com/go-gitea/gitea/releases/download/v${_version}/gitea-${_version}-linux-arm64" ;;
 		go)
-			echo "https://go.dev/dl/go${2}.linux-arm64.tar.gz" ;;
+			echo "https://go.dev/dl/go${_version}.linux-arm64.tar.gz" ;;
 		golangci-lint)
-			echo "https://github.com/golangci/golangci-lint/releases/download/v${2}/golangci-lint-${2}-linux-arm64.tar.gz" ;;
+			echo "https://github.com/golangci/golangci-lint/releases/download/v${_version}/golangci-lint-${_version}-linux-arm64.tar.gz" ;;
 		hugo)
-			echo "https://github.com/gohugoio/hugo/releases/download/v${2}/hugo_extended_withdeploy_${2}_linux-arm64.tar.gz" ;;
+			echo "https://github.com/gohugoio/hugo/releases/download/v${_version}/hugo_extended_withdeploy_${_version}_linux-arm64.tar.gz" ;;
 		grafana-alloy)
-			echo "https://github.com/grafana/alloy/releases/download/v${2}/alloy-linux-arm64.zip" ;;
+			echo "https://github.com/grafana/alloy/releases/download/v${_version}/alloy-linux-arm64.zip" ;;
 		grafana-loki)
-			echo "https://github.com/grafana/loki/releases/download/v${2}/loki-linux-arm64.zip" ;;
+			echo "https://github.com/grafana/loki/releases/download/v${_version}/loki-linux-arm64.zip" ;;
 		jellyfin)
-			echo "https://repo.jellyfin.org/files/server/linux/stable/v${2}/arm64/jellyfin_${2}-arm64.tar.xz" ;;
+			echo "https://repo.jellyfin.org/files/server/linux/stable/v${_version}/arm64/jellyfin_${_version}-arm64.tar.xz" ;;
 		just)
-			echo "https://github.com/casey/just/releases/download/${2}/just-${2}-aarch64-unknown-linux-musl.tar.gz" ;;
+			echo "https://github.com/casey/just/releases/download/${_version}/just-${_version}-aarch64-unknown-linux-musl.tar.gz" ;;
 		localai)
-			echo "https://github.com/mudler/LocalAI/releases/download/v${2}/local-ai-v${2}-linux-arm64" ;;
+			echo "https://github.com/mudler/LocalAI/releases/download/v${_version}/local-ai-v${_version}-linux-arm64" ;;
 		ollama)
-			echo "https://github.com/ollama/ollama/releases/download/v${2}/ollama-linux-arm64.tar.zst" ;;
+			echo "https://github.com/ollama/ollama/releases/download/v${_version}/ollama-linux-arm64.tar.zst" ;;
 		op-reth)
-			echo "https://github.com/paradigmxyz/reth/releases/download/v${2}/op-reth-v${2}-aarch64-unknown-linux-gnu.tar.gz" ;;
+			echo "https://github.com/paradigmxyz/reth/releases/download/v${_version}/op-reth-v${_version}-aarch64-unknown-linux-gnu.tar.gz" ;;
 		op-node)
-			echo "https://github.com/ethereum-optimism/optimism/archive/refs/tags/v${2}.tar.gz" ;;
+			echo "https://github.com/ethereum-optimism/optimism/archive/refs/tags/v${_version}.tar.gz" ;;
 		opencode)
-			echo "https://github.com/anomalyco/opencode/releases/download/v${2}/opencode-linux-arm64.tar.gz" ;;
+			echo "https://github.com/anomalyco/opencode/releases/download/v${_version}/opencode-linux-arm64.tar.gz" ;;
 		opencode-desktop)
-			echo "https://github.com/anomalyco/opencode/releases/download/v${2}/opencode-desktop-linux-arm64.AppImage" ;;
+			echo "https://github.com/anomalyco/opencode/releases/download/v${_version}/opencode-desktop-linux-arm64.AppImage" ;;
 		pgweb)
-			echo "https://github.com/sosedoff/pgweb/releases/download/v${2}/pgweb_linux_arm64.zip" ;;
+			echo "https://github.com/sosedoff/pgweb/releases/download/v${_version}/pgweb_linux_arm64.zip" ;;
 		pnpm)
-			echo "https://github.com/pnpm/pnpm/releases/download/v${2}/pnpm-linux-arm64" ;;
+			echo "https://github.com/pnpm/pnpm/releases/download/v${_version}/pnpm-linux-arm64" ;;
 		prometheus)
-			echo "https://github.com/prometheus/prometheus/releases/download/v${2}/prometheus-${2}.linux-arm64.tar.gz" ;;
+			echo "https://github.com/prometheus/prometheus/releases/download/v${_version}/prometheus-${_version}.linux-arm64.tar.gz" ;;
 		prysm-beacon)
-			echo "https://github.com/OffchainLabs/prysm/releases/download/v${2}/beacon-chain-v${2}-linux-arm64" ;;
+			echo "https://github.com/OffchainLabs/prysm/releases/download/v${_version}/beacon-chain-v${_version}-linux-arm64" ;;
 		prysm-stats)
-			echo "https://github.com/OffchainLabs/prysm/releases/download/v${2}/client-stats-v${2}-linux-arm64" ;;
+			echo "https://github.com/OffchainLabs/prysm/releases/download/v${_version}/client-stats-v${_version}-linux-arm64" ;;
 		prysmctl)
-			echo "https://github.com/OffchainLabs/prysm/releases/download/v${2}/prysmctl-v${2}-linux-arm64" ;;
+			echo "https://github.com/OffchainLabs/prysm/releases/download/v${_version}/prysmctl-v${_version}-linux-arm64" ;;
 		qdrant)
-			echo "https://github.com/qdrant/qdrant/releases/download/v${2}/qdrant-aarch64-unknown-linux-musl.tar.gz" ;;
+			echo "https://github.com/qdrant/qdrant/releases/download/v${_version}/qdrant-aarch64-unknown-linux-musl.tar.gz" ;;
 		reth)
-			echo "https://github.com/paradigmxyz/reth/releases/download/v${2}/reth-v${2}-aarch64-unknown-linux-gnu.tar.gz" ;;
+			echo "https://github.com/paradigmxyz/reth/releases/download/v${_version}/reth-v${_version}-aarch64-unknown-linux-gnu.tar.gz" ;;
 		sass)
-			echo "https://github.com/sass/dart-sass/releases/download/${2}/dart-sass-${2}-linux-arm64.tar.gz" ;;
+			echo "https://github.com/sass/dart-sass/releases/download/${_version}/dart-sass-${_version}-linux-arm64.tar.gz" ;;
 		snitch)
-			echo "https://github.com/karol-broda/snitch/releases/download/v${2}/snitch_${2}_linux_arm64.tar.gz" ;;
+			echo "https://github.com/karol-broda/snitch/releases/download/v${_version}/snitch_${_version}_linux_arm64.tar.gz" ;;
 		solana)
 			echo "" ;;
 		stashapp)
-			echo "https://github.com/stashapp/stash/releases/download/v${2}/stash-linux-arm64v8" ;;
+			echo "https://github.com/stashapp/stash/releases/download/v${_version}/stash-linux-arm64v8" ;;
 		stashbox)
-			echo "https://github.com/stashapp/stash-box/releases/download/v${2}/stash-box-linux" ;;
+			echo "https://github.com/stashapp/stash-box/releases/download/v${_version}/stash-box-linux" ;;
 		sui)
-			echo "https://github.com/MystenLabs/sui/releases/download/mainnet-v${2}/sui-mainnet-v${2}-ubuntu-aarch64.tgz" ;;
+			echo "https://github.com/MystenLabs/sui/releases/download/mainnet-v${_version}/sui-mainnet-v${_version}-ubuntu-aarch64.tgz" ;;
 		syncthing)
-			echo "https://github.com/syncthing/syncthing/releases/download/v${2}/syncthing-linux-arm64-v${2}.tar.gz" ;;
+			echo "https://github.com/syncthing/syncthing/releases/download/v${_version}/syncthing-linux-arm64-v${_version}.tar.gz" ;;
 		syncthrelay)
-			echo "https://github.com/syncthing/relaysrv/releases/download/v${2}/strelaysrv-linux-arm64-v${2}.tar.gz" ;;
+			echo "https://github.com/syncthing/relaysrv/releases/download/v${_version}/strelaysrv-linux-arm64-v${_version}.tar.gz" ;;
 		syncthdiscv)
-			echo "https://github.com/syncthing/discosrv/releases/download/v${2}/stdiscosrv-linux-arm64-v${2}.tar.gz" ;;
+			echo "https://github.com/syncthing/discosrv/releases/download/v${_version}/stdiscosrv-linux-arm64-v${_version}.tar.gz" ;;
 		tabby)
-			echo "https://github.com/Eugeny/tabby/releases/download/v${2}/tabby-${2}-linux-arm64.tar.gz" ;;
+			echo "https://github.com/Eugeny/tabby/releases/download/v${_version}/tabby-${_version}-linux-arm64.tar.gz" ;;
 		telegram)
-			echo "https://github.com/telegramdesktop/tdesktop/releases/download/v${2}/tsetup.${2}.tar.xz" ;;
+			echo "https://github.com/telegramdesktop/tdesktop/releases/download/v${_version}/tsetup.${_version}.tar.xz" ;;
 		thunderbird)
 			echo "" ;;
 		tufw)
-			echo "https://github.com/peltho/tufw/releases/download/v${2}/tufw_${2}_linux_amd64.tar.gz" ;;
+			echo "https://github.com/peltho/tufw/releases/download/v${_version}/tufw_${_version}_linux_amd64.tar.gz" ;;
 		uv)
-			echo "https://github.com/astral-sh/uv/releases/download/${2}/uv-aarch64-unknown-linux-gnu.tar.gz" ;;
+			echo "https://github.com/astral-sh/uv/releases/download/${_version}/uv-aarch64-unknown-linux-gnu.tar.gz" ;;
 		vic-geth)
-			echo "https://github.com/BuildOnViction/vic-geth/releases/download/v${2}/vic-geth-v${2}-linux-arm64.tar.zst" ;;
+			echo "https://github.com/BuildOnViction/vic-geth/releases/download/v${_version}/vic-geth-v${_version}-linux-arm64.tar.zst" ;;
 		viction)
-			echo "https://github.com/BuildOnViction/victionchain/releases/download/v${2}/tomo-linux-arm64" ;;
+			echo "https://github.com/BuildOnViction/victionchain/releases/download/v${_version}/tomo-linux-arm64" ;;
 		vscode)
-			echo "https://update.code.visualstudio.com/${2}/linux-arm64/stable" ;;
+			echo "https://update.code.visualstudio.com/${_version}/linux-arm64/stable" ;;
 		waterfox)
-			echo "https://cdn.waterfox.com/waterfox/releases/${2}/Linux_arm64/waterfox-${2}.tar.bz2" ;;
+			echo "https://cdn.waterfox.com/waterfox/releases/${_version}/Linux_arm64/waterfox-${_version}.tar.bz2" ;;
 		yellowstone-grpc)
 			echo "" ;;
 		ytdlp)
-			echo "https://github.com/yt-dlp/yt-dlp/releases/download/${2}/yt-dlp_linux_aarch64" ;;
+			echo "https://github.com/yt-dlp/yt-dlp/releases/download/${_version}/yt-dlp_linux_aarch64" ;;
 		zenith)
-			echo "https://github.com/bvaisvil/zenith/releases/download/${2}/zenith-Linux-musl-arm64.tar.gz" ;;
+			echo "https://github.com/bvaisvil/zenith/releases/download/${_version}/zenith-Linux-musl-arm64.tar.gz" ;;
 		*) echo "" ;;
 	esac
 }

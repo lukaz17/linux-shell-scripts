@@ -266,7 +266,9 @@ init_install_env() {
 # Extended version of init_install_env to support desktop environment
 # ------------------------------------------------------------------------------
 init_install_env_desktop() {
-	init_install_env "${1}" "${2}" || return 1
+	_program_id="${1}"
+	_install_version="${2}"
+	init_install_env "${_program_id}" "${_install_version}" || return 1
 
 	_user_id="$(id -u)"
 	if [ "${_user_id}" -eq 0 ]; then
@@ -283,9 +285,9 @@ init_install_env_desktop() {
 # Download different file based on current system architecture
 # ------------------------------------------------------------------------------
 download_uri_per_arch() {
-	_amd64_url="$1"
-	_arm64_url="$2"
-	_destination="$3"
+	_amd64_url="${1}"
+	_arm64_url="${2}"
+	_destination="${3}"
 	if [ -z "${_amd64_url}" ] && [ -z "${_arm64_url}" ]; then
 		echo "download_uri_per_arch: Invalid arguments"
 		return 1
@@ -320,9 +322,9 @@ download_uri_per_arch() {
 # Move file/folder based on current system architecture
 # ------------------------------------------------------------------------------
 move_item_per_arch() {
-	_amd64_path="$1"
-	_arm64_path="$2"
-	_destination="$3"
+	_amd64_path="${1}"
+	_arm64_path="${2}"
+	_destination="${3}"
 	if [ -z "${_amd64_path}" ] && [ -z "${_arm64_path}" ]; then
 		echo "move_item_per_arch: Invalid arguments"
 		return 1
@@ -355,9 +357,9 @@ move_item_per_arch() {
 # Extract archive
 # ------------------------------------------------------------------------------
 extract_archive() {
-	_archive_file="$1"
-	_archive_type="$2"
-	_destination_dir="$3"
+	_archive_file="${1}"
+	_archive_type="${2}"
+	_destination_dir="${3}"
 	if [ -z "${_archive_file}" ] || [ -z "${_archive_type}" ] || [ -z "${_destination_dir}" ]; then
 		echo "extract_archive: Invalid arguments"
 		return 1
@@ -409,10 +411,10 @@ refresh_desktop_icon() {
 # Install desktop manifest and icons
 # ------------------------------------------------------------------------------
 install_desktop() {
-	_name="$1"
-	_context_root="$2"
-	_desktop_root="$3"
-	_icon_root="$4"
+	_name="${1}"
+	_context_root="${2}"
+	_desktop_root="${3}"
+	_icon_root="${4}"
 	if [ -z "${_name}" ] || [ -z "${_context_root}" ] || [ -z "${_desktop_root}" ] || [ -z "${_icon_root}" ]; then
 		echo "install_desktop: Invalid arguments"
 		return 1
@@ -445,8 +447,8 @@ install_desktop() {
 # Install polkit policy (requires root)
 # ------------------------------------------------------------------------------
 install_polkit_policy() {
-	_name="$1"
-	_context_root="$2"
+	_name="${1}"
+	_context_root="${2}"
 	if [ -z "${_name}" ] || [ -z "${_context_root}" ]; then
 		echo "install_polkit_policy: Invalid arguments"
 		return 1
@@ -472,8 +474,8 @@ install_polkit_policy() {
 # - The file must end with a newline
 # ------------------------------------------------------------------------------
 append_text_idempotent() {
-	_text="$1"
-	_file="$2"
+	_text="${1}"
+	_file="${2}"
 	if [ -z "${_text}" ] || [ -z "${_file}" ]; then
 		echo "append_text_idempotent: Invalid arguments"
 		return 1
