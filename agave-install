@@ -9,7 +9,7 @@
 #
 #  Homepage: https://www.anza.xyz/
 #
-#  Presquites:
+#  Prerequisites:
 #  - Rust
 #  - clang protobuf-compiler
 #  - libclang-dev libprotobuf-dev libssl-dev libudev-dev zlib1g-dev
@@ -27,30 +27,31 @@
 #
 ################################################################################
 
-set -ex
+set -e
 
 # Application info
-GITHUB_OWNER="anza-xyz"
-GITHUB_REPO="agave"
 PROGRAM_ID="agave"
 PROGRAM_EXEC="solana"
 
 # Shared library
-CTXDIR="$(cd "$(dirname "$0")" && pwd)"
+CTXDIR="$(cd "$(dirname "${0}")" && pwd)"
 . "${CTXDIR}/shared/install-common.sh"
+. "${CTXDIR}/shared/install-source.sh"
 
 # Prepare environment
-get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "$1"
+GITHUB_OWNER="$(get_source_owner "${PROGRAM_ID}")"
+GITHUB_REPO="$(get_source_repo "${PROGRAM_ID}")"
+get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "${1}"
 init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
 INSTALL_ROOT="${HOME}/.local/share/solana"
 INSTALL_TARGET="${INSTALL_ROOT}/install/releases/${INSTALL_VERSION}"
 ACTIVE_TARGET="${INSTALL_ROOT}/install/active_release"
-mkdir -p "${INSTALL_ROOT}/install/releases"
+create_dir "${INSTALL_ROOT}/install/releases"
 
 # Download and install binaries
 if [ ! -d "${INSTALL_TARGET}" ]; then
-	SRC_ARCH_URI_AMD64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/archive/refs/tags/v${INSTALL_VERSION}.tar.gz"
-	SRC_ARCH_URI_ARM64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/archive/refs/tags/v${INSTALL_VERSION}.tar.gz"
+	SRC_ARCH_URI_AMD64="$(get_download_uri_amd64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
+	SRC_ARCH_URI_ARM64="$(get_download_uri_arm64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
 	SRC_ARCH_TMP_FILE="${TEMP_TARGET}.tar.gz"
 	download_uri_per_arch "${SRC_ARCH_URI_AMD64}" "${SRC_ARCH_URI_ARM64}" "${SRC_ARCH_TMP_FILE}"
 	create_dir "${TEMP_TARGET}"
@@ -68,5 +69,6 @@ symlink_item_overwrite "${INSTALL_TARGET}/solana-release" "${ACTIVE_TARGET}"
 cat << EOF > "${INSTALL_ROOT}/env.sh"
 export PATH="\$HOME/.local/share/solana/install/active_release/bin:\$PATH"
 EOF
-append_text_idempotent "# solana" "${USER_PROFILE_RC}"
+append_text_idempotent "\n# solana" "${USER_PROFILE_RC}"
 append_text_idempotent ". \"${INSTALL_ROOT}/env.sh\"" "${USER_PROFILE_RC}"
+finalize_install
