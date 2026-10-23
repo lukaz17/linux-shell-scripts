@@ -9,7 +9,7 @@
 #
 #  Homepage: https://triton.one/products/streaming
 #
-#  Presquites:
+#  Prerequisites:
 #  - Agave
 #
 #  Usage:
@@ -24,7 +24,7 @@
 #
 ################################################################################
 
-set -ex
+set -e
 
 # Application info
 GITHUB_OWNER="rpcpool"
@@ -36,12 +36,13 @@ PROGRAM_EXEC_2="yellowstone-grpc-geyser-release-x86_64-unknown-linux-gnu.yml"
 SYSTEM_EXEC__2="version.yml"
 
 # Shared library
-CTXDIR="$(cd "$(dirname "$0")" && pwd)"
+CTXDIR="$(cd "$(dirname "${0}")" && pwd)"
 . "${CTXDIR}/shared/install-common.sh"
+. "${CTXDIR}/shared/install-source.sh"
 
 # Prepare environment
-SOLANA_VERSION=$(normalize_install_version "$2" && echo "${INSTALL_VERSION}")
-YGRPC_VERSION=$(normalize_install_version "$1" && echo "${INSTALL_VERSION}")
+SOLANA_VERSION=$(normalize_install_version "${2}" && echo "${INSTALL_VERSION}")
+YGRPC_VERSION=$(normalize_install_version "${1}" && echo "${INSTALL_VERSION}")
 INSTALL_VERSION="${YGRPC_VERSION}+solana.${SOLANA_VERSION}"
 init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
 
@@ -65,5 +66,6 @@ if [ ! -d "${INSTALL_TARGET}" ]; then
 fi
 
 # Finalize install
-ACTIVE_TARGET="/root/.local/share/solana/install/releases/${SOLANA_VERSION}/solana-release/ys-grpc"
+ACTIVE_TARGET="${USER_HOME}/.local/share/solana/install/releases/${SOLANA_VERSION}/solana-release/ys-grpc"
 symlink_item_overwrite "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
+finalize_install
