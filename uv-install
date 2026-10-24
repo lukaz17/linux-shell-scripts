@@ -29,14 +29,14 @@ PROGRAM_ID="uv"
 PROGRAM_EXEC="uv"
 
 # Shared library
-CTXDIR="$(cd "$(dirname "$0")" && pwd)"
+CTXDIR="$(cd "$(dirname "${0}")" && pwd)"
 . "${CTXDIR}/shared/install-common.sh"
 . "${CTXDIR}/shared/install-source.sh"
 
 # Prepare environment
 GITHUB_OWNER="$(get_source_owner "${PROGRAM_ID}")"
 GITHUB_REPO="$(get_source_repo "${PROGRAM_ID}")"
-get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "$1"
+get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "${1}"
 init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
 
 # Download and install binaries
