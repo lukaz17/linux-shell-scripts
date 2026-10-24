@@ -187,6 +187,28 @@ normalize_install_version() {
 }
 
 # ------------------------------------------------------------------------------
+# Extract the major version from a version string.
+# ------------------------------------------------------------------------------
+get_version_major() {
+	_version="${1}"
+	if [ -z "${_version}" ]; then
+		echo "get_version_major: Invalid arguments"
+		return 1
+	fi
+
+	_version="${_version#v}"
+	_version="${_version%%-*}"
+	_major="${_version%%.*}"
+	case "${_major}" in
+		'' | *[!0-9]*)
+			echo "get_version_major: Invalid version: ${1}"
+			return 1
+			;;
+	esac
+	echo "${_major}"
+}
+
+# ------------------------------------------------------------------------------
 # Get latest version from GitHub
 # ------------------------------------------------------------------------------
 get_install_version_from_github() {
