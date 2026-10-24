@@ -43,11 +43,21 @@ init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
 if [ ! -d "${INSTALL_TARGET}" ]; then
 	BIN_URI_AMD64="$(get_download_uri_amd64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
 	BIN_URI_ARM64="$(get_download_uri_arm64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
-	BIN_TMP_FILE="${TEMP_TARGET}.bin"
-	download_uri_per_arch "${BIN_URI_AMD64}" "${BIN_URI_ARM64}" "${BIN_TMP_FILE}"
-	create_dir "${TEMP_TARGET}"
-	make_executable "${BIN_TMP_FILE}"
-	move_item "${BIN_TMP_FILE}" "${TEMP_TARGET}/${PROGRAM_EXEC}"
+	INSTALL_MAJOR="$(get_version_major "${INSTALL_VERSION}")" || INSTALL_MAJOR=0
+	if [ "${INSTALL_MAJOR}" -ge 11 ]; then
+		BIN_TMP_FILE="${TEMP_TARGET}.tar.gz"
+		download_uri_per_arch "${BIN_URI_AMD64}" "${BIN_URI_ARM64}" "${BIN_TMP_FILE}"
+		create_dir "${TEMP_TARGET}"
+		extract_archive "${BIN_TMP_FILE}" "TAR" "${TEMP_TARGET}"
+		remove_item "${BIN_TMP_FILE}"
+		make_executable "${TEMP_TARGET}/${PROGRAM_EXEC}"
+	else
+		BIN_TMP_FILE="${TEMP_TARGET}.bin"
+		download_uri_per_arch "${BIN_URI_AMD64}" "${BIN_URI_ARM64}" "${BIN_TMP_FILE}"
+		create_dir "${TEMP_TARGET}"
+		make_executable "${BIN_TMP_FILE}"
+		move_item "${BIN_TMP_FILE}" "${TEMP_TARGET}/${PROGRAM_EXEC}"
+	fi
 	move_item "${TEMP_TARGET}" "${INSTALL_TARGET}"
 	remove_item "${TEMP_TARGET}"
 fi

@@ -225,7 +225,12 @@ get_download_uri_amd64() {
 		pgweb)
 			echo "https://github.com/sosedoff/pgweb/releases/download/v${_version}/pgweb_linux_amd64.zip" ;;
 		pnpm)
-			echo "https://github.com/pnpm/pnpm/releases/download/v${_version}/pnpm-linux-x64" ;;
+			_pnpm_major="$(get_version_major "${_version}" 2>/dev/null)" || _pnpm_major=0
+			if [ "${_pnpm_major}" -ge 11 ]; then
+				echo "https://github.com/pnpm/pnpm/releases/download/v${_version}/pnpm-linux-x64.tar.gz"
+			else
+				echo "https://github.com/pnpm/pnpm/releases/download/v${_version}/pnpm-linux-x64"
+			fi ;;
 		prometheus)
 			echo "https://github.com/prometheus/prometheus/releases/download/v${_version}/prometheus-${_version}.linux-amd64.tar.gz" ;;
 		prysm-beacon)
@@ -359,7 +364,12 @@ get_download_uri_arm64() {
 		pgweb)
 			echo "https://github.com/sosedoff/pgweb/releases/download/v${_version}/pgweb_linux_arm64.zip" ;;
 		pnpm)
-			echo "https://github.com/pnpm/pnpm/releases/download/v${_version}/pnpm-linux-arm64" ;;
+			_version_major="$(get_version_major "${_version}" 2>/dev/null)" || _pnpm_major=0
+			if [ "${_version_major}" -ge 11 ]; then
+				echo "https://github.com/pnpm/pnpm/releases/download/v${_version}/pnpm-linux-arm64.tar.gz"
+			else
+				echo "https://github.com/pnpm/pnpm/releases/download/v${_version}/pnpm-linux-arm64"
+			fi ;;
 		prometheus)
 			echo "https://github.com/prometheus/prometheus/releases/download/v${_version}/prometheus-${_version}.linux-arm64.tar.gz" ;;
 		prysm-beacon)
