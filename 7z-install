@@ -9,9 +9,6 @@
 #
 #  Homepage: https://7-zip.org/
 #
-#  Presquites:
-#    - sed
-#
 #  Usage:
 #    7z-install [<version>]
 #
@@ -25,27 +22,27 @@
 #
 ################################################################################
 
-set -ex
+set -e
 
 # Application info
-GITHUB_OWNER="ip7z"
-GITHUB_REPO="7zip"
 PROGRAM_ID="7z"
 PROGRAM_EXEC="7zz"
 
 # Shared library
-CTXDIR="$(cd "$(dirname "$0")" && pwd)"
+CTXDIR="$(cd "$(dirname "${0}")" && pwd)"
 . "${CTXDIR}/shared/install-common.sh"
+. "${CTXDIR}/shared/install-source.sh"
 
 # Prepare environment
-get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "$1"
+GITHUB_OWNER="$(get_source_owner "${PROGRAM_ID}")"
+GITHUB_REPO="$(get_source_repo "${PROGRAM_ID}")"
+get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "${1}"
 init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
 
 # Download and install binaries
 if [ ! -d "${INSTALL_TARGET}" ]; then
-	_INSTALL_VERSION=$(echo "${INSTALL_VERSION}" | sed 's/\.//')
-	BIN_ARCH_URI_AMD64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/${INSTALL_VERSION}/7z${_INSTALL_VERSION}-linux-x64.tar.xz"
-	BIN_ARCH_URI_ARM64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/${INSTALL_VERSION}/7z${_INSTALL_VERSION}-linux-arm64.tar.xz"
+	BIN_ARCH_URI_AMD64="$(get_download_uri_amd64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
+	BIN_ARCH_URI_ARM64="$(get_download_uri_arm64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
 	BIN_ARCH_TMP_FILE="${TEMP_TARGET}.tar.xz"
 	download_uri_per_arch "${BIN_ARCH_URI_AMD64}" "${BIN_ARCH_URI_ARM64}" "${BIN_ARCH_TMP_FILE}"
 	create_dir "${TEMP_TARGET}"
@@ -58,3 +55,4 @@ fi
 # Finalize install
 symlink_item_overwrite "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
 symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC}" "${SYSTEM_BIN_ROOT}/${PROGRAM_ID}"
+finalize_install
