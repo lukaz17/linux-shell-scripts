@@ -43,8 +43,7 @@ init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
 if [ ! -d "${INSTALL_TARGET}" ]; then
 	BIN_URI_AMD64="$(get_download_uri_amd64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
 	BIN_URI_ARM64="$(get_download_uri_arm64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
-	INSTALL_MAJOR="$(get_version_major "${INSTALL_VERSION}")" || INSTALL_MAJOR=0
-	if [ "${INSTALL_MAJOR}" -ge 11 ]; then
+	if is_version_at_least "${INSTALL_VERSION}" "11"; then
 		BIN_TMP_FILE="${TEMP_TARGET}.tar.gz"
 		download_uri_per_arch "${BIN_URI_AMD64}" "${BIN_URI_ARM64}" "${BIN_TMP_FILE}"
 		create_dir "${TEMP_TARGET}"

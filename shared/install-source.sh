@@ -227,8 +227,7 @@ get_download_uri_amd64() {
 		pgweb)
 			echo "https://github.com/sosedoff/pgweb/releases/download/v${_version}/pgweb_linux_amd64.zip" ;;
 		pnpm)
-			_pnpm_major="$(get_version_major "${_version}" 2>/dev/null)" || _pnpm_major=0
-			if [ "${_pnpm_major}" -ge 11 ]; then
+			if is_version_at_least "${_version}" "11"; then
 				echo "https://github.com/pnpm/pnpm/releases/download/v${_version}/pnpm-linux-x64.tar.gz"
 			else
 				echo "https://github.com/pnpm/pnpm/releases/download/v${_version}/pnpm-linux-x64"
@@ -370,8 +369,7 @@ get_download_uri_arm64() {
 		pgweb)
 			echo "https://github.com/sosedoff/pgweb/releases/download/v${_version}/pgweb_linux_arm64.zip" ;;
 		pnpm)
-			_version_major="$(get_version_major "${_version}" 2>/dev/null)" || _pnpm_major=0
-			if [ "${_version_major}" -ge 11 ]; then
+			if is_version_at_least "${_version}" "11"; then
 				echo "https://github.com/pnpm/pnpm/releases/download/v${_version}/pnpm-linux-arm64.tar.gz"
 			else
 				echo "https://github.com/pnpm/pnpm/releases/download/v${_version}/pnpm-linux-arm64"
