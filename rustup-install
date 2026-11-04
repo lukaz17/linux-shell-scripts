@@ -1,0 +1,95 @@
+#!/bin/sh
+
+################################################################################
+#
+#  rustup-install
+#
+#  Install/Update Rustup for current user. This also works as a version manager.
+#  If version is not specified, the latest version will be installed.
+#  Rust toolchains are installed separately for each user, e.g. rustup default stable.
+#
+#  Homepage: https://rustup.rs/
+#
+#  Usage:
+#    rustup-install [<version>]
+#
+#  Example:
+#    rustup-install
+#    rustup-install 1.29.3
+#    rustup-install v1.29.3
+#
+#  MIT License.
+#  Copyright (C) 2025 Nguyen Nhat Tung.
+#
+################################################################################
+
+set -e
+
+# Application info
+PROGRAM_ID="rustup"
+PROGRAM_EXEC="rustup"
+
+# Shared library
+CTXDIR="$(cd "$(dirname "${0}")" && pwd)"
+. "${CTXDIR}/shared/install-common.sh"
+. "${CTXDIR}/shared/install-source.sh"
+
+# ------------------------------------------------------------------------------
+# Get latest Rustup version
+# ------------------------------------------------------------------------------
+get_install_version_from_rustlang() {
+	_fallback_version="${1}"
+	if [ -z "${_fallback_version}" ]; then
+		INSTALL_VERSION="$(curl -fsSL "https://static.rust-lang.org/rustup/release-stable.toml" | sed -n "s/^version = '\(.*\)'$/\1/p")"
+	else
+		INSTALL_VERSION="${_fallback_version}"
+	fi
+	normalize_install_version
+	echo "> Latest Version:  ${INSTALL_VERSION}"
+}
+
+# ------------------------------------------------------------------------------
+# Run rustup as the invoking user when run with sudo, so RUSTUP_HOME stays theirs
+# ------------------------------------------------------------------------------
+run_rustup_as_user() {
+	if [ "$(id -u)" -eq 0 ] && [ -n "${SUDO_USER}" ]; then
+		sudo -u "${SUDO_USER}" env RUSTUP_HOME="${USER_PROFILE_DATA}/.${PROGRAM_ID}" "${ACTIVE_TARGET}/${PROGRAM_EXEC}" "$@"
+	else
+		RUSTUP_HOME="${USER_PROFILE_DATA}/.${PROGRAM_ID}" "${ACTIVE_TARGET}/${PROGRAM_EXEC}" "$@"
+	fi
+}
+
+# Prepare environment
+get_install_version_from_rustlang "${1}"
+init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
+
+# Download and install binaries
+if [ ! -d "${INSTALL_TARGET}" ]; then
+	BIN_URI_AMD64="$(get_download_uri_amd64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
+	BIN_URI_ARM64="$(get_download_uri_arm64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
+	BIN_TMP_FILE="${TEMP_ROOT}/rustup-init"
+	download_uri_per_arch "${BIN_URI_AMD64}" "${BIN_URI_ARM64}" "${BIN_TMP_FILE}"
+	make_executable "${BIN_TMP_FILE}"
+	create_dir "${TEMP_TARGET}"
+	CARGO_HOME="${TEMP_TARGET}/cargo" RUSTUP_HOME="${TEMP_TARGET}/rustup" RUSTUP_INIT_SKIP_PATH_CHECK="yes" "${BIN_TMP_FILE}" -y --no-modify-path --default-toolchain none
+	remove_item "${BIN_TMP_FILE}"
+	move_item "${TEMP_TARGET}/cargo/bin" "${INSTALL_TARGET}"
+	remove_item "${TEMP_TARGET}"
+fi
+
+# Finalize install
+symlink_item_overwrite "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
+cat << EOF > "${INSTALL_ROOT}/env.sh"
+export RUSTUP_HOME="\${CLIINST_USR_PROFILE:-\$HOME/.local}/.${PROGRAM_ID}"
+export CARGO_HOME="\${CLIINST_USR_PROFILE:-\$HOME/.local}/.cargo"
+export PATH="${ACTIVE_TARGET}:\$CARGO_HOME/bin:\$PATH"
+EOF
+run_rustup_as_user completions bash > "${INSTALL_ROOT}/bash.sh"
+# rustup update exits with an error when self-update finds no rustup in CARGO_HOME/bin
+run_rustup_as_user set auto-self-update disable
+run_rustup_as_user set profile minimal
+append_text_idempotent "\n# rustup" "${USER_PROFILE_RC}"
+append_text_idempotent ". \"${INSTALL_ROOT}/env.sh\"" "${USER_PROFILE_RC}"
+append_text_idempotent "\n# rustup" "${USER_BASH_RC}"
+append_text_idempotent ". \"${INSTALL_ROOT}/bash.sh\"" "${USER_BASH_RC}"
+finalize_install

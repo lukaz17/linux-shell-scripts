@@ -55,7 +55,7 @@ get_source_owner() {
 		prysm) echo "OffchainLabs" ;;
 		qdrant) echo "qdrant" ;;
 		reth) echo "paradigmxyz" ;;
-		rust) echo "rust-lang" ;;
+		rustup) echo "rust-lang" ;;
 		sass) echo "sass" ;;
 		snitch) echo "karol-broda" ;;
 		solana) echo "solana-labs" ;;
@@ -124,7 +124,7 @@ get_source_repo() {
 		prysm) echo "prysm" ;;
 		qdrant) echo "qdrant" ;;
 		reth) echo "reth" ;;
-		rust) echo "rust" ;;
+		rustup) echo "rustup" ;;
 		sass) echo "dart-sass" ;;
 		snitch) echo "snitch" ;;
 		solana) echo "solana" ;;
@@ -245,6 +245,8 @@ get_download_uri_amd64() {
 			echo "https://github.com/qdrant/qdrant/releases/download/v${_version}/qdrant-x86_64-unknown-linux-musl.tar.gz" ;;
 		reth)
 			echo "https://github.com/paradigmxyz/reth/releases/download/v${_version}/reth-v${_version}-x86_64-unknown-linux-gnu.tar.gz" ;;
+		rustup)
+			echo "https://static.rust-lang.org/rustup/archive/${_version}/x86_64-unknown-linux-gnu/rustup-init" ;;
 		sass)
 			echo "https://github.com/sass/dart-sass/releases/download/${_version}/dart-sass-${_version}-linux-x64.tar.gz" ;;
 		snitch)
@@ -386,6 +388,8 @@ get_download_uri_arm64() {
 			echo "https://github.com/qdrant/qdrant/releases/download/v${_version}/qdrant-aarch64-unknown-linux-musl.tar.gz" ;;
 		reth)
 			echo "https://github.com/paradigmxyz/reth/releases/download/v${_version}/reth-v${_version}-aarch64-unknown-linux-gnu.tar.gz" ;;
+		rustup)
+			echo "https://static.rust-lang.org/rustup/archive/${_version}/aarch64-unknown-linux-gnu/rustup-init" ;;
 		sass)
 			echo "https://github.com/sass/dart-sass/releases/download/${_version}/dart-sass-${_version}-linux-arm64.tar.gz" ;;
 		snitch)
