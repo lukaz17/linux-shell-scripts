@@ -1,9 +1,15 @@
-# Attunic Protocol transient memory
-.attunic/wip.md
+# Attunic Protocol: commit only context.md, memory.md, and question.md
+.attunic/*.md
+!.attunic/context.md
+!.attunic/memory.md
+!.attunic/question.md
 
 # Local env and secrets
 .env
 .env.*
+!.env.example
+!.env.sample
+!.env.template
 *.local.env
 
 # OS files

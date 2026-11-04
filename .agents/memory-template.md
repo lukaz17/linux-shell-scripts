@@ -1,17 +1,17 @@
 # Memory Template
 
-Create a file by copying its skeleton below, keeping the headings and replacing the placeholders. Do not create a file before its trigger arrives.
+Create a file only when its trigger arrives, by copying the fenced skeleton of its section, keeping the headings and replacing the placeholders; then apply the project-owned content below that section's marker, if any.
 
-Check the language notes in [project-structure.md](project-structure.md) first.
+## `.attunic/workstream.md`
 
-## `.attunic/wip.md`
+Trigger: the user consents to an audit or cleanup workstream (see [attunic-protocol.md's Write Rules](attunic-protocol.md#write-rules)).
 
 ````markdown
-# WIP
+# Workstream
 
-State of the current audit or cleanup campaign; kept current during the work.
+State of the current audit or cleanup workstream; kept current during the work.
 
-**Campaign**: <what is being audited or cleaned up>
+**Workstream**: <what is being audited or cleaned up>
 **Started**: <date>   **Last updated**: <date>
 **Status**: <auditing | in progress | paused | closed>
 
@@ -21,13 +21,13 @@ Recorded before the first change, verbatim:
 
 - **Verify command**: <command>
 - **Result**: <pass/fail with counts, quoted from the actual run>
-- **Known-failing before we started**: <list, so nothing is blamed on this campaign>
+- **Known-failing before we started**: <list, so nothing is blamed on this workstream>
 
 ## Batches
 
 One batch = one intent; never mix a mechanical sweep with structural edits in the same diff.
 
-- [ ] 1. <module or smell family> - <what changes> - commit: <sha>
+- [ ] 1. <module or smell family> - <what changes> - commit: <sha, if the user asked for one>
 
 ## Found But Not Fixed
 
@@ -44,6 +44,8 @@ Deliberately out of scope, with the reason.
 |------|--------------|--------------|
 ````
 
+<!-- Project-specific / .attunic/workstream.md -->
+
 ## Project-specific
 
-<!-- Project-specific -->
+<!-- Project-specific / Project-specific -->

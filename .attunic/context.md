@@ -1,8 +1,8 @@
 # Project Context
 
-Part of the project memory layer: human-readable memory of what this project is and what has been confirmed.
+Part of the project memory: human-readable memory of what this project is.
 
-The reading and writing rules for this file and the rest of `.attunic/` are defined in [attunic-protocol.md](../.agents/attunic-protocol.md).
+The reading and writing rules for this file and the rest of `.attunic/` are defined in [attunic-protocol.md](../.agents/attunic-protocol.md). The user fills this file in, by hand or by asking an agent to help; change it only on such a request and after the user explicitly confirms that change (see [attunic-protocol.md's Write Rules](../.agents/attunic-protocol.md#write-rules)).
 
 ## Abstract
 
@@ -16,9 +16,11 @@ Collection of installers and utility scripts for Linux, written in Shell.
 
 ## Technical Specifications
 
-A brief overview of the ingredients used for developing this project. These are things developers should know when developing the project.
+A brief overview of the ingredients developers of this project should know.
 
-Typical ingredients include, but are not limited to: primary language, frameworks, architecture styles, environment prerequisites, libraries, test runners, tools, databases...
+Write one bullet per ingredient, as `- <Ingredient>: <value>.`, such as primary language, frameworks, architecture style, build system, test runner, linter, databases, environment prerequisites.
+
+Write `None` as the value of an ingredient the project lacks but an agent would look for, such as a build system, test runner, or linter.
 
 <!-- Project-specific / Technical Specifications -->
 
@@ -30,18 +32,20 @@ Typical ingredients include, but are not limited to: primary language, framework
 
 ## Layout
 
-Layout of this project; [project-structure.md](../.agents/project-structure.md) holds the language's standard map, kept for reference.
+Layout of this project; [project-structure.md](../.agents/project-structure.md) holds the standard layouts of its languages and frameworks, kept for reference.
 
 List of important folders, files and their roles in the project:
 
-- They visualize the actual file system where source files live.
-- If a top-level file/folder is missing from the list, prompt the user to update it.
+Write the list as a tree in a fenced block, one entry per line with its role as a `#` comment, mirroring the actual file system.
+
+When the list is not empty and a top-level file/folder is missing from it, prompt the user to update it.
+
 <!-- Project-specific / Layout -->
 - Top-level *-install scripts are an exception, it is not necessary to include all of them in the Layout.
 
 ```
 ├── .agents/                  # project AI agent instructions (attunic protocol, coding-conventions, development-guideline, pull-request-guideline)
-├── .attunic/                 # project AI agent memory (context, memory, wip)
+├── .attunic/                 # project AI agent memory (context, memory, question)
 ├── desktop/                  # XDG .desktop manifests and polkit policies for desktop installers
 │   └── *.desktop, *.policy
 ├── icon/                     # PNG/SVG icon assets per program, sized for the Hicolor theme
@@ -60,46 +64,38 @@ List of important folders, files and their roles in the project:
 
 ## Layer Dependencies
 
-List of layers and their relationships:
+List of architecture layers and their relationships:
 
-- Declare the innermost layer first.
-- A layer may depend on itself and on any layer declared before it, and on nothing declared after it.
-- If a layer appears in the table below, the dependency graph must be enforced.
+- Declare the innermost architecture layer first.
+- An architecture layer may depend only on itself and on the architecture layers in its `Depends on` column, all declared before it.
+- If an architecture layer appears in the table below, the dependency graph must be enforced.
 
-| Layer | Path | Depends on | Must never contain |
-|-------|------|------------|--------------------|
-<!-- Project-specific / Layer Dependencies -->
+| Architecture layer | Path | Depends on | Must never contain |
+|--------------------|------|------------|--------------------|
+| <!-- Project-specific / Layer Dependencies --> | | | |
 
 ### Deliberate Exceptions
 
-List of documented exceptions that cannot follow the architecture rules above:
+List of documented exceptions that cannot follow the architecture layers above:
 
 - Any place the rules above are knowingly broken, with the reason and the condition for fixing it.
-- An undocumented exception is a defect; a documented one is a decision.
+- Only exceptions to the architecture layers above belong here.
+- An undocumented exception is a defect; a documented one is allowed, and revisited once its `Revisit-if` condition holds.
 
 | What | Why | Revisit-if |
 |------|-----|------------|
-<!-- Project-specific / Deliberate Exceptions -->
+| <!-- Project-specific / Deliberate Exceptions --> | | |
 
 ## Supporting Tools
 
 All the supporting tools declared here are opinionated for the sake of consistent results across development environments.
 
 List each required tool/library under its own heading, followed by the commands for each use case.
-Common use cases include: Build, Test, Lint, Format, Install, ...
+
+Common use cases include: Build, Test, Lint, Format, Install.
 
 <!-- Project-specific / Supporting Tools -->
 
-There is no build, test, lint, or format pipeline; shell scripts are executed directly from the repository root. Format consistency is governed by `.editorconfig` (tabs for this project).
-
-## Confirmed Facts
-
-Facts about the project which have been confirmed; they outrank anything derived or guessed.
-
-| Fact | Reason |
-|------|--------|
-<!-- Project-specific / Confirmed Facts -->
-
 ## Project-specific
 
-<!-- Project-specific -->
+<!-- Project-specific / Project-specific -->
