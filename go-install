@@ -68,7 +68,7 @@ fi
 symlink_item_overwrite "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
 cat << EOF > "${INSTALL_ROOT}/env.sh"
 export GOROOT="${ACTIVE_TARGET}"
-export GOPATH="\$HOME/go"
+export GOPATH="\${CLIINST_USR_PROFILE:-\$HOME/.local}/.${PROGRAM_ID}"
 export PATH="\$GOROOT/bin:\$GOPATH/bin:\$PATH"
 EOF
 append_text_idempotent "\n# go" "${USER_PROFILE_RC}"
