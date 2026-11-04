@@ -249,6 +249,24 @@ get_version_major() {
 }
 
 # ------------------------------------------------------------------------------
+# Check that the first version is not older than the second
+# ------------------------------------------------------------------------------
+is_version_at_least() {
+	_version_to_check="${1}"
+	_version_anchor="${2}"
+	[ "$(printf '%s\n%s\n' "${_version_to_check}" "${_version_anchor}" | sort -V | tail -n 1)" = "${_version_to_check}" ]
+}
+
+# ------------------------------------------------------------------------------
+# Check that the first version is not newer than the second
+# ------------------------------------------------------------------------------
+is_version_at_most() {
+	_version_to_check="${1}"
+	_version_anchor="${2}"
+	[ "$(printf '%s\n%s\n' "${_version_to_check}" "${_version_anchor}" | sort -V | tail -n 1)" = "${_version_anchor}" ]
+}
+
+# ------------------------------------------------------------------------------
 # Get latest version from GitHub
 # ------------------------------------------------------------------------------
 get_install_version_from_github() {
