@@ -212,6 +212,8 @@ get_download_uri_amd64() {
 			echo "https://github.com/casey/just/releases/download/${_version}/just-${_version}-x86_64-unknown-linux-musl.tar.gz" ;;
 		localai)
 			echo "https://github.com/mudler/LocalAI/releases/download/v${_version}/local-ai-v${_version}-linux-amd64" ;;
+		nvm)
+			echo "https://github.com/nvm-sh/nvm/archive/refs/tags/v${_version}.tar.gz" ;;
 		ollama)
 			echo "https://github.com/ollama/ollama/releases/download/v${_version}/ollama-linux-amd64.tar.zst" ;;
 		op-reth)
@@ -351,6 +353,8 @@ get_download_uri_arm64() {
 			echo "https://github.com/casey/just/releases/download/${_version}/just-${_version}-aarch64-unknown-linux-musl.tar.gz" ;;
 		localai)
 			echo "https://github.com/mudler/LocalAI/releases/download/v${_version}/local-ai-v${_version}-linux-arm64" ;;
+		nvm)
+			echo "https://github.com/nvm-sh/nvm/archive/refs/tags/v${_version}.tar.gz" ;;
 		ollama)
 			echo "https://github.com/ollama/ollama/releases/download/v${_version}/ollama-linux-arm64.tar.zst" ;;
 		op-reth)
