@@ -49,6 +49,26 @@ create_user_dir() {
 }
 
 # ------------------------------------------------------------------------------
+# Create an empty file safely, owned by the invoking user when run with sudo
+# ------------------------------------------------------------------------------
+create_user_file() {
+	_path="${1}"
+	if [ -z "${_path}" ]; then
+		echo "create_user_file: Invalid arguments" >&2
+		return 1
+	fi
+
+	if [ ! -e "${_path}" ]; then
+		echo "> Create File:  ${_path}"
+		if [ "$(id -u)" -eq 0 ] && [ -n "${SUDO_USER}" ]; then
+			sudo -u "${SUDO_USER}" touch "${_path}"
+		else
+			touch "${_path}"
+		fi
+	fi
+}
+
+# ------------------------------------------------------------------------------
 # Remove file/folder safely
 # ------------------------------------------------------------------------------
 remove_item() {
@@ -259,6 +279,31 @@ get_install_version_from_github() {
 }
 
 # ------------------------------------------------------------------------------
+# Get the login file that shell setup goes to in the given home.
+# Bash runs only the first of .bash_profile, .bash_login, .profile, so use that
+# first file unless it loads .profile, which other login readers also run.
+# ------------------------------------------------------------------------------
+get_user_profile_rc() {
+	_user_home="${1}"
+	if [ -z "${_user_home}" ]; then
+		echo "get_user_profile_rc: Invalid arguments" >&2
+		return 1
+	fi
+
+	for _login_file in "${_user_home}/.bash_profile" "${_user_home}/.bash_login"; do
+		if [ -r "${_login_file}" ]; then
+			# A mention after a # is a comment, so it does not load .profile
+			if grep -Eq '^[^#]*\.profile' "${_login_file}"; then
+				break
+			fi
+			echo "${_login_file}"
+			return 0
+		fi
+	done
+	echo "${_user_home}/.profile"
+}
+
+# ------------------------------------------------------------------------------
 # Initialize environment for the install and pre-populate root dirs
 # ------------------------------------------------------------------------------
 init_install_env() {
@@ -287,7 +332,7 @@ init_install_env() {
 		fi
 	fi
 	TEMP_ROOT="/tmp"
-	USER_PROFILE_RC="${USER_HOME}/.profile"
+	USER_PROFILE_RC="$(get_user_profile_rc "${USER_HOME}")"
 	USER_BASH_RC="${USER_HOME}/.bashrc"
 	USER_PROFILE_DATA="${USER_HOME}/.local"
 
@@ -308,6 +353,8 @@ init_install_env() {
 	create_dir "${INSTALL_ROOT}"
 	create_dir "${SYSTEM_BIN_ROOT}"
 	create_user_dir "${USER_PROFILE_DATA}"
+	create_user_file "${USER_PROFILE_RC}"
+	create_user_file "${USER_BASH_RC}"
 }
 
 # ------------------------------------------------------------------------------
