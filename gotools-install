@@ -42,7 +42,7 @@ CTXDIR="$(cd "$(dirname "${0}")" && pwd)"
 get_active_go_version() {
 	_go_exec="${1}"
 	if [ -z "${_go_exec}" ]; then
-		echo "get_active_go_version: Invalid arguments"
+		echo "get_active_go_version: Invalid arguments" >&2
 		return 1
 	fi
 
@@ -74,7 +74,7 @@ get_tool_version_from_goproxy() {
 	_floor_version="${2}"
 	_go_version="${3}"
 	if [ -z "${_module}" ] || [ -z "${_floor_version}" ] || [ -z "${_go_version}" ]; then
-		echo "get_tool_version_from_goproxy: Invalid arguments"
+		echo "get_tool_version_from_goproxy: Invalid arguments" >&2
 		return 1
 	fi
 
@@ -103,7 +103,7 @@ install_tool() {
 	_package="${2}"
 	_floor_version="${3}"
 	if [ -z "${_module}" ] || [ -z "${_package}" ] || [ -z "${_floor_version}" ]; then
-		echo "install_tool: Invalid arguments"
+		echo "install_tool: Invalid arguments" >&2
 		return 1
 	fi
 
