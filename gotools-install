@@ -1,0 +1,150 @@
+#!/bin/sh
+
+################################################################################
+#
+#  gotools-install
+#
+#  Install/Update common Go tools in the bin dir of the active Go, next to `go` and `gofmt`:
+#  - dlv
+#  - goimports
+#  - gopls
+#  - govulncheck
+#  - staticcheck
+#  Each tool is built with the active Go, at the newest version it can build.
+#  Go versions keep separate tools, so run this for each version that needs them.
+#
+#  Prerequisites:
+#  - Go installed by go-install, using the same account or sudo mode as this script
+#
+#  Usage:
+#    gotools-install
+#
+#  Example:
+#    gotools-install
+#
+#  MIT License.
+#  Copyright (C) 2025 Nguyen Nhat Tung.
+#
+################################################################################
+
+set -e
+
+# Application info
+GO_PROGRAM_ID="go"
+
+# Shared library
+CTXDIR="$(cd "$(dirname "${0}")" && pwd)"
+. "${CTXDIR}/shared/install-common.sh"
+
+# ------------------------------------------------------------------------------
+# Get the version of the active Go, failing if it cannot be found or invoked
+# ------------------------------------------------------------------------------
+get_active_go_version() {
+	_go_exec="${1}"
+	if [ -z "${_go_exec}" ]; then
+		echo "get_active_go_version: Invalid arguments"
+		return 1
+	fi
+
+	if [ ! -x "${_go_exec}" ]; then
+		echo "Error: Go not found at ${_go_exec}. Install it with go-install, using the same account or sudo mode as this script." >&2
+		return 1
+	fi
+
+	# The case below reports a failed run, and go's own stderr stays visible.
+	_go_version_line="$("${_go_exec}" version)" || true
+	case "${_go_version_line}" in
+		"go version go"[0-9]*) ;;
+		*)
+			echo "Error: Go at ${_go_exec} cannot be invoked. Reinstall it with go-install." >&2
+			return 1
+			;;
+	esac
+
+	ACTIVE_GO_VERSION="${_go_version_line#go version go}"
+	ACTIVE_GO_VERSION="${ACTIVE_GO_VERSION%% *}"
+	echo "> Active Go:    ${ACTIVE_GO_VERSION}"
+}
+
+# ------------------------------------------------------------------------------
+# Get the newest release of a module, equal or greater than floor version
+# ------------------------------------------------------------------------------
+get_tool_version_from_goproxy() {
+	_module="${1}"
+	_floor_version="${2}"
+	_go_version="${3}"
+	if [ -z "${_module}" ] || [ -z "${_floor_version}" ] || [ -z "${_go_version}" ]; then
+		echo "get_tool_version_from_goproxy: Invalid arguments"
+		return 1
+	fi
+
+	TOOL_VERSION=""
+	_module_uri="https://proxy.golang.org/${_module}/@v"
+	_versions="$(curl -fsSL "${_module_uri}/list")"
+	for _version in $(printf '%s\n' "${_versions}" | sed '/-/d' | sort -rV); do
+		# Releases run newest first, so the rest are below the floor too
+		if ! is_version_at_least "${_version}" "${_floor_version}"; then
+			return 0
+		fi
+		_go_mod="$(curl -fsSL "${_module_uri}/${_version}.mod")"
+		_required_go="$(printf '%s\n' "${_go_mod}" | sed -n 's/^go //p')"
+		if is_version_at_most "${_required_go}" "${_go_version}"; then
+			TOOL_VERSION="${_version}"
+			return 0
+		fi
+	done
+}
+
+# ------------------------------------------------------------------------------
+# Build a tool from its module with the active Go, and install it in GOBIN
+# ------------------------------------------------------------------------------
+install_tool() {
+	_module="${1}"
+	_package="${2}"
+	_floor_version="${3}"
+	if [ -z "${_module}" ] || [ -z "${_package}" ] || [ -z "${_floor_version}" ]; then
+		echo "install_tool: Invalid arguments"
+		return 1
+	fi
+
+	get_tool_version_from_goproxy "${_module}" "${_floor_version}" "${ACTIVE_GO_VERSION}"
+	if [ -z "${TOOL_VERSION}" ]; then
+		echo "> Skip Item:    ${_package} must be ${_floor_version} or higher"
+		return 0
+	fi
+
+	echo "> Build Item:   ${_package}@${TOOL_VERSION} -> ${GOBIN}"
+	"${GO_EXEC}" install "${_package}@${TOOL_VERSION}"
+}
+
+# Tool versions follow the active Go, so a version argument has no meaning here
+if [ "$#" -ne 0 ]; then
+	echo "Error: gotools-install takes no arguments. Use go-install to choose the Go version." >&2
+	exit 1
+fi
+
+# Prepare environment
+init_install_env "${GO_PROGRAM_ID}" "active-release"
+GO_EXEC="${ACTIVE_TARGET}/bin/go"
+export CGO_ENABLED=0
+export GOBIN="${ACTIVE_TARGET}/bin"
+export GOFLAGS="-modcacherw"
+export GOROOT="${ACTIVE_TARGET}"
+export GOTOOLCHAIN="local"
+get_active_go_version "${GO_EXEC}"
+
+GOTOOLS_BUILD_ROOT="$(mktemp -d "${TEMP_ROOT}/gotools_XXXXXX")"
+trap 'remove_item "${GOTOOLS_BUILD_ROOT}"' EXIT INT TERM
+export GOCACHE="${GOTOOLS_BUILD_ROOT}/cache"
+export GOMODCACHE="${GOTOOLS_BUILD_ROOT}/mod"
+
+# Build and install tools, each with its floor version
+install_tool "golang.org/x/tools" "golang.org/x/tools/cmd/goimports" "v0.1.0"
+install_tool "golang.org/x/tools/gopls" "golang.org/x/tools/gopls" "v0.16.0"
+install_tool "golang.org/x/vuln" "golang.org/x/vuln/cmd/govulncheck" "v1.1.3"
+install_tool "github.com/go-delve/delve" "github.com/go-delve/delve/cmd/dlv" "v0.1.0"
+install_tool "honnef.co/go/tools" "honnef.co/go/tools/cmd/staticcheck" "v0.1.0"
+
+# Finalize install
+remove_item "${GOTOOLS_BUILD_ROOT}"
+finalize_install
