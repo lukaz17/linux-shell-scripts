@@ -57,6 +57,7 @@ get_source_owner() {
 		sass) echo "sass" ;;
 		snitch) echo "karol-broda" ;;
 		solana) echo "solana-labs" ;;
+		sqlc) echo "sqlc-dev" ;;
 		stashapp) echo "stashapp" ;;
 		stashbox) echo "stashapp" ;;
 		sui) echo "MystenLabs" ;;
@@ -126,6 +127,7 @@ get_source_repo() {
 		sass) echo "dart-sass" ;;
 		snitch) echo "snitch" ;;
 		solana) echo "solana" ;;
+		sqlc) echo "sqlc" ;;
 		stashapp) echo "stash" ;;
 		stashbox) echo "stash-box" ;;
 		sui) echo "sui" ;;
@@ -250,6 +252,8 @@ get_download_uri_amd64() {
 			echo "https://github.com/karol-broda/snitch/releases/download/v${_version}/snitch_${_version}_linux_amd64.tar.gz" ;;
 		solana)
 			echo "https://github.com/solana-labs/solana/releases/download/v${_version}/solana-release-x86_64-unknown-linux-gnu.tar.bz2" ;;
+		sqlc)
+			echo "https://github.com/sqlc-dev/sqlc/releases/download/v${_version}/sqlc_${_version}_linux_amd64.tar.gz" ;;
 		stashapp)
 			echo "https://github.com/stashapp/stash/releases/download/v${_version}/stash-linux" ;;
 		stashbox)
@@ -392,6 +396,8 @@ get_download_uri_arm64() {
 			echo "https://github.com/karol-broda/snitch/releases/download/v${_version}/snitch_${_version}_linux_arm64.tar.gz" ;;
 		solana)
 			echo "" ;;
+		sqlc)
+			echo "https://github.com/sqlc-dev/sqlc/releases/download/v${_version}/sqlc_${_version}_linux_arm64.tar.gz" ;;
 		stashapp)
 			echo "https://github.com/stashapp/stash/releases/download/v${_version}/stash-linux-arm64v8" ;;
 		stashbox)
