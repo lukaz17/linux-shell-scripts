@@ -10,15 +10,13 @@
 #
 ################################################################################
 
-set +x
-
 # ------------------------------------------------------------------------------
-# Create a directory safely
+# Create a directory safely.
 # ------------------------------------------------------------------------------
 create_dir() {
 	_path="${1}"
 	if [ -z "${_path}" ]; then
-		echo "create_dir: Invalid arguments"
+		echo "create_dir: Invalid arguments" >&2
 		return 1
 	fi
 
@@ -29,12 +27,12 @@ create_dir() {
 }
 
 # ------------------------------------------------------------------------------
-# Create a directory safely, owned by the invoking user when run with sudo
+# Create a directory safely, owned by the invoking user when run with sudo.
 # ------------------------------------------------------------------------------
 create_user_dir() {
 	_path="${1}"
 	if [ -z "${_path}" ]; then
-		echo "create_user_dir: Invalid arguments"
+		echo "create_user_dir: Invalid arguments" >&2
 		return 1
 	fi
 
@@ -49,7 +47,7 @@ create_user_dir() {
 }
 
 # ------------------------------------------------------------------------------
-# Create an empty file safely, owned by the invoking user when run with sudo
+# Create an empty file safely, owned by the invoking user when run with sudo.
 # ------------------------------------------------------------------------------
 create_user_file() {
 	_path="${1}"
@@ -69,12 +67,12 @@ create_user_file() {
 }
 
 # ------------------------------------------------------------------------------
-# Remove file/folder safely
+# Remove file/folder safely.
 # ------------------------------------------------------------------------------
 remove_item() {
 	_path="${1}"
 	if [ -z "${_path}" ]; then
-		echo "remove_item: Invalid arguments"
+		echo "remove_item: Invalid arguments" >&2
 		return 1
 	fi
 
@@ -85,13 +83,13 @@ remove_item() {
 }
 
 # ------------------------------------------------------------------------------
-# Copy file/folder safely
+# Copy file/folder safely.
 # ------------------------------------------------------------------------------
 copy_item() {
 	_from="${1}"
 	_to="${2}"
 	if [ -z "${_from}" ] || [ -z "${_to}" ]; then
-		echo "copy_item: Invalid arguments"
+		echo "copy_item: Invalid arguments" >&2
 		return 1
 	fi
 
@@ -100,13 +98,13 @@ copy_item() {
 }
 
 # ------------------------------------------------------------------------------
-# Copy file/folder and overwrite the target
+# Copy file/folder and overwrite the target.
 # ------------------------------------------------------------------------------
 copy_item_overwrite() {
 	_from="${1}"
 	_to="${2}"
 	if [ -z "${_from}" ] || [ -z "${_to}" ]; then
-		echo "copy_item_overwrite: Invalid arguments"
+		echo "copy_item_overwrite: Invalid arguments" >&2
 		return 1
 	fi
 
@@ -116,13 +114,13 @@ copy_item_overwrite() {
 }
 
 # ------------------------------------------------------------------------------
-# Move file/folder safely
+# Move file/folder safely.
 # ------------------------------------------------------------------------------
 move_item() {
 	_from="${1}"
 	_to="${2}"
 	if [ -z "${_from}" ] || [ -z "${_to}" ]; then
-		echo "move_item: Invalid arguments"
+		echo "move_item: Invalid arguments" >&2
 		return 1
 	fi
 
@@ -131,13 +129,13 @@ move_item() {
 }
 
 # ------------------------------------------------------------------------------
-# Move file/folder and overwrite the target
+# Move file/folder and overwrite the target.
 # ------------------------------------------------------------------------------
 move_item_overwrite() {
 	_from="${1}"
 	_to="${2}"
 	if [ -z "${_from}" ] || [ -z "${_to}" ]; then
-		echo "move_item_overwrite: Invalid arguments"
+		echo "move_item_overwrite: Invalid arguments" >&2
 		return 1
 	fi
 
@@ -147,13 +145,13 @@ move_item_overwrite() {
 }
 
 # ------------------------------------------------------------------------------
-# Symlink file/folder safely
+# Symlink file/folder safely.
 # ------------------------------------------------------------------------------
 symlink_item() {
 	_from="${1}"
 	_to="${2}"
 	if [ -z "${_from}" ] || [ -z "${_to}" ]; then
-		echo "symlink_item: Invalid arguments"
+		echo "symlink_item: Invalid arguments" >&2
 		return 1
 	fi
 
@@ -162,13 +160,17 @@ symlink_item() {
 }
 
 # ------------------------------------------------------------------------------
-# Symlink file/folder and overwrite the target
+# Symlink file/folder and overwrite the target, failing if the file/folder is missing
 # ------------------------------------------------------------------------------
 symlink_item_overwrite() {
 	_from="${1}"
 	_to="${2}"
 	if [ -z "${_from}" ] || [ -z "${_to}" ]; then
-		echo "symlink_item_overwrite: Invalid arguments"
+		echo "symlink_item_overwrite: Invalid arguments" >&2
+		return 1
+	fi
+	if [ ! -e "${_from}" ]; then
+		echo "symlink_item_overwrite: Item not found: ${_from}" >&2
 		return 1
 	fi
 
@@ -178,12 +180,12 @@ symlink_item_overwrite() {
 }
 
 # ------------------------------------------------------------------------------
-# Make a file/folder accessible for all users
+# Make a file/folder accessible for all users.
 # ------------------------------------------------------------------------------
 make_all_access() {
 	_path="${1}"
 	if [ -z "${_path}" ]; then
-		echo "make_executable: Invalid arguments"
+		echo "make_all_access: Invalid arguments" >&2
 		return 1
 	fi
 
@@ -194,12 +196,12 @@ make_all_access() {
 }
 
 # ------------------------------------------------------------------------------
-# Make a file/folder executable
+# Make a file/folder executable.
 # ------------------------------------------------------------------------------
 make_executable() {
 	_path="${1}"
 	if [ -z "${_path}" ]; then
-		echo "make_executable: Invalid arguments"
+		echo "make_executable: Invalid arguments" >&2
 		return 1
 	fi
 
@@ -210,7 +212,7 @@ make_executable() {
 }
 
 # ------------------------------------------------------------------------------
-# Normalize install version for consistency
+# Normalize install version for consistency.
 # ------------------------------------------------------------------------------
 normalize_install_version() {
 	_fallback_version="${1}"
@@ -218,7 +220,7 @@ normalize_install_version() {
 		if [ -n "${_fallback_version}" ]; then
 			INSTALL_VERSION="${_fallback_version}"
 		else
-			echo "normalize_install_version: Install version is not specified"
+			echo "normalize_install_version: Install version is not specified" >&2
 			return 1
 		fi
 	fi
@@ -232,16 +234,16 @@ normalize_install_version() {
 get_version_major() {
 	_version="${1}"
 	if [ -z "${_version}" ]; then
-		echo "get_version_major: Invalid arguments"
+		echo "get_version_major: Invalid arguments" >&2
 		return 1
 	fi
 
-	_version="${_version#v}"
-	_version="${_version%%-*}"
-	_major="${_version%%.*}"
+	_version_core="${_version#v}"
+	_version_core="${_version_core%%-*}"
+	_major="${_version_core%%.*}"
 	case "${_major}" in
 		'' | *[!0-9]*)
-			echo "get_version_major: Invalid version: ${1}"
+			echo "get_version_major: Invalid version: ${_version}" >&2
 			return 1
 			;;
 	esac
@@ -249,7 +251,7 @@ get_version_major() {
 }
 
 # ------------------------------------------------------------------------------
-# Check that the first version is not older than the second
+# Check that the first version is not older than the second.
 # ------------------------------------------------------------------------------
 is_version_at_least() {
 	_version_to_check="${1}"
@@ -258,7 +260,7 @@ is_version_at_least() {
 }
 
 # ------------------------------------------------------------------------------
-# Check that the first version is not newer than the second
+# Check that the first version is not newer than the second.
 # ------------------------------------------------------------------------------
 is_version_at_most() {
 	_version_to_check="${1}"
@@ -267,7 +269,7 @@ is_version_at_most() {
 }
 
 # ------------------------------------------------------------------------------
-# Get latest version from GitHub
+# Get latest version from GitHub.
 # ------------------------------------------------------------------------------
 get_install_version_from_github() {
 	_github_owner="${1}"
@@ -276,7 +278,7 @@ get_install_version_from_github() {
 	_trim_prefix="${4}"
 	_tag_filter="${5}"
 	if [ -z "${_github_owner}" ] || [ -z "${_github_repository}" ]; then
-		echo "get_install_version_from_github: Invalid arguments"
+		echo "get_install_version_from_github: Invalid arguments" >&2
 		return 1
 	fi
 
@@ -298,8 +300,6 @@ get_install_version_from_github() {
 
 # ------------------------------------------------------------------------------
 # Get the login file that shell setup goes to in the given home.
-# Bash runs only the first of .bash_profile, .bash_login, .profile, so use that
-# first file unless it loads .profile, which other login readers also run.
 # ------------------------------------------------------------------------------
 get_user_profile_rc() {
 	_user_home="${1}"
@@ -322,13 +322,13 @@ get_user_profile_rc() {
 }
 
 # ------------------------------------------------------------------------------
-# Initialize environment for the install and pre-populate root dirs
+# Initialize environment for the install and pre-populate root dirs.
 # ------------------------------------------------------------------------------
 init_install_env() {
 	_program_id="${1}"
 	_install_version="${2}"
 	if [ -z "${_program_id}" ] || [ -z "${_install_version}" ]; then
-		echo "init_install_env: Invalid arguments"
+		echo "init_install_env: Invalid arguments" >&2
 		return 1
 	fi
 
@@ -376,7 +376,7 @@ init_install_env() {
 }
 
 # ------------------------------------------------------------------------------
-# Extended version of init_install_env to support desktop environment
+# Extended version of init_install_env to support desktop environment.
 # ------------------------------------------------------------------------------
 init_install_env_desktop() {
 	_program_id="${1}"
@@ -395,86 +395,86 @@ init_install_env_desktop() {
 }
 
 # ------------------------------------------------------------------------------
-# Download different file based on current system architecture
+# Download different file based on current system architecture.
 # ------------------------------------------------------------------------------
 download_uri_per_arch() {
 	_amd64_url="${1}"
 	_arm64_url="${2}"
 	_destination="${3}"
 	if [ -z "${_amd64_url}" ] && [ -z "${_arm64_url}" ]; then
-		echo "download_uri_per_arch: Invalid arguments"
+		echo "download_uri_per_arch: Invalid arguments" >&2
 		return 1
 	fi
 	if [ -z "${_destination}" ]; then
-		echo "download_uri_per_arch: Invalid arguments"
+		echo "download_uri_per_arch: Invalid arguments" >&2
 		return 1
 	fi
 
 	_arch="$(uname -m)"
 	if [ "${_arch}" = "x86_64" ] || [ "${_arch}" = "amd64" ]; then
 		if [ -z "${_amd64_url}" ]; then
-			echo "download_uri_per_arch: Unsupported architecture: ${_arch}"
+			echo "download_uri_per_arch: Unsupported architecture: ${_arch}" >&2
 			exit 1
 		fi
 		echo "> Download Uri: ${_amd64_url} -> ${_destination}"
 		curl -fSL "${_amd64_url}" -o "${_destination}"
 	elif [ "${_arch}" = "aarch64" ] || [ "${_arch}" = "arm64" ]; then
 		if [ -z "${_arm64_url}" ]; then
-			echo "download_uri_per_arch: Unsupported architecture: ${_arch}"
+			echo "download_uri_per_arch: Unsupported architecture: ${_arch}" >&2
 			exit 1
 		fi
 		echo "> Download Uri: ${_arm64_url} -> ${_destination}"
 		curl -fSL "${_arm64_url}" -o "${_destination}"
 	else
-		echo "download_uri_per_arch: Unsupported architecture: ${_arch}"
+		echo "download_uri_per_arch: Unsupported architecture: ${_arch}" >&2
 		exit 1
 	fi
 }
 
 # ------------------------------------------------------------------------------
-# Move file/folder based on current system architecture
+# Move file/folder based on current system architecture.
 # ------------------------------------------------------------------------------
 move_item_per_arch() {
 	_amd64_path="${1}"
 	_arm64_path="${2}"
 	_destination="${3}"
 	if [ -z "${_amd64_path}" ] && [ -z "${_arm64_path}" ]; then
-		echo "move_item_per_arch: Invalid arguments"
+		echo "move_item_per_arch: Invalid arguments" >&2
 		return 1
 	fi
 	if [ -z "${_destination}" ]; then
-		echo "move_item_per_arch: Invalid arguments"
+		echo "move_item_per_arch: Invalid arguments" >&2
 		return 1
 	fi
 
 	_arch="$(uname -m)"
 	if [ "${_arch}" = "x86_64" ] || [ "${_arch}" = "amd64" ]; then
 		if [ -z "${_amd64_path}" ]; then
-			echo "move_item_per_arch: Unsupported architecture: ${_arch}"
+			echo "move_item_per_arch: Unsupported architecture: ${_arch}" >&2
 			exit 1
 		fi
 		move_item "${_amd64_path}" "${_destination}"
 	elif [ "${_arch}" = "aarch64" ] || [ "${_arch}" = "arm64" ]; then
 		if [ -z "${_arm64_path}" ]; then
-			echo "move_item_per_arch: Unsupported architecture: ${_arch}"
+			echo "move_item_per_arch: Unsupported architecture: ${_arch}" >&2
 			exit 1
 		fi
 		move_item "${_arm64_path}" "${_destination}"
 	else
-		echo "move_item_per_arch: Unsupported architecture: ${_arch}"
+		echo "move_item_per_arch: Unsupported architecture: ${_arch}" >&2
 		exit 1
 	fi
 }
 
 # ------------------------------------------------------------------------------
-# Extract archive
+# Extract archive.
 # ------------------------------------------------------------------------------
 extract_archive() {
 	_archive_file="${1}"
 	_archive_type="${2}"
 	_destination_dir="${3}"
 	if [ -z "${_archive_file}" ] || [ -z "${_archive_type}" ] || [ -z "${_destination_dir}" ]; then
-		echo "extract_archive: Invalid arguments"
+		echo "extract_archive: Invalid arguments" >&2
 		return 1
 	fi
 
@@ -484,13 +484,13 @@ extract_archive() {
 	elif [ "${_archive_type}" = "zip" ] || [ "${_archive_type}" = "ZIP" ]; then
 		unzip "${_archive_file}" -d "${_destination_dir}"
 	else
-		echo "extract_archive: Unsupported archive type: ${_archive_type}"
+		echo "extract_archive: Unsupported archive type: ${_archive_type}" >&2
 		exit 1
 	fi
 }
 
 # ------------------------------------------------------------------------------
-# Refresh desktop icons
+# Refresh desktop icons.
 # ------------------------------------------------------------------------------
 refresh_desktop_icon() {
 	if [ -d "${HOME}/.local/share/applications" ]; then
@@ -521,7 +521,7 @@ refresh_desktop_icon() {
 }
 
 # ------------------------------------------------------------------------------
-# Install desktop manifest and icons
+# Install desktop manifest and icons.
 # ------------------------------------------------------------------------------
 install_desktop() {
 	_name="${1}"
@@ -529,7 +529,7 @@ install_desktop() {
 	_desktop_root="${3}"
 	_icon_root="${4}"
 	if [ -z "${_name}" ] || [ -z "${_context_root}" ] || [ -z "${_desktop_root}" ] || [ -z "${_icon_root}" ]; then
-		echo "install_desktop: Invalid arguments"
+		echo "install_desktop: Invalid arguments" >&2
 		return 1
 	fi
 
@@ -557,13 +557,13 @@ install_desktop() {
 }
 
 # ------------------------------------------------------------------------------
-# Install polkit policy (requires root)
+# Install polkit policy (requires root).
 # ------------------------------------------------------------------------------
 install_polkit_policy() {
 	_name="${1}"
 	_context_root="${2}"
 	if [ -z "${_name}" ] || [ -z "${_context_root}" ]; then
-		echo "install_polkit_policy: Invalid arguments"
+		echo "install_polkit_policy: Invalid arguments" >&2
 		return 1
 	fi
 
@@ -579,18 +579,18 @@ install_polkit_policy() {
 }
 
 # ------------------------------------------------------------------------------
-# Append text into a file
-# - If the text matches a whole-line in the file, do nothing
-# - The text must be inserted as a whole-line
-# - The text can have an optional newline: real newline or a literal "\n" to create 1-line spacing from existing content
-# - The optional newline can only be placed at the beginning of the text, otherwise throw an error
-# - The file must end with a newline
+# Append text into a file:
+# - If the text matches a whole-line in the file, do nothing.
+# - The text must be inserted as a whole-line.
+# - The text can have an optional newline: real newline or a literal "\n" to create 1-line spacing from existing content.
+# - The optional newline can only be placed at the beginning of the text, otherwise throw an error.
+# - The file must end with a newline.
 # ------------------------------------------------------------------------------
 append_text_idempotent() {
 	_text="${1}"
 	_file="${2}"
 	if [ -z "${_text}" ] || [ -z "${_file}" ]; then
-		echo "append_text_idempotent: Invalid arguments"
+		echo "append_text_idempotent: Invalid arguments" >&2
 		return 1
 	fi
 	# Optional newline: a real newline or a literal "\n".
@@ -614,12 +614,12 @@ append_text_idempotent() {
 	case "${_content}" in
 		*'
 '* | *'\n'*)
-			echo "append_text_idempotent: Invalid arguments"
+			echo "append_text_idempotent: Invalid arguments" >&2
 			return 1
 			;;
 	esac
 	if [ -z "${_content}" ]; then
-		echo "append_text_idempotent: Invalid arguments"
+		echo "append_text_idempotent: Invalid arguments" >&2
 		return 1
 	fi
 
