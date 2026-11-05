@@ -411,7 +411,7 @@ get_download_uri_arm64() {
 		thunderbird)
 			echo "" ;;
 		tufw)
-			echo "https://github.com/peltho/tufw/releases/download/v${_version}/tufw_${_version}_linux_amd64.tar.gz" ;;
+			echo "https://github.com/peltho/tufw/releases/download/v${_version}/tufw_${_version}_linux_arm64.tar.gz" ;;
 		uv)
 			echo "https://github.com/astral-sh/uv/releases/download/${_version}/uv-aarch64-unknown-linux-gnu.tar.gz" ;;
 		vic-geth)
