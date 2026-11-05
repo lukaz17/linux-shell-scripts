@@ -10,8 +10,6 @@
 #
 ################################################################################
 
-set +x
-
 # ------------------------------------------------------------------------------
 # Return the GitHub owner for a Program ID.
 # ------------------------------------------------------------------------------
@@ -40,7 +38,7 @@ get_source_owner() {
 		grafana-alloy) echo "grafana" ;;
 		grafana-loki) echo "grafana" ;;
 		hugo) echo "gohugoio" ;;
-		jellyfin) echo "" ;;
+		jellyfin) echo "jellyfin" ;;
 		just) echo "casey" ;;
 		localai) echo "mudler" ;;
 		nvm) echo "nvm-sh" ;;
@@ -109,7 +107,7 @@ get_source_repo() {
 		grafana-alloy) echo "alloy" ;;
 		grafana-loki) echo "loki" ;;
 		hugo) echo "hugo" ;;
-		jellyfin) echo "" ;;
+		jellyfin) echo "jellyfin" ;;
 		just) echo "just" ;;
 		localai) echo "LocalAI" ;;
 		nvm) echo "nvm" ;;
