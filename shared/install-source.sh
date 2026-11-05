@@ -401,7 +401,7 @@ get_download_uri_arm64() {
 		stashapp)
 			echo "https://github.com/stashapp/stash/releases/download/v${_version}/stash-linux-arm64v8" ;;
 		stashbox)
-			echo "https://github.com/stashapp/stash-box/releases/download/v${_version}/stash-box-linux" ;;
+			echo "" ;;
 		sui)
 			echo "https://github.com/MystenLabs/sui/releases/download/mainnet-v${_version}/sui-mainnet-v${_version}-ubuntu-aarch64.tgz" ;;
 		syncthing)
