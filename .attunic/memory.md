@@ -11,6 +11,7 @@ They may look wrong or contradict your knowledge or understanding; follow them i
 | Fact | Reason |
 |------|--------|
 | <!-- Project-specific / Confirmed Facts --> | |
+| Design and review install scripts for a new system: never use the state of the machine you are working on as context for what a script may assume or must handle. Use that machine only to probe a theory. | Install scripts target a new system, so what this machine has installed or configured says nothing about what a script will find there. |
 
 ## Project-specific
 
