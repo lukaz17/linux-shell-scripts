@@ -212,6 +212,24 @@ make_executable() {
 }
 
 # ------------------------------------------------------------------------------
+# Parse arguments for the install scripts.
+# ------------------------------------------------------------------------------
+get_install_argument() {
+	INSTALL_ARG_VERSION=""
+	INSTALL_ARG_IS_DEFAULT=0
+	for _argument in "$@"; do
+		if [ "${_argument}" = "--default" ]; then
+			INSTALL_ARG_IS_DEFAULT=1
+		elif [ -z "${INSTALL_ARG_VERSION}" ]; then
+			INSTALL_ARG_VERSION="${_argument}"
+		else
+			echo "get_install_argument: Expected [<version>] [--default], got: $*" >&2
+			return 1
+		fi
+	done
+}
+
+# ------------------------------------------------------------------------------
 # Normalize install version for consistency.
 # ------------------------------------------------------------------------------
 normalize_install_version() {
