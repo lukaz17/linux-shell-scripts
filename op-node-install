@@ -5,16 +5,20 @@
 #  op-node-install
 #
 #  Install/Update op-node for current user. This also works as a version manager.
-#
-#  Presquites:
-#  - Go
+#  If version is not specified, the latest version will be installed.
 #
 #  Homepage: https://www.optimism.io/
 #
+#  Prerequisites:
+#  - Go
+#  - yq
+#  - zip
+#
 #  Usage:
-#    op-node-install <version>
+#    op-node-install [<version>]
 #
 #  Example:
+#    op-node-install
 #    op-node-install 1.14.1
 #    op-node-install v1.14.1
 #
@@ -23,83 +27,66 @@
 #
 ################################################################################
 
+set -e
+
 # Application info
-GITHUB_OWNER="ethereum-optimism"
-GITHUB_REPO="optimism"
 PROGRAM_ID="op-node"
 PROGRAM_EXEC="op-node"
+REGISTRY_ID="superchain-registry"
 
-set -ex
+# Shared library
+CTXDIR="$(cd "$(dirname "${0}")" && pwd)"
+. "${CTXDIR}/shared/install-common.sh"
+. "${CTXDIR}/shared/install-source.sh"
 
-# Determine version to install
-if [ -z "$1" ]; then
-	echo "Error: Version must be explicitly specified"
-	exit 1
-else
-	LATEST_VERSION="$1"
-fi
-LATEST_VERSION="${LATEST_VERSION#v}"
-
-# Installation environment
-USERID="$(id -u)"
-ARCH="$(uname -m)"
-if [ "${USERID}" -eq 0 ]; then
-	INSTALL_ROOT="/usr/local/share/${PROGRAM_ID}"
-	SYSTEM_BIN_ROOT="/usr/local/bin"
-else
-	INSTALL_ROOT="${HOME}/.local/share/${PROGRAM_ID}"
-	SYSTEM_BIN_ROOT="${HOME}/.local/bin"
-fi
-INSTALL_TARGET="${INSTALL_ROOT}/${PROGRAM_ID}-v${LATEST_VERSION}"
-ACTIVE_TARGET="${INSTALL_ROOT}/active-release"
-
-if [ ! -d "${INSTALL_ROOT}" ]; then
-	mkdir -p "${INSTALL_ROOT}"
-fi
-if [ ! -d "${SYSTEM_BIN_ROOT}" ]; then
-	mkdir -p "${SYSTEM_BIN_ROOT}"
-fi
+# Prepare environment
+GITHUB_OWNER="$(get_source_owner "${PROGRAM_ID}")"
+GITHUB_REPO="$(get_source_repo "${PROGRAM_ID}")"
+get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "${1}" "op-node/v" "op-node/v"
+init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
 
 # Download and install binaries
 if [ ! -d "${INSTALL_TARGET}" ]; then
-	SRC_ARCH_URI_AMD64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/archive/refs/tags/v${LATEST_VERSION}.tar.gz"
-	SRC_ARCH_URI_ARM64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/archive/refs/tags/v${LATEST_VERSION}.tar.gz"
-	SRC_ARCH_TMP_FILE="/tmp/${PROGRAM_ID}-v${LATEST_VERSION}.tar.gz"
-
-	if [ "${ARCH}" = "x86_64" ] || [ "${ARCH}" = "amd64" ]; then
-		curl -fSL "${SRC_ARCH_URI_AMD64}" -o "${SRC_ARCH_TMP_FILE}"
-	elif [ "${ARCH}" = "aarch64" ] || [ "${ARCH}" = "arm64" ]; then
-		curl -fSL "${SRC_ARCH_URI_ARM64}" -o "${SRC_ARCH_TMP_FILE}"
+	SRC_ARCH_URI_AMD64="$(get_download_uri_amd64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
+	SRC_ARCH_URI_ARM64="$(get_download_uri_arm64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
+	SRC_ARCH_TMP_FILE="${TEMP_TARGET}.tar.gz"
+	download_uri_per_arch "${SRC_ARCH_URI_AMD64}" "${SRC_ARCH_URI_ARM64}" "${SRC_ARCH_TMP_FILE}"
+	create_dir "${TEMP_TARGET}"
+	extract_archive "${SRC_ARCH_TMP_FILE}" "tar" "${TEMP_TARGET}"
+	remove_item "${SRC_ARCH_TMP_FILE}"
+	if is_version_at_least "${INSTALL_VERSION}" "1.10.0"; then
+		SRC_ROOT="${TEMP_TARGET}/${GITHUB_REPO}-${PROGRAM_ID}-v${INSTALL_VERSION}"
 	else
-		echo "Unsupported architecture: ${ARCH}"
-		exit 1
+		SRC_ROOT="${TEMP_TARGET}/${GITHUB_REPO}-${INSTALL_VERSION}"
 	fi
-
-	TEMP_TARGET="/tmp/${PROGRAM_ID}-v${LATEST_VERSION}"
-	mkdir "${TEMP_TARGET}"
-	tar -x -v -f "${SRC_ARCH_TMP_FILE}" -C "${TEMP_TARGET}"
-	rm "${SRC_ARCH_TMP_FILE}"
-	cd "${TEMP_TARGET}/${GITHUB_REPO}-${LATEST_VERSION}"
+	if is_version_at_least "${INSTALL_VERSION}" "1.19.1"; then
+		REGISTRY_COMMIT="$(curl -fsSL "https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${REGISTRY_ID}?ref=${PROGRAM_ID}/v${INSTALL_VERSION}" | jq -r '.sha // empty')"
+		if [ -z "${REGISTRY_COMMIT}" ]; then
+			echo "op-node-install: Cannot resolve ${REGISTRY_ID} commit for v${INSTALL_VERSION}" >&2
+			exit 1
+		fi
+		REG_ARCH_URI_AMD64="$(get_download_uri_amd64 "${REGISTRY_ID}" "${REGISTRY_COMMIT}")"
+		REG_ARCH_URI_ARM64="$(get_download_uri_arm64 "${REGISTRY_ID}" "${REGISTRY_COMMIT}")"
+		REG_ARCH_TMP_FILE="${TEMP_TARGET}-${REGISTRY_ID}.tar.gz"
+		download_uri_per_arch "${REG_ARCH_URI_AMD64}" "${REG_ARCH_URI_ARM64}" "${REG_ARCH_TMP_FILE}"
+		extract_archive "${REG_ARCH_TMP_FILE}" "tar" "${SRC_ROOT}"
+		remove_item "${REG_ARCH_TMP_FILE}"
+		remove_item "${SRC_ROOT}/${REGISTRY_ID}"
+		move_item "${SRC_ROOT}/${REGISTRY_ID}-${REGISTRY_COMMIT}" "${SRC_ROOT}/${REGISTRY_ID}"
+		if is_version_at_least "${INSTALL_VERSION}" "1.20.1"; then
+			bash "${SRC_ROOT}/op-core/superchain/bundle/sync-superchain.sh"
+		else
+			bash "${SRC_ROOT}/op-core/superchain/sync-superchain.sh"
+		fi
+	fi
+	cd "${SRC_ROOT}"
 	cd "op-node"
-	env GO111MODULE=on GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -v -ldflags "-X main.GitCommit=release -X main.GitDate=$(date +%s) -X github.com/ethereum-optimism/optimism/op-node/version.Version=v${LATEST_VERSION} -X github.com/ethereum-optimism/optimism/op-node/version.Meta=" -o ./bin/op-node ./cmd
-	mv "${TEMP_TARGET}/${GITHUB_REPO}-${LATEST_VERSION}/op-node/bin" "${INSTALL_TARGET}"
-	if [ -d "${TEMP_TARGET}" ]; then
-		rm -r "${TEMP_TARGET}"
-	fi
+	env GO111MODULE=on GOOS=linux CGO_ENABLED=0 go build -v -ldflags "-X main.GitCommit=release -X main.GitDate=$(date +%s) -X github.com/ethereum-optimism/optimism/op-node/version.Version=v${INSTALL_VERSION} -X github.com/ethereum-optimism/optimism/op-node/version.Meta=" -o ./bin/op-node ./cmd
+	move_item "${SRC_ROOT}/op-node/bin" "${INSTALL_TARGET}"
+	remove_item "${TEMP_TARGET}"
 fi
 
-# Set active release
-if [ -f "${ACTIVE_TARGET}" ] || [ -d "${ACTIVE_TARGET}" ] || [ -L "${ACTIVE_TARGET}" ]; then
-	rm -r "${ACTIVE_TARGET}"
-fi
-ln -s "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
-
-# Create symlink for quick access
-ACTIVE_TARGET_BIN="${ACTIVE_TARGET}/${PROGRAM_EXEC}"
-SYSTEM_BIN_TARGET_BIN="${SYSTEM_BIN_ROOT}/${PROGRAM_ID}"
-if [ -f "${ACTIVE_TARGET_BIN}" ]; then
-	if [ -f "${SYSTEM_BIN_TARGET_BIN}" ] || [ -d "${SYSTEM_BIN_TARGET_BIN}" ] || [ -L "${SYSTEM_BIN_TARGET_BIN}" ]; then
-		rm -r "${SYSTEM_BIN_TARGET_BIN}"
-	fi
-	ln -s "${ACTIVE_TARGET_BIN}" "${SYSTEM_BIN_TARGET_BIN}"
-fi
+# Finalize install
+symlink_item_overwrite "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
+symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC}" "${SYSTEM_BIN_ROOT}/${PROGRAM_ID}"
+finalize_install

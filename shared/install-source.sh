@@ -219,7 +219,11 @@ get_download_uri_amd64() {
 		op-reth)
 			echo "https://github.com/paradigmxyz/reth/releases/download/v${_version}/op-reth-v${_version}-x86_64-unknown-linux-gnu.tar.gz" ;;
 		op-node)
-			echo "https://github.com/ethereum-optimism/optimism/archive/refs/tags/v${_version}.tar.gz" ;;
+			if is_version_at_least "${_version}" "1.10.0"; then
+				echo "https://github.com/ethereum-optimism/optimism/archive/refs/tags/op-node/v${_version}.tar.gz"
+			else
+				echo "https://github.com/ethereum-optimism/optimism/archive/refs/tags/v${_version}.tar.gz"
+			fi ;;
 		opencode)
 			echo "https://github.com/anomalyco/opencode/releases/download/v${_version}/opencode-linux-x64.tar.gz" ;;
 		opencode-desktop)
@@ -260,6 +264,8 @@ get_download_uri_amd64() {
 			echo "https://github.com/stashapp/stash-box/releases/download/v${_version}/stash-box-linux" ;;
 		sui)
 			echo "https://github.com/MystenLabs/sui/releases/download/mainnet-v${_version}/sui-mainnet-v${_version}-ubuntu-x86_64.tgz" ;;
+		superchain-registry)
+			echo "https://github.com/ethereum-optimism/superchain-registry/archive/${_version}.tar.gz" ;;
 		syncthing)
 			echo "https://github.com/syncthing/syncthing/releases/download/v${_version}/syncthing-linux-amd64-v${_version}.tar.gz" ;;
 		syncthrelay)
@@ -363,7 +369,11 @@ get_download_uri_arm64() {
 		op-reth)
 			echo "https://github.com/paradigmxyz/reth/releases/download/v${_version}/op-reth-v${_version}-aarch64-unknown-linux-gnu.tar.gz" ;;
 		op-node)
-			echo "https://github.com/ethereum-optimism/optimism/archive/refs/tags/v${_version}.tar.gz" ;;
+			if is_version_at_least "${_version}" "1.10.0"; then
+				echo "https://github.com/ethereum-optimism/optimism/archive/refs/tags/op-node/v${_version}.tar.gz"
+			else
+				echo "https://github.com/ethereum-optimism/optimism/archive/refs/tags/v${_version}.tar.gz"
+			fi ;;
 		opencode)
 			echo "https://github.com/anomalyco/opencode/releases/download/v${_version}/opencode-linux-arm64.tar.gz" ;;
 		opencode-desktop)
@@ -404,6 +414,8 @@ get_download_uri_arm64() {
 			echo "" ;;
 		sui)
 			echo "https://github.com/MystenLabs/sui/releases/download/mainnet-v${_version}/sui-mainnet-v${_version}-ubuntu-aarch64.tgz" ;;
+		superchain-registry)
+			echo "https://github.com/ethereum-optimism/superchain-registry/archive/${_version}.tar.gz" ;;
 		syncthing)
 			echo "https://github.com/syncthing/syncthing/releases/download/v${_version}/syncthing-linux-arm64-v${_version}.tar.gz" ;;
 		syncthrelay)
