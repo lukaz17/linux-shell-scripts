@@ -27,8 +27,6 @@
 set -e
 
 # Application info
-GITHUB_OWNER="rpcpool"
-GITHUB_REPO="yellowstone-grpc"
 PROGRAM_ID="yellowstone-grpc"
 PROGRAM_EXEC_1="libyellowstone_grpc_geyser.so"
 SYSTEM_EXEC__1="lib/libyellowstone_grpc_geyser.so"
@@ -41,6 +39,8 @@ CTXDIR="$(cd "$(dirname "${0}")" && pwd)"
 . "${CTXDIR}/shared/install-source.sh"
 
 # Prepare environment
+GITHUB_OWNER="$(get_source_owner "${PROGRAM_ID}")"
+GITHUB_REPO="$(get_source_repo "${PROGRAM_ID}")"
 SOLANA_VERSION=$(normalize_install_version "${2}" && echo "${INSTALL_VERSION}")
 YGRPC_VERSION=$(normalize_install_version "${1}" && echo "${INSTALL_VERSION}")
 INSTALL_VERSION="${YGRPC_VERSION}+solana.${SOLANA_VERSION}"
