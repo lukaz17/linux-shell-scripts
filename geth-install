@@ -9,7 +9,7 @@
 #
 #  Homepage: https://geth.ethereum.org/
 #
-#  Presquites:
+#  Prerequisites:
 #  - Go
 #
 #  Usage:
@@ -17,34 +17,35 @@
 #
 #  Example:
 #    geth-install
-#    geth-install 1.16.7
-#    geth-install v1.16.7
+#    geth-install 1.17.10
+#    geth-install v1.17.10
 #
 #  MIT License.
 #  Copyright (C) 2025 Nguyen Nhat Tung.
 #
 ################################################################################
 
-set -ex
+set -e
 
 # Application info
-GITHUB_OWNER="ethereum"
-GITHUB_REPO="go-ethereum"
 PROGRAM_ID="geth"
 PROGRAM_EXEC="geth"
 
 # Shared library
-CTXDIR="$(cd "$(dirname "$0")" && pwd)"
+CTXDIR="$(cd "$(dirname "${0}")" && pwd)"
 . "${CTXDIR}/shared/install-common.sh"
+. "${CTXDIR}/shared/install-source.sh"
 
 # Prepare environment
-get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "$1"
+GITHUB_OWNER="$(get_source_owner "${PROGRAM_ID}")"
+GITHUB_REPO="$(get_source_repo "${PROGRAM_ID}")"
+get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "${1}"
 init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
 
 # Download and install binaries
 if [ ! -d "${INSTALL_TARGET}" ]; then
-	SRC_ARCH_URI_AMD64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/archive/refs/tags/v${INSTALL_VERSION}.tar.gz"
-	SRC_ARCH_URI_ARM64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/archive/refs/tags/v${INSTALL_VERSION}.tar.gz"
+	SRC_ARCH_URI_AMD64="$(get_download_uri_amd64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
+	SRC_ARCH_URI_ARM64="$(get_download_uri_arm64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
 	SRC_ARCH_TMP_FILE="${TEMP_TARGET}.tar.gz"
 	download_uri_per_arch "${SRC_ARCH_URI_AMD64}" "${SRC_ARCH_URI_ARM64}" "${SRC_ARCH_TMP_FILE}"
 	create_dir "${TEMP_TARGET}"
@@ -59,3 +60,4 @@ fi
 # Finalize install
 symlink_item_overwrite "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
 symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC}" "${SYSTEM_BIN_ROOT}/${PROGRAM_ID}"
+finalize_install
