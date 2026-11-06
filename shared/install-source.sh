@@ -74,6 +74,7 @@ get_source_owner() {
 		vscode) echo "microsoft" ;;
 		waterfox) echo "BrowserWorks" ;;
 		yellowstone-grpc) echo "rpcpool" ;;
+		yq) echo "mikefarah" ;;
 		ytdlp) echo "yt-dlp" ;;
 		zenith) echo "bvaisvil" ;;
 		*) echo "" ;;
@@ -144,6 +145,7 @@ get_source_repo() {
 		vscode) echo "vscode" ;;
 		waterfox) echo "waterfox" ;;
 		yellowstone-grpc) echo "yellowstone-grpc" ;;
+		yq) echo "yq" ;;
 		ytdlp) echo "yt-dlp" ;;
 		zenith) echo "zenith" ;;
 		*) echo "" ;;
@@ -292,6 +294,8 @@ get_download_uri_amd64() {
 			echo "https://cdn.waterfox.com/waterfox/releases/${_version}/Linux_x86_64/waterfox-${_version}.tar.bz2" ;;
 		yellowstone-grpc)
 			echo "" ;;
+		yq)
+			echo "https://github.com/mikefarah/yq/releases/download/v${_version}/yq_linux_amd64" ;;
 		ytdlp)
 			echo "https://github.com/yt-dlp/yt-dlp/releases/download/${_version}/yt-dlp_linux" ;;
 		zenith)
@@ -442,6 +446,8 @@ get_download_uri_arm64() {
 			echo "https://cdn.waterfox.com/waterfox/releases/${_version}/Linux_arm64/waterfox-${_version}.tar.bz2" ;;
 		yellowstone-grpc)
 			echo "" ;;
+		yq)
+			echo "https://github.com/mikefarah/yq/releases/download/v${_version}/yq_linux_arm64" ;;
 		ytdlp)
 			echo "https://github.com/yt-dlp/yt-dlp/releases/download/${_version}/yt-dlp_linux_aarch64" ;;
 		zenith)
