@@ -197,7 +197,7 @@ get_download_uri_amd64() {
 		geth)
 			echo "https://github.com/ethereum/go-ethereum/archive/refs/tags/v${_version}.tar.gz" ;;
 		gitea)
-			echo "https://github.com/go-gitea/gitea/releases/download/v${_version}/gitea-${_version}-linux-amd64" ;;
+			echo "https://github.com/go-gitea/gitea/releases/download/v${_version}/gitea-${_version}-linux-amd64.xz" ;;
 		go)
 			echo "https://go.dev/dl/go${_version}.linux-amd64.tar.gz" ;;
 		golangci-lint)
@@ -349,7 +349,7 @@ get_download_uri_arm64() {
 		geth)
 			echo "https://github.com/ethereum/go-ethereum/archive/refs/tags/v${_version}.tar.gz" ;;
 		gitea)
-			echo "https://github.com/go-gitea/gitea/releases/download/v${_version}/gitea-${_version}-linux-arm64" ;;
+			echo "https://github.com/go-gitea/gitea/releases/download/v${_version}/gitea-${_version}-linux-arm64.xz" ;;
 		go)
 			echo "https://go.dev/dl/go${_version}.linux-arm64.tar.gz" ;;
 		golangci-lint)

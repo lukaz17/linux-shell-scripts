@@ -14,8 +14,8 @@
 #
 #  Example:
 #    gitea-install
-#    gitea-install 1.25.2
-#    gitea-install v1.25.2
+#    gitea-install 1.27.3
+#    gitea-install v1.27.3
 #
 #  MIT License.
 #  Copyright (C) 2025 Nguyen Nhat Tung.
@@ -34,20 +34,22 @@ CTXDIR="$(cd "$(dirname "${0}")" && pwd)"
 . "${CTXDIR}/shared/install-source.sh"
 
 # Prepare environment
+get_install_argument "$@"
 GITHUB_OWNER="$(get_source_owner "${PROGRAM_ID}")"
 GITHUB_REPO="$(get_source_repo "${PROGRAM_ID}")"
-get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "${1}"
+get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "${INSTALL_ARG_VERSION}"
 init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
 
 # Download and install binaries
 if [ ! -d "${INSTALL_TARGET}" ]; then
-	BIN_URI_AMD64="$(get_download_uri_amd64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
-	BIN_URI_ARM64="$(get_download_uri_arm64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
-	BIN_TMP_FILE="${TEMP_TARGET}.bin"
-	download_uri_per_arch "${BIN_URI_AMD64}" "${BIN_URI_ARM64}" "${BIN_TMP_FILE}"
+	BIN_ARCH_URI_AMD64="$(get_download_uri_amd64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
+	BIN_ARCH_URI_ARM64="$(get_download_uri_arm64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
+	BIN_ARCH_TMP_FILE="${TEMP_ROOT}/${PROGRAM_EXEC}.xz"
+	download_uri_per_arch "${BIN_ARCH_URI_AMD64}" "${BIN_ARCH_URI_ARM64}" "${BIN_ARCH_TMP_FILE}"
 	create_dir "${TEMP_TARGET}"
-	make_executable "${BIN_TMP_FILE}"
-	move_item "${BIN_TMP_FILE}" "${TEMP_TARGET}/${PROGRAM_EXEC}"
+	extract_archive "${BIN_ARCH_TMP_FILE}" "xz" "${TEMP_TARGET}"
+	remove_item "${BIN_ARCH_TMP_FILE}"
+	make_executable "${TEMP_TARGET}/${PROGRAM_EXEC}"
 	move_item "${TEMP_TARGET}" "${INSTALL_TARGET}"
 	remove_item "${TEMP_TARGET}"
 fi
