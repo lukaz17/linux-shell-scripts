@@ -284,7 +284,7 @@ get_install_version_from_github() {
 
 	if [ -z "${_fallback_version}" ]; then
 		if [ -n "${_tag_filter}" ]; then
-			INSTALL_VERSION="$(curl -fsSL "https://api.github.com/repos/${_github_owner}/${_github_repository}/releases?per_page=20" | jq -r "[.[] | select(.tag_name | startswith(\"${_tag_filter}\"))] | first | .tag_name")"
+			INSTALL_VERSION="$(curl -fsSL "https://api.github.com/repos/${_github_owner}/${_github_repository}/releases?per_page=100" | jq -r "[.[] | select(.tag_name | startswith(\"${_tag_filter}\"))] | first | .tag_name")"
 		else
 			INSTALL_VERSION="$(curl -fsSL "https://api.github.com/repos/${_github_owner}/${_github_repository}/releases/latest" | jq -r .tag_name)"
 		fi
