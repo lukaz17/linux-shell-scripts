@@ -6,36 +6,30 @@ Collection of sh for convenience.
 
 The scripts are portable and can be run from any place in you system.
 
-The scripts rely on common tools available on most Linux systems: `curl`, `git`, `jq`, `sed`, and `tar`. If any of them is missing, install with your package manager:
+The scripts rely on common tools available on most Linux systems: `curl`, `git`, `jq`, `sed`, `tar`, and `xz`. If any of them is missing, install with your package manager:
 
 Debian / Ubuntu
 
 ```
-sudo apt-get install curl git jq sed tar
+sudo apt-get install curl git jq sed tar xz-utils
 ```
 
 Fedora / RHEL
 
 ```
-sudo dnf install curl git jq sed tar
+sudo dnf install curl git jq sed tar xz
 ```
 
 Arch Linux
 
 ```
-sudo pacman -S curl git jq sed tar
+sudo pacman -S curl git jq sed tar xz
 ```
 
 openSUSE
 
 ```
-sudo zypper install curl git jq sed tar
-```
-
-Alpine Linux
-
-```
-sudo apk add curl git jq sed tar
+sudo zypper install curl git jq sed tar xz
 ```
 
 However, it is recommended to check out this repository in `~/bin` directory. Most system have already defined the path for this directory. Otherwise, the path can be added manually in your login file or `~/.bashrc`.

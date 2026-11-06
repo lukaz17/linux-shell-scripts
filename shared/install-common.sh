@@ -480,7 +480,9 @@ extract_archive() {
 
 	echo "> Extract Arch: ${_archive_file} -> ${_destination_dir}"
 	if [ "${_archive_type}" = "tar" ] || [ "${_archive_type}" = "TAR" ]; then
-		tar -x -v -f "${_archive_file}" -C "${_destination_dir}"
+		tar --no-same-owner -x -v -f "${_archive_file}" -C "${_destination_dir}"
+	elif [ "${_archive_type}" = "xz" ] || [ "${_archive_type}" = "XZ" ]; then
+		xz -d -c "${_archive_file}" > "${_destination_dir}/$(basename "${_archive_file}" .xz)"
 	elif [ "${_archive_type}" = "zip" ] || [ "${_archive_type}" = "ZIP" ]; then
 		unzip "${_archive_file}" -d "${_destination_dir}"
 	else
