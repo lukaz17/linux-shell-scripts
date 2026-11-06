@@ -7,10 +7,10 @@
 #  Install/Update BSC Reth for current user. This also works as a version manager.
 #  If version is not specified, the latest version will be installed.
 #
-#  Presquites:
-#  - Rust
-#
 #  Homepage: https://www.bnbchain.org/en/bnb-smart-chain
+#
+#  Prerequisites:
+#  - Rust
 #
 #  Usage:
 #    bsc-reth-install [<version>]
@@ -28,23 +28,24 @@
 set -e
 
 # Application info
-GITHUB_OWNER="bnb-chain"
-GITHUB_REPO="reth-bsc"
 PROGRAM_ID="bsc-reth"
 PROGRAM_EXEC="reth-bsc"
 
 # Shared library
-CTXDIR="$(cd "$(dirname "$0")" && pwd)"
+CTXDIR="$(cd "$(dirname "${0}")" && pwd)"
 . "${CTXDIR}/shared/install-common.sh"
+. "${CTXDIR}/shared/install-source.sh"
 
 # Prepare environment
-get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "$1"
+GITHUB_OWNER="$(get_source_owner "${PROGRAM_ID}")"
+GITHUB_REPO="$(get_source_repo "${PROGRAM_ID}")"
+get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "${1}"
 init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
 
 # Download and install binaries
 if [ ! -d "${INSTALL_TARGET}" ]; then
-	SRC_ARCH_URI_AMD64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/archive/refs/tags/v${INSTALL_VERSION}.tar.gz"
-	SRC_ARCH_URI_ARM64="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/archive/refs/tags/v${INSTALL_VERSION}.tar.gz"
+	SRC_ARCH_URI_AMD64="$(get_download_uri_amd64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
+	SRC_ARCH_URI_ARM64="$(get_download_uri_arm64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
 	SRC_ARCH_TMP_FILE="${TEMP_TARGET}.tar.gz"
 	download_uri_per_arch "${SRC_ARCH_URI_AMD64}" "${SRC_ARCH_URI_ARM64}" "${SRC_ARCH_TMP_FILE}"
 	create_dir "${TEMP_TARGET}"
@@ -63,3 +64,4 @@ fi
 # Finalize install
 symlink_item_overwrite "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
 symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC}" "${SYSTEM_BIN_ROOT}/${PROGRAM_ID}"
+finalize_install
