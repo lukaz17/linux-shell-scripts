@@ -212,6 +212,23 @@ make_executable() {
 }
 
 # ------------------------------------------------------------------------------
+# Give a file/folder to the invoking user when run with sudo.
+# ------------------------------------------------------------------------------
+make_user_owned() {
+	_path="${1}"
+	if [ -z "${_path}" ]; then
+		echo "make_user_owned: Invalid arguments" >&2
+		return 1
+	fi
+
+	if [ "$(id -u)" -eq 0 ] && [ -n "${SUDO_USER}" ]; then
+		echo "> Make Owned:   ${_path}"
+		# -h changes a link itself, so a link in the tree never gives away its target
+		chown -hR "${SUDO_USER}:" "${_path}"
+	fi
+}
+
+# ------------------------------------------------------------------------------
 # Parse arguments for the install scripts.
 # ------------------------------------------------------------------------------
 get_install_argument() {
@@ -340,6 +357,27 @@ get_user_profile_rc() {
 }
 
 # ------------------------------------------------------------------------------
+# Get the home of the account that gets shell setup.
+# ------------------------------------------------------------------------------
+get_user_home() {
+	if [ "$(id -u)" -ne 0 ] || [ -z "${SUDO_USER}" ]; then
+		echo "${HOME}"
+		return 0
+	fi
+
+	_user_home="$(getent passwd "${SUDO_USER}" 2>/dev/null | cut -d: -f6)"
+	if [ -z "${_user_home}" ]; then
+		eval "_user_home=~${SUDO_USER}"
+	fi
+	# Shell keeps the tilde when the account does not exist
+	if [ "${_user_home}" = "~${SUDO_USER}" ]; then
+		echo "get_user_home: No home found for ${SUDO_USER}" >&2
+		return 1
+	fi
+	echo "${_user_home}"
+}
+
+# ------------------------------------------------------------------------------
 # Initialize environment for the install and pre-populate root dirs.
 # ------------------------------------------------------------------------------
 init_install_env() {
@@ -361,13 +399,7 @@ init_install_env() {
 		INSTALL_ROOT="${HOME}/.local/share/${_program_id}"
 		SYSTEM_BIN_ROOT="${HOME}/.local/bin"
 	fi
-	USER_HOME="${HOME}"
-	if [ "${_user_id}" -eq 0 ] && [ -n "${SUDO_USER}" ]; then
-		USER_HOME="$(getent passwd "${SUDO_USER}" 2>/dev/null | cut -d: -f6)"
-		if [ -z "${USER_HOME}" ]; then
-			eval "USER_HOME=\"~${SUDO_USER}\""
-		fi
-	fi
+	USER_HOME="$(get_user_home)" || return 1
 	TEMP_ROOT="/tmp"
 	USER_PROFILE_RC="$(get_user_profile_rc "${USER_HOME}")"
 	USER_BASH_RC="${USER_HOME}/.bashrc"
@@ -393,6 +425,28 @@ init_install_env() {
 	create_user_dir "${USER_PROFILE_DATA}"
 	create_user_file "${USER_PROFILE_RC}"
 	create_user_file "${USER_BASH_RC}"
+}
+
+# ------------------------------------------------------------------------------
+# Extended version of init_install_env for a program that stays in the account getting shell setup, even when run as root.
+# ------------------------------------------------------------------------------
+init_install_env_user() {
+	_program_id="${1}"
+	_install_version="${2}"
+	_active_tag="${3}"
+
+	USER_HOME="$(get_user_home)" || return 1
+	INSTALL_ROOT="${USER_HOME}/.local/share/${_program_id}"
+	SYSTEM_BIN_ROOT="${USER_HOME}/.local/bin"
+	if [ -n "${CLIINST_USR_LOCAL_SHARE}" ]; then
+		INSTALL_ROOT="${CLIINST_USR_LOCAL_SHARE}/${_program_id}"
+	else
+		CLIINST_USR_LOCAL_SHARE="${USER_HOME}/.local/share"
+	fi
+	create_user_dir "${INSTALL_ROOT}"
+	create_user_dir "${SYSTEM_BIN_ROOT}"
+	init_install_env "${_program_id}" "${_install_version}" "${_active_tag}"
+	SYSTEM_BIN_ROOT="${USER_HOME}/.local/bin"
 }
 
 # ------------------------------------------------------------------------------
