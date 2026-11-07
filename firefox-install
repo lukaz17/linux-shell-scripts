@@ -20,24 +20,26 @@
 #
 ################################################################################
 
-set -ex
+set -e
 
 # Application info
 PROGRAM_ID="firefox"
 PROGRAM_EXEC="firefox"
 
 # Shared library
-CTXDIR="$(cd "$(dirname "$0")" && pwd)"
+CTXDIR="$(cd "$(dirname "${0}")" && pwd)"
 . "${CTXDIR}/shared/install-common.sh"
+. "${CTXDIR}/shared/install-source.sh"
 
 # Prepare environment
-normalize_install_version "$1"
+get_install_argument "$@"
+normalize_install_version "${INSTALL_ARG_VERSION}"
 init_install_env_desktop "${PROGRAM_ID}" "${INSTALL_VERSION}"
 
 # Download and install binaries
 if [ ! -d "${INSTALL_TARGET}" ]; then
-	BIN_ARCH_URI_AMD64="https://ftp.mozilla.org/pub/firefox/releases/${INSTALL_VERSION}/linux-x86_64/en-US/firefox-${INSTALL_VERSION}.tar.xz"
-	BIN_ARCH_URI_ARM64="https://ftp.mozilla.org/pub/firefox/releases/${INSTALL_VERSION}/linux-aarch64/en-US/firefox-${INSTALL_VERSION}.tar.xz"
+	BIN_ARCH_URI_AMD64="$(get_download_uri_amd64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
+	BIN_ARCH_URI_ARM64="$(get_download_uri_arm64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
 	BIN_ARCH_TMP_FILE="${TEMP_TARGET}.tar.xz"
 	download_uri_per_arch "${BIN_ARCH_URI_AMD64}" "${BIN_ARCH_URI_ARM64}" "${BIN_ARCH_TMP_FILE}"
 	create_dir "${TEMP_TARGET}"
@@ -51,3 +53,4 @@ fi
 copy_item_overwrite "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
 symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC}" "${SYSTEM_BIN_ROOT}/${PROGRAM_ID}"
 install_desktop "${PROGRAM_ID}" "${CTXDIR}" "${DESKTOP_ROOT}" "${ICON_ROOT}"
+finalize_install
