@@ -29,14 +29,15 @@ PROGRAM_ID="zenith"
 PROGRAM_EXEC="zenith"
 
 # Shared library
-CTXDIR="$(cd "$(dirname "$0")" && pwd)"
+CTXDIR="$(cd "$(dirname "${0}")" && pwd)"
 . "${CTXDIR}/shared/install-common.sh"
 . "${CTXDIR}/shared/install-source.sh"
 
 # Prepare environment
+get_install_argument "$@"
 GITHUB_OWNER="$(get_source_owner "${PROGRAM_ID}")"
 GITHUB_REPO="$(get_source_repo "${PROGRAM_ID}")"
-get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "$1"
+get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "${INSTALL_ARG_VERSION}"
 init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
 
 # Download and install binaries
@@ -55,5 +56,4 @@ fi
 # Finalize install
 symlink_item_overwrite "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
 symlink_item_overwrite "${ACTIVE_TARGET}/${PROGRAM_EXEC}" "${SYSTEM_BIN_ROOT}/${PROGRAM_ID}"
-
-echo "> Success."
+finalize_install
