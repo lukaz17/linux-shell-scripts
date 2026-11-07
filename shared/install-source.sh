@@ -41,6 +41,7 @@ get_source_owner() {
 		jellyfin) echo "jellyfin" ;;
 		just) echo "casey" ;;
 		localai) echo "mudler" ;;
+		nodejs) echo "" ;;
 		nvm) echo "nvm-sh" ;;
 		ollama) echo "ollama" ;;
 		op-reth) echo "paradigmxyz" ;;
@@ -112,6 +113,7 @@ get_source_repo() {
 		jellyfin) echo "jellyfin" ;;
 		just) echo "just" ;;
 		localai) echo "LocalAI" ;;
+		nodejs) echo "" ;;
 		nvm) echo "nvm" ;;
 		ollama) echo "ollama" ;;
 		op-reth) echo "reth" ;;
@@ -214,6 +216,8 @@ get_download_uri_amd64() {
 			echo "https://github.com/casey/just/releases/download/${_version}/just-${_version}-x86_64-unknown-linux-musl.tar.gz" ;;
 		localai)
 			echo "https://github.com/mudler/LocalAI/releases/download/v${_version}/local-ai-v${_version}-linux-amd64" ;;
+		nodejs)
+			echo "https://nodejs.org/dist/v${_version}/node-v${_version}-linux-x64.tar.gz" ;;
 		nvm)
 			echo "https://github.com/nvm-sh/nvm/archive/refs/tags/v${_version}.tar.gz" ;;
 		ollama)
@@ -366,6 +370,12 @@ get_download_uri_arm64() {
 			echo "https://github.com/casey/just/releases/download/${_version}/just-${_version}-aarch64-unknown-linux-musl.tar.gz" ;;
 		localai)
 			echo "https://github.com/mudler/LocalAI/releases/download/v${_version}/local-ai-v${_version}-linux-arm64" ;;
+		nodejs)
+			if is_version_at_least "${_version}" "4.0.0"; then
+				echo "https://nodejs.org/dist/v${_version}/node-v${_version}-linux-arm64.tar.gz"
+			else
+				echo ""
+			fi ;;
 		nvm)
 			echo "https://github.com/nvm-sh/nvm/archive/refs/tags/v${_version}.tar.gz" ;;
 		ollama)

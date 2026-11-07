@@ -1,0 +1,102 @@
+#!/bin/sh
+
+################################################################################
+#
+#  nodejs-install
+#
+#  Install/Update Node.js for current user. This also works as a version manager.
+#  If version is not specified, the latest stable version will be installed.
+#
+#  Homepage: https://nodejs.org/
+#
+#  Usage:
+#    nodejs-install [<version>] [--default]
+#
+#    --default makes this major version the active-release.
+#
+#  Note: This script will cause nvm refuses to run because npm_config_prefix is set.
+#
+#  Example:
+#    nodejs-install
+#    nodejs-install 24
+#    nodejs-install 24.22
+#    nodejs-install 24.22.2
+#    nodejs-install v24
+#    nodejs-install v24.22
+#    nodejs-install v24.22.2
+#    nodejs-install 24 --default
+#
+#  MIT License.
+#  Copyright (C) 2025 Nguyen Nhat Tung.
+#
+################################################################################
+
+set -e
+
+# Application info
+PROGRAM_ID="nodejs"
+
+# Shared library
+CTXDIR="$(cd "$(dirname "${0}")" && pwd)"
+. "${CTXDIR}/shared/install-common.sh"
+. "${CTXDIR}/shared/install-source.sh"
+
+# ------------------------------------------------------------------------------
+# Get latest stable Node.js version of a series, a full version resolves to itself
+# ------------------------------------------------------------------------------
+get_install_version_from_nodejs() {
+	_requested_version="${1}"
+	_series_prefix=""
+	if [ -n "${_requested_version}" ]; then
+		_requested_version="${_requested_version#v}"
+		_series_prefix="${_requested_version}."
+	fi
+
+	_release_index="$(curl -fsSL "https://nodejs.org/dist/index.json")"
+	INSTALL_VERSION="$(printf '%s' "${_release_index}" | jq -r --arg requested "${_requested_version}" --arg series "${_series_prefix}" '
+		[.[].version | ltrimstr("v")] as $versions
+		| if any($versions[]; . == $requested) then $requested
+		else [$versions[] | select(test("^[0-9]+\\.[0-9]+\\.[0-9]+$") and startswith($series))]
+			| sort_by(split(".") | map(tonumber)) | last // empty
+		end')"
+	if [ -z "${INSTALL_VERSION}" ]; then
+		echo "get_install_version_from_nodejs: No stable release found for ${_requested_version}" >&2
+		return 1
+	fi
+
+	echo "> Latest Version:  ${INSTALL_VERSION}"
+}
+
+# Prepare environment
+get_install_argument "$@"
+get_install_version_from_nodejs "${INSTALL_ARG_VERSION}"
+INSTALL_MAJOR="$(get_version_major "${INSTALL_VERSION}")"
+init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}" "v${INSTALL_MAJOR}"
+
+# Download and install binaries
+if [ ! -d "${INSTALL_TARGET}" ]; then
+	BIN_ARCH_URI_AMD64="$(get_download_uri_amd64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
+	BIN_ARCH_URI_ARM64="$(get_download_uri_arm64 "${PROGRAM_ID}" "${INSTALL_VERSION}")"
+	BIN_ARCH_TMP_FILE="${TEMP_TARGET}.tar.gz"
+	download_uri_per_arch "${BIN_ARCH_URI_AMD64}" "${BIN_ARCH_URI_ARM64}" "${BIN_ARCH_TMP_FILE}"
+	create_dir "${TEMP_TARGET}"
+	extract_archive "${BIN_ARCH_TMP_FILE}" "tar" "${TEMP_TARGET}"
+	remove_item "${BIN_ARCH_TMP_FILE}"
+	move_item_per_arch "${TEMP_TARGET}/node-v${INSTALL_VERSION}-linux-x64" "${TEMP_TARGET}/node-v${INSTALL_VERSION}-linux-arm64" "${INSTALL_TARGET}"
+	remove_item "${TEMP_TARGET}"
+fi
+
+# Finalize install
+NODEJS_USER_TARGET="${USER_PROFILE_DATA}/.${PROGRAM_ID}"
+symlink_item_overwrite "${INSTALL_TARGET}" "${ACTIVE_TARGET}"
+if [ "${INSTALL_ARG_IS_DEFAULT}" -eq 1 ]; then
+	symlink_item_overwrite "${ACTIVE_TARGET}" "${DEFAULT_TARGET}"
+fi
+cat << EOF > "${INSTALL_ROOT}/env.sh"
+export npm_config_cache="\${CLIINST_USR_PROFILE:-\$HOME/.local}/.${PROGRAM_ID}/cache"
+export npm_config_prefix="\${CLIINST_USR_PROFILE:-\$HOME/.local}/.${PROGRAM_ID}"
+export PATH="${DEFAULT_TARGET}/bin:\$npm_config_prefix/bin:\$PATH"
+EOF
+append_text_idempotent "\n# nodejs" "${USER_PROFILE_RC}"
+append_text_idempotent ". \"${INSTALL_ROOT}/env.sh\"" "${USER_PROFILE_RC}"
+finalize_install
