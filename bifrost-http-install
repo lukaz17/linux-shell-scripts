@@ -5,13 +5,15 @@
 #  bifrost-http-install
 #
 #  Install/Update Bifrost LLM Gateway for current user. This also works as a version manager.
+#  If version is not specified, the latest version will be installed.
 #
 #  Homepage: https://www.getmaxim.ai/bifrost
 #
 #  Usage:
-#    bifrost-http-install <version>
+#    bifrost-http-install [<version>]
 #
 #  Example:
+#    bifrost-http-install
 #    bifrost-http-install 1.7.1
 #    bifrost-http-install v1.7.1
 #
@@ -27,12 +29,15 @@ PROGRAM_ID="bifrost-http"
 PROGRAM_EXEC="bifrost-http"
 
 # Shared library
-CTXDIR="$(cd "$(dirname "$0")" && pwd)"
+CTXDIR="$(cd "$(dirname "${0}")" && pwd)"
 . "${CTXDIR}/shared/install-common.sh"
 . "${CTXDIR}/shared/install-source.sh"
 
 # Prepare environment
-normalize_install_version "$1"
+get_install_argument "$@"
+GITHUB_OWNER="$(get_source_owner "${PROGRAM_ID}")"
+GITHUB_REPO="$(get_source_repo "${PROGRAM_ID}")"
+get_install_version_from_github "${GITHUB_OWNER}" "${GITHUB_REPO}" "${INSTALL_ARG_VERSION}" "transports/v" "transports/v"
 init_install_env "${PROGRAM_ID}" "${INSTALL_VERSION}"
 
 # Download and install binaries
