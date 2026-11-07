@@ -76,6 +76,14 @@ Where sudoers sets `secure_path`, as Debian and Ubuntu do, `sudo go-install` fai
 
 Either way, the program installs systemwide and shell setup goes to your account, like `sudo -i go-install`. Changing `secure_path` only affects `sudo`: to run `go-install` when logged in as root, the path must still be in root's login file.
 
+### Install with multiple major releases
+
+Scripts that list `--default` in their usage can keep several major versions installed. Pass `--default` to make a major version the default, so later updates of that major version carry over. Pass `--default` with another major version to switch:
+
+```
+nodejs-install 24 --default
+```
+
 ## License
 
 Linux Shell Scripts is licensed under the MIT license. See LICENSE file and NOTICE file for more details.
