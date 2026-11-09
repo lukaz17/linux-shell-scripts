@@ -57,6 +57,8 @@ When the list is not empty and a top-level file/folder is missing from it, promp
 ├── .copier-answers.yml       # project Copier answers
 ├── .editorconfig             # editor formatting rules
 ├── .gitignore                # git ignore patterns
+├── AGENTS.md                 # AI agent entry point
+├── CLAUDE.md                 # Claude Code entry point, imports AGENTS.md
 ├── LICENSE                   # project license (MIT)
 ├── README.md                 # project README
 └── *                         # top-level scripts

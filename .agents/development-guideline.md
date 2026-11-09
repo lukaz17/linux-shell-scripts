@@ -141,9 +141,9 @@ Check your diff against these failure patterns; each must be fixed before comple
 - Unchecked `cd`: a `cd` whose failure goes unnoticed, so later commands run against the wrong files => check it (`cd "$dir" || exit 1`).
 - Monolithic script: hundreds of lines with no functions and no `main` => split the logic into functions called from one `main "$@"`.
 <!-- Project-specific / Shell-Common Mistakes -->
-- Positional arguments usage in boday: a positional parameter (`$1`, `${2}`) referenced anywhere inside a function body, instead of being bound to an `_`-prefixed name at the top.
+- Positional arguments usage in body: a positional parameter (`$1`, `${2}`) referenced anywhere inside a function body, instead of being bound to an `_`-prefixed name at the top.
 - Missing script usage and strict guard: a top-level script whose top lacks the banner comment or a `set` guard.
-- Unexcutable script: a script nowhere `$PATH`-invokable: a top-level script missing the executable bit.
+- Unexecutable script: a script nowhere `$PATH`-invokable: a top-level script missing the executable bit.
 
 ## Checklist
 
